@@ -1,0 +1,17 @@
+{
+    "name": "gb-emu",
+    "version": "1.0.0",
+    "description": "",
+    "main": "gb.ts",
+    "scripts": {
+        "prebuild": "prettier --list-different $PWD/src/*.ts && rm -rvf dist",
+        "build": "mkdir $PWD/dist && cp $PWD/src/*.{html,png} dist/ && tsc",
+        "env": "env"
+    },
+    "keywords": [],
+    "author": "Joren Van Onder <joren@jvo.sh>",
+    "license": "GPL-3.0-or-later",
+    "devDependencies": {
+        "prettier": "^1.18.2"
+    }
+}
