@@ -1,17 +1,29 @@
 {
-    "name": "gb-emu",
-    "version": "1.0.0",
-    "description": "",
-    "main": "gb.ts",
-    "scripts": {
-        "prebuild": "prettier --list-different $PWD/src/*.ts && rm -rvf dist",
-        "build": "mkdir $PWD/dist && cp $PWD/src/*.{html,png} dist/ && tsc",
-        "env": "env"
-    },
-    "keywords": [],
-    "author": "Joren Van Onder <joren@jvo.sh>",
-    "license": "GPL-3.0-or-later",
-    "devDependencies": {
-        "prettier": "^1.18.2"
+  "name": "gb-emu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gb.ts",
+  "scripts": {
+    "prebuild": "prettier --list-different $PWD/src/*.ts && rm -rvf dist/*",
+    "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.html dist/",
+    "watch": "npm-watch",
+    "env": "env"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "ts,html,css",
+      "quiet": false
     }
+  },
+  "keywords": [],
+  "author": "Joren Van Onder <joren@jvo.sh>",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "typescript": "^3.9.6",
+    "prettier": "^1.18.2",
+    "npm-watch": "^0.6.0"
+  }
 }
