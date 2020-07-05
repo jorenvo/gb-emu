@@ -1,0 +1,6 @@
+{
+  "public": "dist",
+  "hosting": {
+    "public": "dist"
+  }
+}
