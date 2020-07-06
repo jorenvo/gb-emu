@@ -2,5 +2,16 @@
   "public": "dist",
   "hosting": {
     "public": "dist"
-  }
+  },
+  "headers": [
+    {
+      "source": "/**",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ]
 }
