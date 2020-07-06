@@ -4,7 +4,7 @@
   "description": "",
   "main": "gb.ts",
   "scripts": {
-    "prebuild": "prettier --list-different $PWD/src/*.ts && rm -rvf dist/*",
+    "prebuild": "rm -rvf dist/*",
     "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.html dist/",
     "watch": "npm-watch",
     "env": "env"
