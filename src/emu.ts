@@ -22,6 +22,11 @@ function readFile(file: File): Promise<Uint8Array> {
   });
 }
 
+function logToConsole(msg: string) {
+  let console = document.getElementById("console")!;
+  console.innerText += msg;
+}
+
 async function handleFiles(event: Event) {
   const target = event.target as HTMLInputElement;
   const rom = target.files![0];
@@ -29,5 +34,5 @@ async function handleFiles(event: Event) {
 
   const bytes = await readFile(rom);
   const nintendoLogo = bytes.slice(0x104, 0x133 + 1);
-  console.log(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
+  logToConsole(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
 }
