@@ -5,7 +5,7 @@
   "main": "gb.ts",
   "scripts": {
     "prebuild": "rm -rvf dist/*",
-    "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.html dist/",
+    "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.{html,css} dist/",
     "watch": "npm-watch",
     "env": "env"
   },

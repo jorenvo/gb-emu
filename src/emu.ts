@@ -1,6 +1,8 @@
 const inputElement = document.getElementById("rom")!;
 inputElement.addEventListener("change", handleFiles, false);
 
+logToConsole("Console");
+
 function formatArrayAsHex(array: Uint8Array): string {
   return array
     .reduce(
