@@ -1,8 +1,6 @@
 const inputElement = document.getElementById("rom")!;
 inputElement.addEventListener("change", handleFiles, false);
 
-logToConsole("Console");
-
 function formatArrayAsHex(array: Uint8Array): string {
   return array
     .reduce(
@@ -26,15 +24,18 @@ function readFile(file: File): Promise<Uint8Array> {
 
 function logToConsole(msg: string) {
   let console = document.getElementById("console")!;
-  console.innerText += msg;
+  console.innerText += "\n" + msg;
 }
 
 async function handleFiles(event: Event) {
   const target = event.target as HTMLInputElement;
   const rom = target.files![0];
-  console.log(rom);
 
   const bytes = await readFile(rom);
   const nintendoLogo = bytes.slice(0x104, 0x133 + 1);
-  logToConsole(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
+  console.log(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
+
+  const cpu = new CPU(bytes);
+  cpu.PC = 0x100;
+  cpu.run();
 }
