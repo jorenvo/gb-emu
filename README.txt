@@ -5,4 +5,3 @@ https://gbdev.io/pandocs/
 
 Todo
 ====
-- find a way to disable the browser caching files, probably through simplehttp2server.json
