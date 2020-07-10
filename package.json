@@ -7,6 +7,7 @@
     "prebuild": "rm -rvf dist/*",
     "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.{html,css} dist/",
     "watch": "npm-watch",
+    "test": "mocha -r ts-node/register src/*.spec.ts",
     "env": "env"
   },
   "watch": {
@@ -22,8 +23,13 @@
   "author": "Joren Van Onder <joren@jvo.sh>",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "typescript": "^3.9.6",
+    "@types/assert": "^1.5.1",
+    "@types/mocha": "^7.0.2",
+    "assert": "^2.0.0",
+    "mocha": "^8.0.1",
+    "npm-watch": "^0.6.0",
     "prettier": "^1.18.2",
-    "npm-watch": "^0.6.0"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6"
   }
 }

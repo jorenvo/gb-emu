@@ -1,3 +1,5 @@
+import { CPU } from "./cpu.js";
+
 const inputElement = document.getElementById("rom")!;
 inputElement.addEventListener("change", handleFiles, false);
 
@@ -22,11 +24,6 @@ function readFile(file: File): Promise<Uint8Array> {
   });
 }
 
-function logToConsole(msg: string) {
-  let console = document.getElementById("console")!;
-  console.innerText += "\n" + msg;
-}
-
 async function handleFiles(event: Event) {
   const target = event.target as HTMLInputElement;
   const rom = target.files![0];
@@ -36,6 +33,5 @@ async function handleFiles(event: Event) {
   console.log(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
 
   const cpu = new CPU(bytes);
-  cpu.PC = 0x100;
   cpu.run();
 }

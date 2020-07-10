@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "system",
     "noImplicitAny": true,
     "removeComments": true,
     "noEmitOnError": true,
-    "outFile": "dist/js/emu.js",
+    "outDir": "dist/js/",
     "sourceMap": true,
     "inlineSources": true,
     "strict": true,
