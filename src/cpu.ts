@@ -1,8 +1,4 @@
 export class CPU {
-  AF: number;
-  BC: number;
-  DE: number;
-  HL: number;
   SP: number;
   PC: number;
 
@@ -10,10 +6,6 @@ export class CPU {
   memory: Uint8Array;
 
   constructor(memory: Uint8Array) {
-    this.AF = 0;
-    this.BC = 0;
-    this.DE = 0;
-    this.HL = 0;
     this.SP = 0;
     this.PC = 0;
     // from 0x0 to 0x7
@@ -49,11 +41,17 @@ export class CPU {
   }
 
   opLdD16ToR16(byte: number) {
-    const d16_low = this.memory[this.PC++];
-    const d16_high = this.memory[this.PC++];
+    const d16Low = this.memory[this.PC++];
+    const d16High = this.memory[this.PC++];
     const register = this.getBits(byte, 4, 5);
-    this.regs[register] = d16_high; // TODO: swap these?
-    this.regs[register + 1] = d16_low;
+    this.regs[register] = d16High; // TODO: swap these?
+    this.regs[register + 1] = d16Low;
+  }
+
+  opLdD8ToR8(byte: number) {
+    const register = byte * 2;
+    const d8 = this.memory[this.PC++];
+    this.regs[register] = d8;
   }
 
   opLdR8ToA16(byte: number) {
@@ -61,6 +59,13 @@ export class CPU {
     const high = this.regs[register];
     const low = this.regs[register + 1];
     this.memory[(high << 8) | low] = this.regs[0x7]; // TODO: always register A?
+  }
+
+  opLdSPToA16(_byte: number) {
+    const a16Low = this.memory[this.PC++];
+    const a16High = this.memory[this.PC++];
+    const a16 = (a16High << 8) | a16Low;
+    this.memory[a16] = this.PC;
   }
 
   opInc16(byte: number) {
@@ -90,6 +95,15 @@ export class CPU {
     this.regs[0x6] = (this.regs[0x6] & 0b1101_1111) | (halfCarryFlag << 5);
   }
 
+  setCarryFlag(a: number, b: number) {
+    const carryFlag = a + b > 0xff ? 1 : 0;
+    this.regs[0x6] = (this.regs[0x6] & 0b1110_1111) | (carryFlag << 4);
+  }
+
+  getCarryFlag(): number {
+    return (this.regs[0x6] & 0b0001_0000) > 0 ? 1 : 0;
+  }
+
   opInc8(byte: number) {
     const register = byte * 2;
     this.setHalfCarryFlag(this.regs[register], 1);
@@ -108,7 +122,31 @@ export class CPU {
     this.setSubtractFlag(true);
   }
 
-  // 4 msb between [1001, 1111] (except HALT: 0x76)
+  opRLC(_byte: number) {
+    let numberWithCarry = (this.getCarryFlag() << 8) | this.regs[0x7];
+    numberWithCarry <<= 1;
+
+    const carryFlag = numberWithCarry >> 9;
+    numberWithCarry |= carryFlag;
+    numberWithCarry &= 0xff;
+    this.regs[0x7] = numberWithCarry;
+
+    this.setCarryFlag(0xff, 0xff);
+    this.setHalfCarryFlag(0, 0);
+    this.setSubtractFlag(false);
+    this.setZeroFlag(1);
+  }
+
+  opAddR16ToHL(byte: number) {
+    const register = byte * 2;
+    const r16 = (this.regs[register] << 8) | this.regs[register + 1];
+    let hl = (this.regs[0x4] << 8) | this.regs[0x4];
+    this.setHalfCarryFlag(r16, hl);
+    this.setCarryFlag(r16, hl);
+    hl += r16;
+    this.setSubtractFlag(false);
+  }
+
   run() {
     while (true) {
       if (this.PC >= this.memory.length) {
@@ -137,16 +175,16 @@ export class CPU {
           this.decInc8(byte);
           break;
         case 0x06:
-          this.logNotImplemented(byte);
+          this.opLdD8ToR8(byte);
           break;
         case 0x07:
-          this.logNotImplemented(byte);
+          this.opRLC(byte);
           break;
         case 0x08:
-          this.logNotImplemented(byte);
+          this.opLdSPToA16(byte);
           break;
         case 0x09:
-          this.logNotImplemented(byte);
+          this.opAddR16ToHL(byte);
           break;
         case 0x0a:
           this.logNotImplemented(byte);
