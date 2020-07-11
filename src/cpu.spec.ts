@@ -19,9 +19,57 @@ describe("flags", function() {
     const cpu = new CPU(new Uint8Array([]));
     assert.equal(cpu.regs[0x6], 0);
 
-    cpu.setZeroFlag(0);
-    assert.equal(cpu.regs[0x6], 0b1000_0000);
     cpu.setZeroFlag(1);
+    assert.equal(cpu.regs[0x6], 0b1000_0000);
+    cpu.setZeroFlag(0);
     assert.equal(cpu.regs[0x6], 0);
+  });
+});
+
+describe("rotations", function() {
+  it("should correctly rotate left", function() {
+    const cpu = new CPU(new Uint8Array([]));
+    assert.equal(cpu.regs[0x7], 0);
+    assert.equal(cpu.getCarryFlag(), 0);
+
+    // 0b1_1010_0000 rotated left is
+    // 0b1_0100_0001
+    cpu.regs[0x7] = 0b1010_0000;
+    cpu.setCarryFlagDirect(1);
+    cpu.opRLCA(0);
+    assert.equal(cpu.regs[0x7], 0b0100_0001);
+    assert.equal(cpu.getCarryFlag(), 1);
+
+    // 0b1_0001_0110 rotated left is
+    // 0b0_0010_1101
+    cpu.regs[0x7] = 0b0001_0110;
+    cpu.setCarryFlagDirect(1);
+    cpu.opRLCA(0);
+    assert.equal(cpu.regs[0x7], 0b0010_1101);
+    assert.equal(cpu.getCarryFlag(), 0);
+  });
+});
+
+describe("rotations", function() {
+  it("should correctly rotate right", function() {
+    const cpu = new CPU(new Uint8Array([]));
+    assert.equal(cpu.regs[0x7], 0);
+    assert.equal(cpu.getCarryFlag(), 0);
+
+    // 0b1_1010_0000 rotated right is
+    // 0b0_1101_0000
+    cpu.regs[0x7] = 0b1010_0000;
+    cpu.setCarryFlagDirect(1);
+    cpu.opRRCA(0);
+    assert.equal(cpu.regs[0x7], 0b1101_0000);
+    assert.equal(cpu.getCarryFlag(), 0);
+
+    // 0b0_0001_0111 rotated right is
+    // 0b1_0000_1011
+    cpu.regs[0x7] = 0b0001_0111;
+    cpu.setCarryFlagDirect(0);
+    cpu.opRRCA(0);
+    assert.equal(cpu.regs[0x7], 0b0000_1011);
+    assert.equal(cpu.getCarryFlag(), 1);
   });
 });

@@ -61,6 +61,13 @@ export class CPU {
     this.memory[(high << 8) | low] = this.regs[0x7]; // TODO: always register A?
   }
 
+  opLdA16ToA(byte: number) {
+    const register = byte * 2;
+    const aHigh = this.regs[register];
+    const aLow = this.regs[register + 1];
+    this.regs[0x7] = this.memory[(aHigh << 8) | aLow];
+  }
+
   opLdSPToA16(_byte: number) {
     const a16Low = this.memory[this.PC++];
     const a16High = this.memory[this.PC++];
@@ -68,21 +75,32 @@ export class CPU {
     this.memory[a16] = this.PC;
   }
 
-  opInc16(byte: number) {
+  opDecInc16(byte: number, inc: boolean) {
     // TODO: SP will be 0x3, check if that works
     const register = byte * 2;
     const high = this.regs[register];
     const low = this.regs[register + 1];
 
     let r16 = (high << 8) | low;
-    r16 += 1;
+    r16 += inc ? 1 : -1;
     this.regs[register] = r16 >> 8;
     this.regs[register + 1] = r16 & 0xff;
   }
 
-  setZeroFlag(n: number) {
-    const zeroFlag = n === 0 ? 1 : 0;
+  opInc16(byte: number) {
+    this.opDecInc16(byte, true);
+  }
+
+  opDec16(byte: number) {
+    this.opDecInc16(byte, false);
+  }
+
+  setZeroFlag(zeroFlag: number) {
     this.regs[0x6] = (this.regs[0x6] & 0b0111_1111) | (zeroFlag << 7);
+  }
+
+  getZeroFlag(): number {
+    return (this.regs[0x6] & 0b0111_1111) >> 8;
   }
 
   setSubtractFlag(isSubtract: boolean) {
@@ -95,9 +113,13 @@ export class CPU {
     this.regs[0x6] = (this.regs[0x6] & 0b1101_1111) | (halfCarryFlag << 5);
   }
 
+  setCarryFlagDirect(carryFlag: number) {
+    this.regs[0x6] = (this.regs[0x6] & 0b1110_1111) | (carryFlag << 4);
+  }
+
   setCarryFlag(a: number, b: number) {
     const carryFlag = a + b > 0xff ? 1 : 0;
-    this.regs[0x6] = (this.regs[0x6] & 0b1110_1111) | (carryFlag << 4);
+    this.setCarryFlagDirect(carryFlag);
   }
 
   getCarryFlag(): number {
@@ -109,32 +131,39 @@ export class CPU {
     this.setHalfCarryFlag(this.regs[register], 1);
 
     this.regs[register] += 1;
-    this.setZeroFlag(this.regs[register]);
+    this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
     this.setSubtractFlag(false);
   }
 
-  decInc8(byte: number) {
+  opDec8(byte: number) {
     const register = byte * 2;
     this.setHalfCarryFlag(this.regs[register], -1);
 
     this.regs[register] -= 1;
-    this.setZeroFlag(this.regs[register]);
+    this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
     this.setSubtractFlag(true);
   }
 
-  opRLC(_byte: number) {
-    let numberWithCarry = (this.getCarryFlag() << 8) | this.regs[0x7];
-    numberWithCarry <<= 1;
+  opRLCA(_byte: number) {
+    const msb = (this.regs[0x7] & 0b1000_0000) >> 7;
+    this.regs[0x7] = (this.regs[0x7] << 1) & 0b1111_1110;
+    this.regs[0x7] |= this.getCarryFlag();
+    this.setCarryFlagDirect(msb);
 
-    const carryFlag = numberWithCarry >> 9;
-    numberWithCarry |= carryFlag;
-    numberWithCarry &= 0xff;
-    this.regs[0x7] = numberWithCarry;
-
-    this.setCarryFlag(0xff, 0xff);
     this.setHalfCarryFlag(0, 0);
     this.setSubtractFlag(false);
-    this.setZeroFlag(1);
+    this.setZeroFlag(0);
+  }
+
+  opRRCA(_byte: number) {
+    const lsb = this.regs[0x7] & 1;
+    this.regs[0x7] >>= 1;
+    this.regs[0x7] |= this.getCarryFlag() << 7;
+    this.setCarryFlagDirect(lsb);
+
+    this.setHalfCarryFlag(0, 0);
+    this.setSubtractFlag(false);
+    this.setZeroFlag(0);
   }
 
   opAddR16ToHL(byte: number) {
@@ -172,13 +201,13 @@ export class CPU {
           this.opInc8(byte);
           break;
         case 0x05:
-          this.decInc8(byte);
+          this.opDec8(byte);
           break;
         case 0x06:
           this.opLdD8ToR8(byte);
           break;
         case 0x07:
-          this.opRLC(byte);
+          this.opRLCA(byte);
           break;
         case 0x08:
           this.opLdSPToA16(byte);
@@ -187,22 +216,22 @@ export class CPU {
           this.opAddR16ToHL(byte);
           break;
         case 0x0a:
-          this.logNotImplemented(byte);
+          this.opLdA16ToA(byte);
           break;
         case 0x0b:
-          this.logNotImplemented(byte);
+          this.opDec16(byte);
           break;
         case 0x0c:
-          this.logNotImplemented(byte);
+          this.opInc8(byte + 1);
           break;
         case 0x0d:
-          this.logNotImplemented(byte);
+          this.opDec8(byte + 1);
           break;
         case 0x0e:
-          this.logNotImplemented(byte);
+          this.opLdD8ToR8(byte + 1);
           break;
         case 0x0f:
-          this.logNotImplemented(byte);
+          this.opRRCA(byte);
           break;
         case 0x10:
           this.logNotImplemented(byte);
