@@ -73,3 +73,19 @@ describe("rotations", function() {
     assert.equal(cpu.getCarryFlag(), 1);
   });
 });
+
+describe("2s complement", function() {
+  it("should correctly convert 2s complement", function() {
+    const cpu = new CPU(new Uint8Array([]));
+    assert.equal(cpu.twosComplementToNumber(0b0000_0000), 0);
+    assert.equal(cpu.twosComplementToNumber(0b0000_0001), 1);
+    assert.equal(cpu.twosComplementToNumber(0b0000_0010), 2);
+    assert.equal(cpu.twosComplementToNumber(0b0111_1110), 126);
+    assert.equal(cpu.twosComplementToNumber(0b0111_1111), 127);
+    assert.equal(cpu.twosComplementToNumber(0b1000_0000), -128);
+    assert.equal(cpu.twosComplementToNumber(0b1000_0001), -127);
+    assert.equal(cpu.twosComplementToNumber(0b1000_0010), -126);
+    assert.equal(cpu.twosComplementToNumber(0b1111_1110), -2);
+    assert.equal(cpu.twosComplementToNumber(0b1111_1111), -1);
+  });
+});

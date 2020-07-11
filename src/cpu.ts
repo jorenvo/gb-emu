@@ -26,6 +26,16 @@ export class CPU {
     return (byte >> from) & mask;
   }
 
+  twosComplementToNumber(x: number): number {
+    const msb = x >> 7;
+    if (msb === 1) {
+      // don't use ~ because numbers are signed
+      return -(x ^ 0xff) - 1;
+    } else {
+      return x;
+    }
+  }
+
   binString(x: number): string {
     let bin = x.toString(2);
     bin = bin.padStart(8, "0");
@@ -166,6 +176,28 @@ export class CPU {
     this.setZeroFlag(0);
   }
 
+  opRLA(_byte: number) {
+    const msb = this.regs[0x7] >> 7;
+    this.regs[0x7] <<= 1;
+    this.regs[0x7] |= msb;
+    this.setCarryFlagDirect(msb);
+
+    this.setHalfCarryFlag(0, 0);
+    this.setSubtractFlag(false);
+    this.setZeroFlag(0);
+  }
+
+  opRRA(_byte: number) {
+    const lsb = this.regs[0x7] & 1;
+    this.regs[0x7] >>= 1;
+    this.regs[0x7] |= lsb << 7;
+    this.setCarryFlagDirect(lsb);
+
+    this.setHalfCarryFlag(0, 0);
+    this.setSubtractFlag(false);
+    this.setZeroFlag(0);
+  }
+
   opAddR16ToHL(byte: number) {
     const register = byte * 2;
     const r16 = (this.regs[register] << 8) | this.regs[register + 1];
@@ -174,6 +206,15 @@ export class CPU {
     this.setCarryFlag(r16, hl);
     hl += r16;
     this.setSubtractFlag(false);
+  }
+
+  opStop(byte: number) {
+    this.log(byte, "TODO: stop");
+  }
+
+  opJRE(_byte: number) {
+    const relativeOffset = this.regs[0x3]; // reg E
+    this.PC += this.twosComplementToNumber(relativeOffset);
   }
 
   run() {
@@ -189,21 +230,27 @@ export class CPU {
           this.log(byte, "nop");
           break;
         case 0x01:
+        case 0x11:
           this.opLdD16ToR16(byte);
           break;
         case 0x02:
+        case 0x12:
           this.opLdR8ToA16(byte);
           break;
         case 0x03:
+        case 0x13:
           this.opInc16(byte);
           break;
         case 0x04:
+        case 0x14:
           this.opInc8(byte);
           break;
         case 0x05:
+        case 0x15:
           this.opDec8(byte);
           break;
         case 0x06:
+        case 0x16:
           this.opLdD8ToR8(byte);
           break;
         case 0x07:
@@ -213,73 +260,43 @@ export class CPU {
           this.opLdSPToA16(byte);
           break;
         case 0x09:
+        case 0x19:
           this.opAddR16ToHL(byte);
           break;
         case 0x0a:
+        case 0x1a:
           this.opLdA16ToA(byte);
           break;
         case 0x0b:
+        case 0x1b:
           this.opDec16(byte);
           break;
         case 0x0c:
+        case 0x1c:
           this.opInc8(byte + 1);
           break;
         case 0x0d:
+        case 0x1d:
           this.opDec8(byte + 1);
           break;
         case 0x0e:
+        case 0x1e:
           this.opLdD8ToR8(byte + 1);
           break;
         case 0x0f:
           this.opRRCA(byte);
           break;
         case 0x10:
-          this.logNotImplemented(byte);
-          break;
-        case 0x11:
-          this.logNotImplemented(byte);
-          break;
-        case 0x12:
-          this.logNotImplemented(byte);
-          break;
-        case 0x13:
-          this.logNotImplemented(byte);
-          break;
-        case 0x14:
-          this.logNotImplemented(byte);
-          break;
-        case 0x15:
-          this.logNotImplemented(byte);
-          break;
-        case 0x16:
-          this.logNotImplemented(byte);
+          this.opStop(byte);
           break;
         case 0x17:
-          this.logNotImplemented(byte);
+          this.opRLA(byte);
           break;
         case 0x18:
-          this.logNotImplemented(byte);
-          break;
-        case 0x19:
-          this.logNotImplemented(byte);
-          break;
-        case 0x1a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x1b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x1c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x1d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x1e:
-          this.logNotImplemented(byte);
+          this.opJRE(byte);
           break;
         case 0x1f:
-          this.logNotImplemented(byte);
+          this.opRRA(byte);
           break;
         case 0x20:
           this.logNotImplemented(byte);
