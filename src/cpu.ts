@@ -1,4 +1,14 @@
 export class CPU {
+  // reg indexes in regs
+  static B = 0;
+  static C = 1;
+  static D = 2;
+  static E = 3;
+  static H = 4;
+  static L = 5;
+  static F = 6;
+  static A = 7;
+
   SP: number;
   PC: number;
 
@@ -68,14 +78,24 @@ export class CPU {
     const register = byte * 2;
     const high = this.regs[register];
     const low = this.regs[register + 1];
-    this.memory[(high << 8) | low] = this.regs[0x7]; // TODO: always register A?
+    const addr = (high << 8) | low;
+    this.memory[addr] = this.regs[CPU.A];
+
+    switch (byte) {
+      case 0x22:
+        ++this.memory[addr];
+        break;
+      case 0x32:
+        --this.memory[addr];
+        break;
+    }
   }
 
   opLdA16ToA(byte: number) {
     const register = byte * 2;
     const aHigh = this.regs[register];
     const aLow = this.regs[register + 1];
-    this.regs[0x7] = this.memory[(aHigh << 8) | aLow];
+    this.regs[CPU.A] = this.memory[(aHigh << 8) | aLow];
   }
 
   opLdSPToA16(_byte: number) {
@@ -106,25 +126,25 @@ export class CPU {
   }
 
   setZeroFlag(zeroFlag: number) {
-    this.regs[0x6] = (this.regs[0x6] & 0b0111_1111) | (zeroFlag << 7);
+    this.regs[CPU.F] = (this.regs[CPU.F] & 0b0111_1111) | (zeroFlag << 7);
   }
 
   getZeroFlag(): number {
-    return (this.regs[0x6] & 0b0111_1111) >> 8;
+    return (this.regs[CPU.F] & 0b0111_1111) >> 8;
   }
 
   setSubtractFlag(isSubtract: boolean) {
     const subFlag = isSubtract ? 1 : 0;
-    this.regs[0x6] = (this.regs[0x6] & 0b1011_1111) | (subFlag << 6);
+    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1011_1111) | (subFlag << 6);
   }
 
   setHalfCarryFlag(a: number, b: number) {
     const halfCarryFlag = (a & 0xf) + (b & 0xf) === 0x10 ? 1 : 0;
-    this.regs[0x6] = (this.regs[0x6] & 0b1101_1111) | (halfCarryFlag << 5);
+    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
   }
 
   setCarryFlagDirect(carryFlag: number) {
-    this.regs[0x6] = (this.regs[0x6] & 0b1110_1111) | (carryFlag << 4);
+    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1110_1111) | (carryFlag << 4);
   }
 
   setCarryFlag(a: number, b: number) {
@@ -133,7 +153,7 @@ export class CPU {
   }
 
   getCarryFlag(): number {
-    return (this.regs[0x6] & 0b0001_0000) > 0 ? 1 : 0;
+    return (this.regs[CPU.F] & 0b0001_0000) > 0 ? 1 : 0;
   }
 
   opInc8(byte: number) {
@@ -155,9 +175,9 @@ export class CPU {
   }
 
   opRLCA(_byte: number) {
-    const msb = (this.regs[0x7] & 0b1000_0000) >> 7;
-    this.regs[0x7] = (this.regs[0x7] << 1) & 0b1111_1110;
-    this.regs[0x7] |= this.getCarryFlag();
+    const msb = (this.regs[CPU.A] & 0b1000_0000) >> 7;
+    this.regs[CPU.A] = (this.regs[CPU.A] << 1) & 0b1111_1110;
+    this.regs[CPU.A] |= this.getCarryFlag();
     this.setCarryFlagDirect(msb);
 
     this.setHalfCarryFlag(0, 0);
@@ -166,9 +186,9 @@ export class CPU {
   }
 
   opRRCA(_byte: number) {
-    const lsb = this.regs[0x7] & 1;
-    this.regs[0x7] >>= 1;
-    this.regs[0x7] |= this.getCarryFlag() << 7;
+    const lsb = this.regs[CPU.A] & 1;
+    this.regs[CPU.A] >>= 1;
+    this.regs[CPU.A] |= this.getCarryFlag() << 7;
     this.setCarryFlagDirect(lsb);
 
     this.setHalfCarryFlag(0, 0);
@@ -177,9 +197,9 @@ export class CPU {
   }
 
   opRLA(_byte: number) {
-    const msb = this.regs[0x7] >> 7;
-    this.regs[0x7] <<= 1;
-    this.regs[0x7] |= msb;
+    const msb = this.regs[CPU.A] >> 7;
+    this.regs[CPU.A] <<= 1;
+    this.regs[CPU.A] |= msb;
     this.setCarryFlagDirect(msb);
 
     this.setHalfCarryFlag(0, 0);
@@ -188,9 +208,9 @@ export class CPU {
   }
 
   opRRA(_byte: number) {
-    const lsb = this.regs[0x7] & 1;
-    this.regs[0x7] >>= 1;
-    this.regs[0x7] |= lsb << 7;
+    const lsb = this.regs[CPU.A] & 1;
+    this.regs[CPU.A] >>= 1;
+    this.regs[CPU.A] |= lsb << 7;
     this.setCarryFlagDirect(lsb);
 
     this.setHalfCarryFlag(0, 0);
@@ -201,7 +221,7 @@ export class CPU {
   opAddR16ToHL(byte: number) {
     const register = byte * 2;
     const r16 = (this.regs[register] << 8) | this.regs[register + 1];
-    let hl = (this.regs[0x4] << 8) | this.regs[0x4];
+    let hl = (this.regs[CPU.H] << 8) | this.regs[CPU.H];
     this.setHalfCarryFlag(r16, hl);
     this.setCarryFlag(r16, hl);
     hl += r16;
@@ -213,8 +233,35 @@ export class CPU {
   }
 
   opJRE(_byte: number) {
-    const relativeOffset = this.regs[0x3]; // reg E
+    const relativeOffset = this.regs[CPU.E];
     this.PC += this.twosComplementToNumber(relativeOffset);
+  }
+
+  opJRC(byte: number) {
+    // On https://gbdev.io/gb-opcodes/optables/classic this byte is an
+    // r8, but pretty sure it should be a d8.
+    const relativeOffset = this.twosComplementToNumber(this.memory[this.PC++]);
+    let condition = false;
+    switch (byte) {
+      case 0x20:
+        condition = this.getZeroFlag() !== 0;
+        break;
+      case 0x30:
+        condition = this.getCarryFlag() !== 0;
+        break;
+      case 0x28:
+        condition = this.getZeroFlag() === 0;
+        break;
+      case 0x38:
+        condition = this.getCarryFlag() === 0;
+        break;
+      default:
+        this.log(byte, "JRC condition not implement");
+    }
+
+    if (condition) {
+      this.PC += relativeOffset;
+    }
   }
 
   run() {
@@ -231,10 +278,12 @@ export class CPU {
           break;
         case 0x01:
         case 0x11:
+        case 0x21:
           this.opLdD16ToR16(byte);
           break;
         case 0x02:
         case 0x12:
+        case 0x22:
           this.opLdR8ToA16(byte);
           break;
         case 0x03:
@@ -299,7 +348,7 @@ export class CPU {
           this.opRRA(byte);
           break;
         case 0x20:
-          this.logNotImplemented(byte);
+          this.opJRC(byte);
           break;
         case 0x21:
           this.logNotImplemented(byte);
