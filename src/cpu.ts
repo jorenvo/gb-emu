@@ -63,30 +63,56 @@ export class CPU {
   opLdD16ToR16(byte: number) {
     const d16Low = this.memory[this.PC++];
     const d16High = this.memory[this.PC++];
-    const register = this.getBits(byte, 4, 5);
-    this.regs[register] = d16High; // TODO: swap these?
-    this.regs[register + 1] = d16Low;
+
+    if (byte === 0x31) {
+      this.SP = (d16High << 8) | d16Low;
+    } else {
+      const register = this.getBits(byte, 4, 5) * 2;
+      this.regs[register] = d16High; // TODO: swap these?
+      this.regs[register + 1] = d16Low;
+    }
   }
 
   opLdD8ToR8(byte: number) {
     const register = byte * 2;
     const d8 = this.memory[this.PC++];
-    this.regs[register] = d8;
+    if (byte === 0x36) {
+      this.memory[this.getHL()] = d8;
+    } else {
+      this.regs[register] = d8;
+    }
+  }
+
+  getHL() {
+    return (this.regs[CPU.H] << 8) | this.regs[CPU.L];
+  }
+
+  storeHL(d16: number) {
+    this.regs[CPU.H] = d16 >> 8;
+    this.regs[CPU.L] = d16 & 0xff;
+  }
+
+  incrementHL() {
+    this.storeHL(this.getHL() + 1);
+  }
+
+  decrementHL() {
+    this.storeHL(this.getHL() - 1);
   }
 
   opLdR8ToA16(byte: number) {
     const register = byte * 2;
     const high = this.regs[register];
     const low = this.regs[register + 1];
-    const addr = (high << 8) | low;
+    let addr = (high << 8) | low;
     this.memory[addr] = this.regs[CPU.A];
 
     switch (byte) {
       case 0x22:
-        ++this.memory[addr];
+        this.incrementHL();
         break;
       case 0x32:
-        --this.memory[addr];
+        this.decrementHL();
         break;
     }
   }
@@ -95,14 +121,25 @@ export class CPU {
     const register = byte * 2;
     const aHigh = this.regs[register];
     const aLow = this.regs[register + 1];
-    this.regs[CPU.A] = this.memory[(aHigh << 8) | aLow];
+    let addr = (aHigh << 8) | aLow;
+    this.regs[CPU.A] = this.memory[addr];
+
+    switch (byte) {
+      case 0x2a:
+        this.incrementHL();
+        break;
+      case 0x3a:
+        this.decrementHL();
+        break;
+    }
   }
 
   opLdSPToA16(_byte: number) {
     const a16Low = this.memory[this.PC++];
     const a16High = this.memory[this.PC++];
     const a16 = (a16High << 8) | a16Low;
-    this.memory[a16] = this.PC;
+    this.memory[a16] = this.SP & 0xff; // TODO: this order is correct, should we always store LSB before MSB?
+    this.memory[a16 + 1] = this.SP >> 8;
   }
 
   opDecInc16(byte: number, inc: boolean) {
@@ -118,7 +155,11 @@ export class CPU {
   }
 
   opInc16(byte: number) {
-    this.opDecInc16(byte, true);
+    if (byte === 0x33) {
+      ++this.SP;
+    } else {
+      this.opDecInc16(byte, true);
+    }
   }
 
   opDec16(byte: number) {
@@ -133,8 +174,7 @@ export class CPU {
     return (this.regs[CPU.F] & 0b0111_1111) >> 8;
   }
 
-  setSubtractFlag(isSubtract: boolean) {
-    const subFlag = isSubtract ? 1 : 0;
+  setSubtractFlag(subFlag: number) {
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1011_1111) | (subFlag << 6);
   }
 
@@ -157,21 +197,35 @@ export class CPU {
   }
 
   opInc8(byte: number) {
-    const register = byte * 2;
-    this.setHalfCarryFlag(this.regs[register], 1);
+    if (byte === 0x34) {
+      let addr = this.memory[this.getHL()];
+      this.setHalfCarryFlag(this.memory[addr], 1);
+      this.memory[addr] += 1;
+      this.setZeroFlag(this.memory[addr] === 0 ? 1 : 0);
+    } else {
+      const register = byte * 2;
+      this.setHalfCarryFlag(this.regs[register], 1);
+      this.regs[register] += 1;
+      this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
+    }
 
-    this.regs[register] += 1;
-    this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
   }
 
   opDec8(byte: number) {
-    const register = byte * 2;
-    this.setHalfCarryFlag(this.regs[register], -1);
+    if (byte === 0x35) {
+      let addr = this.memory[this.getHL()];
+      this.setHalfCarryFlag(this.memory[addr], -1);
+      this.memory[addr] -= 1;
+      this.setZeroFlag(this.memory[addr] === 0 ? 1 : 0);
+    } else {
+      const register = byte * 2;
+      this.setHalfCarryFlag(this.regs[register], -1);
+      this.regs[register] -= 1;
+      this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
+    }
 
-    this.regs[register] -= 1;
-    this.setZeroFlag(this.regs[register] === 0 ? 1 : 0);
-    this.setSubtractFlag(true);
+    this.setSubtractFlag(1);
   }
 
   opRLCA(_byte: number) {
@@ -181,7 +235,7 @@ export class CPU {
     this.setCarryFlagDirect(msb);
 
     this.setHalfCarryFlag(0, 0);
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
     this.setZeroFlag(0);
   }
 
@@ -192,7 +246,7 @@ export class CPU {
     this.setCarryFlagDirect(lsb);
 
     this.setHalfCarryFlag(0, 0);
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
     this.setZeroFlag(0);
   }
 
@@ -203,7 +257,7 @@ export class CPU {
     this.setCarryFlagDirect(msb);
 
     this.setHalfCarryFlag(0, 0);
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
     this.setZeroFlag(0);
   }
 
@@ -214,7 +268,7 @@ export class CPU {
     this.setCarryFlagDirect(lsb);
 
     this.setHalfCarryFlag(0, 0);
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
     this.setZeroFlag(0);
   }
 
@@ -225,7 +279,7 @@ export class CPU {
     this.setHalfCarryFlag(r16, hl);
     this.setCarryFlag(r16, hl);
     hl += r16;
-    this.setSubtractFlag(false);
+    this.setSubtractFlag(0);
   }
 
   opStop(byte: number) {
@@ -264,6 +318,12 @@ export class CPU {
     }
   }
 
+  opCPL(_byte: number) {
+    this.regs[CPU.A] ^= 0xff;
+    this.setZeroFlag(1);
+    this.setSubtractFlag(1);
+  }
+
   run() {
     while (true) {
       if (this.PC >= this.memory.length) {
@@ -279,27 +339,37 @@ export class CPU {
         case 0x01:
         case 0x11:
         case 0x21:
+        case 0x31:
           this.opLdD16ToR16(byte);
           break;
         case 0x02:
         case 0x12:
         case 0x22:
+        case 0x32:
           this.opLdR8ToA16(byte);
           break;
         case 0x03:
         case 0x13:
+        case 0x23:
+        case 0x33:
           this.opInc16(byte);
           break;
         case 0x04:
         case 0x14:
+        case 0x24:
+        case 0x34:
           this.opInc8(byte);
           break;
         case 0x05:
         case 0x15:
+        case 0x25:
+        case 0x35:
           this.opDec8(byte);
           break;
         case 0x06:
         case 0x16:
+        case 0x26:
+        case 0x36:
           this.opLdD8ToR8(byte);
           break;
         case 0x07:
@@ -310,26 +380,32 @@ export class CPU {
           break;
         case 0x09:
         case 0x19:
+        case 0x29:
           this.opAddR16ToHL(byte);
           break;
         case 0x0a:
         case 0x1a:
+        case 0x2a:
           this.opLdA16ToA(byte);
           break;
         case 0x0b:
         case 0x1b:
+        case 0x2b:
           this.opDec16(byte);
           break;
         case 0x0c:
         case 0x1c:
+        case 0x2c:
           this.opInc8(byte + 1);
           break;
         case 0x0d:
         case 0x1d:
+        case 0x2d:
           this.opDec8(byte + 1);
           break;
         case 0x0e:
         case 0x1e:
+        case 0x2e:
           this.opLdD8ToR8(byte + 1);
           break;
         case 0x0f:
@@ -348,73 +424,16 @@ export class CPU {
           this.opRRA(byte);
           break;
         case 0x20:
+        case 0x28:
+        case 0x30:
           this.opJRC(byte);
           break;
-        case 0x21:
-          this.logNotImplemented(byte);
-          break;
-        case 0x22:
-          this.logNotImplemented(byte);
-          break;
-        case 0x23:
-          this.logNotImplemented(byte);
-          break;
-        case 0x24:
-          this.logNotImplemented(byte);
-          break;
-        case 0x25:
-          this.logNotImplemented(byte);
-          break;
-        case 0x26:
-          this.logNotImplemented(byte);
-          break;
         case 0x27:
-          this.logNotImplemented(byte);
-          break;
-        case 0x28:
-          this.logNotImplemented(byte);
-          break;
-        case 0x29:
-          this.logNotImplemented(byte);
-          break;
-        case 0x2a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x2b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x2c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x2d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x2e:
+          // TODO: DAA https://ehaskins.com/2018-01-30%20Z80%20DAA/
           this.logNotImplemented(byte);
           break;
         case 0x2f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x30:
-          this.logNotImplemented(byte);
-          break;
-        case 0x31:
-          this.logNotImplemented(byte);
-          break;
-        case 0x32:
-          this.logNotImplemented(byte);
-          break;
-        case 0x33:
-          this.logNotImplemented(byte);
-          break;
-        case 0x34:
-          this.logNotImplemented(byte);
-          break;
-        case 0x35:
-          this.logNotImplemented(byte);
-          break;
-        case 0x36:
-          this.logNotImplemented(byte);
+          this.opCPL(byte);
           break;
         case 0x37:
           this.logNotImplemented(byte);
