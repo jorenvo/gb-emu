@@ -52,12 +52,20 @@ export class CPU {
     return `0b${bin}`;
   }
 
+  hexString(x: number): string {
+    let bin = x.toString(16);
+    bin = bin.padStart(2, "0");
+    return `0x${bin}`;
+  }
+
   log(byte: number, msg: string) {
     console.log(`${byte}: ${msg}`);
   }
 
   logNotImplemented(byte: number) {
-    console.log(`unknown instruction ${this.binString(byte)}`);
+    throw new Error(
+      `unknown instruction ${this.binString(byte)} ${this.hexString(byte)}`
+    );
   }
 
   opLdD16ToR16(byte: number) {
@@ -322,6 +330,19 @@ export class CPU {
     this.regs[CPU.A] ^= 0xff;
     this.setZeroFlag(1);
     this.setSubtractFlag(1);
+  }
+
+  opXorR8(byte: number) {
+    if (byte === 0x7e) {
+      this.regs[CPU.A] ^= this.memory[this.getHL()];
+    } else {
+      const register = this.getBits(byte, 4, 5);
+      this.regs[CPU.A] ^= this.regs[register];
+    }
+    this.setZeroFlag(this.regs[CPU.A] === 0 ? 1 : 0);
+    this.setSubtractFlag(0);
+    this.setCarryFlagDirect(0);
+    this.setHalfCarryFlag(0, 0);
   }
 
   run() {
@@ -775,28 +796,14 @@ export class CPU {
           this.logNotImplemented(byte);
           break;
         case 0xa8:
-          this.logNotImplemented(byte);
-          break;
         case 0xa9:
-          this.logNotImplemented(byte);
-          break;
         case 0xaa:
-          this.logNotImplemented(byte);
-          break;
         case 0xab:
-          this.logNotImplemented(byte);
-          break;
         case 0xac:
-          this.logNotImplemented(byte);
-          break;
         case 0xad:
-          this.logNotImplemented(byte);
-          break;
         case 0xae:
-          this.logNotImplemented(byte);
-          break;
         case 0xaf:
-          this.logNotImplemented(byte);
+          this.opXorR8(byte);
           break;
         case 0xb0:
           this.logNotImplemented(byte);
