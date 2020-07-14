@@ -14,9 +14,10 @@ export class CPU {
 
   regs: Uint8Array;
   memory: Uint8Array;
+  prefix: boolean;
 
   constructor(memory: Uint8Array) {
-    this.SP = 0;
+    this.SP = 0xfffe;
     this.PC = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
@@ -25,6 +26,7 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this.regs = new Uint8Array(new Array(8));
     this.memory = memory;
+    this.prefix = false;
   }
 
   // 0b10101010
@@ -64,7 +66,9 @@ export class CPU {
 
   logNotImplemented(byte: number) {
     throw new Error(
-      `unknown instruction ${this.binString(byte)} ${this.hexString(byte)}`
+      `${this.hexString(this.PC)}: unknown ${
+        this.prefix ? "prefixed" : ""
+      } instruction ${this.binString(byte)} ${this.hexString(byte)}`
     );
   }
 
@@ -109,7 +113,22 @@ export class CPU {
   }
 
   opLdR8ToA16(byte: number) {
-    const register = byte * 2;
+    let register = 0;
+    switch (byte) {
+      case 0x02:
+        register = 0;
+        break;
+      case 0x12:
+        register = 2;
+        break;
+      case 0x22:
+      case 0x32:
+      case 0x77:
+        register = 4;
+        break;
+      default:
+        this.log(byte, "opLdR8ToA16 with unknown byte");
+    }
     const high = this.regs[register];
     const low = this.regs[register + 1];
     let addr = (high << 8) | low;
@@ -142,12 +161,34 @@ export class CPU {
     }
   }
 
+  opLdAtoAddrC(_byte: number) {
+    this.memory[CPU.C] = this.regs[CPU.A];
+  }
+
   opLdSPToA16(_byte: number) {
     const a16Low = this.memory[this.PC++];
     const a16High = this.memory[this.PC++];
     const a16 = (a16High << 8) | a16Low;
     this.memory[a16] = this.SP & 0xff; // TODO: this order is correct, should we always store LSB before MSB?
     this.memory[a16 + 1] = this.SP >> 8;
+  }
+
+  opLdhA8(_byte: number) {
+    const lowAddr = this.memory[this.PC++];
+    this.memory[0xff00 | lowAddr] = this.regs[CPU.A];
+  }
+
+  opLdR8ToR8(byte: number) {
+    const srcReg = this.getBits(byte, 0, 2);
+    const destReg = this.getBits(byte, 3, 5);
+
+    if (srcReg === 6) {
+      this.regs[destReg] = this.memory[this.getHL()];
+    } else if (destReg === 6) {
+      this.memory[this.getHL()] = this.regs[srcReg];
+    } else {
+      this.regs[destReg] = this.regs[srcReg];
+    }
   }
 
   opDecInc16(byte: number, inc: boolean) {
@@ -236,15 +277,31 @@ export class CPU {
     this.setSubtractFlag(1);
   }
 
+  rotateLeft(regValue: number): number {
+    const msb = regValue >> 7;
+    return (regValue << 1) | msb;
+  }
+
+  rotateLeftCarry(carry: number, regValue: number): [number, number] {
+    const eightBit = (regValue >> 7) & 1;
+    regValue <<= 1;
+    regValue &= 0b1111_1110;
+    regValue |= carry;
+
+    return [eightBit, regValue];
+  }
+
   opRLCA(_byte: number) {
-    const msb = (this.regs[CPU.A] & 0b1000_0000) >> 7;
-    this.regs[CPU.A] = (this.regs[CPU.A] << 1) & 0b1111_1110;
-    this.regs[CPU.A] |= this.getCarryFlag();
-    this.setCarryFlagDirect(msb);
+    const [carryBit, rotatedReg] = this.rotateLeftCarry(
+      this.getCarryFlag(),
+      this.regs[CPU.A]
+    );
+    this.regs[CPU.A] = rotatedReg;
+    this.setCarryFlagDirect(carryBit);
 
     this.setHalfCarryFlag(0, 0);
     this.setSubtractFlag(0);
-    this.setZeroFlag(0);
+    this.setZeroFlag(this.regs[CPU.A] === 0 ? 1 : 0);
   }
 
   opRRCA(_byte: number) {
@@ -255,18 +312,33 @@ export class CPU {
 
     this.setHalfCarryFlag(0, 0);
     this.setSubtractFlag(0);
-    this.setZeroFlag(0);
+    this.setZeroFlag(this.regs[CPU.A] === 0 ? 1 : 0);
   }
 
   opRLA(_byte: number) {
-    const msb = this.regs[CPU.A] >> 7;
-    this.regs[CPU.A] <<= 1;
-    this.regs[CPU.A] |= msb;
-    this.setCarryFlagDirect(msb);
+    this.regs[CPU.A] = this.rotateLeft(this.regs[CPU.A]);
+    this.setCarryFlagDirect(this.regs[CPU.A] >> 7);
 
     this.setHalfCarryFlag(0, 0);
     this.setSubtractFlag(0);
-    this.setZeroFlag(0);
+    this.setZeroFlag(this.regs[CPU.A] === 0 ? 1 : 0);
+  }
+
+  opRL(byte: number) {
+    const register = byte & 0xf;
+    let value = 0;
+    if (register === 6) {
+      value = this.rotateLeft(this.memory[this.getHL()]);
+      this.memory[this.getHL()] = value;
+    } else {
+      value = this.rotateLeft(this.regs[register]);
+      this.regs[register] = value;
+    }
+
+    this.setCarryFlagDirect(value >> 7);
+    this.setHalfCarryFlag(0, 0);
+    this.setSubtractFlag(0);
+    this.setZeroFlag(value === 0 ? 1 : 0);
   }
 
   opRRA(_byte: number) {
@@ -345,6 +417,679 @@ export class CPU {
     this.setHalfCarryFlag(0, 0);
   }
 
+  opCall(_byte: number) {
+    const addrLow = this.memory[this.PC++];
+    const addrHigh = this.memory[this.PC++];
+
+    this.memory[this.SP--] = this.PC >> 8;
+    this.memory[this.SP--] = this.PC & 0xff;
+
+    this.PC = (addrHigh << 8) | addrLow;
+  }
+
+  opPush(byte: number) {
+    let low = 0;
+    let high = 0;
+    if (byte === 0xf5) {
+      high = this.regs[CPU.A];
+      low = this.regs[CPU.F];
+    } else {
+      const register = this.getBits(byte, 3, 5);
+      high = this.regs[register];
+      low = this.regs[register + 1];
+    }
+
+    this.memory[--this.SP] = high;
+    this.memory[--this.SP] = low;
+  }
+
+  opPop(byte: number) {
+    if (byte === 0xf1) {
+      this.regs[CPU.A] = this.memory[this.SP--];
+      this.regs[CPU.F] = this.memory[this.SP--];
+    } else {
+      const register = this.getBits(byte, 3, 5);
+      this.regs[register] = this.memory[this.SP--];
+      this.regs[register + 1] = this.memory[this.SP--];
+    }
+  }
+
+  opPrefix(_byte: number) {
+    this.prefix = true;
+  }
+
+  executeOp(byte: number) {
+    switch (byte) {
+      case 0x00:
+        this.log(byte, "nop");
+        break;
+      case 0x01:
+      case 0x11:
+      case 0x21:
+      case 0x31:
+        this.opLdD16ToR16(byte);
+        break;
+      case 0x02:
+      case 0x12:
+      case 0x22:
+      case 0x32:
+      case 0x77:
+        this.opLdR8ToA16(byte);
+        break;
+      case 0x03:
+      case 0x13:
+      case 0x23:
+      case 0x33:
+        this.opInc16(byte);
+        break;
+      case 0x04:
+      case 0x14:
+      case 0x24:
+      case 0x34:
+        this.opInc8(byte);
+        break;
+      case 0x05:
+      case 0x15:
+      case 0x25:
+      case 0x35:
+        this.opDec8(byte);
+        break;
+      case 0x06:
+      case 0x16:
+      case 0x26:
+      case 0x36:
+        this.opLdD8ToR8(byte);
+        break;
+      case 0x07:
+        this.opRLCA(byte);
+        break;
+      case 0x08:
+        this.opLdSPToA16(byte);
+        break;
+      case 0x09:
+      case 0x19:
+      case 0x29:
+        this.opAddR16ToHL(byte);
+        break;
+      case 0x0a:
+      case 0x1a:
+      case 0x2a:
+        this.opLdA16ToA(byte);
+        break;
+      case 0x0b:
+      case 0x1b:
+      case 0x2b:
+        this.opDec16(byte);
+        break;
+      case 0x0c:
+      case 0x1c:
+      case 0x2c:
+      case 0x3c:
+        this.opInc8(byte + 1);
+        break;
+      case 0x0d:
+      case 0x1d:
+      case 0x2d:
+      case 0x3d:
+        this.opDec8(byte + 1);
+        break;
+      case 0x0e:
+      case 0x1e:
+      case 0x2e:
+      case 0x3e:
+        this.opLdD8ToR8(byte + 1);
+        break;
+      case 0x0f:
+        this.opRRCA(byte);
+        break;
+      case 0x10:
+        this.opStop(byte);
+        break;
+      case 0x17:
+        this.opRLA(byte);
+        break;
+      case 0x18:
+        this.opJRE(byte);
+        break;
+      case 0x1f:
+        this.opRRA(byte);
+        break;
+      case 0x20:
+      case 0x28:
+      case 0x30:
+      case 0x38:
+        this.opJRC(byte);
+        break;
+      case 0x27:
+        // TODO: DAA https://ehaskins.com/2018-01-30%20Z80%20DAA/
+        this.logNotImplemented(byte);
+        break;
+      case 0x2f:
+        this.opCPL(byte);
+        break;
+      case 0x37:
+        // TODO: SCF
+        this.logNotImplemented(byte);
+        break;
+      case 0x39:
+      case 0x3a:
+      case 0x3b:
+      case 0x3f:
+        this.logNotImplemented(byte);
+        break;
+      case 0x40:
+      case 0x41:
+      case 0x42:
+      case 0x43:
+      case 0x44:
+      case 0x45:
+      case 0x46:
+      case 0x47:
+      case 0x48:
+      case 0x49:
+      case 0x4a:
+      case 0x4b:
+      case 0x4c:
+      case 0x4d:
+      case 0x4e:
+      case 0x4f:
+      case 0x50:
+      case 0x51:
+      case 0x52:
+      case 0x53:
+      case 0x54:
+      case 0x55:
+      case 0x56:
+      case 0x57:
+      case 0x58:
+      case 0x59:
+      case 0x5a:
+      case 0x5b:
+      case 0x5c:
+      case 0x5d:
+      case 0x5e:
+      case 0x5f:
+      case 0x60:
+      case 0x61:
+      case 0x62:
+      case 0x63:
+      case 0x64:
+      case 0x65:
+      case 0x66:
+      case 0x67:
+      case 0x68:
+      case 0x69:
+      case 0x6a:
+      case 0x6b:
+      case 0x6c:
+      case 0x6d:
+      case 0x6e:
+      case 0x6f:
+      case 0x70:
+      case 0x71:
+      case 0x72:
+      case 0x73:
+      case 0x74:
+      case 0x75:
+      case 0x78:
+      case 0x79:
+      case 0x7a:
+      case 0x7b:
+      case 0x7c:
+      case 0x7d:
+      case 0x7e:
+      case 0x7f:
+        this.opLdR8ToR8(byte);
+        break;
+      case 0x76:
+      case 0x80:
+      case 0x81:
+      case 0x82:
+      case 0x83:
+      case 0x84:
+      case 0x85:
+      case 0x86:
+      case 0x87:
+      case 0x88:
+      case 0x89:
+      case 0x8a:
+      case 0x8b:
+      case 0x8c:
+      case 0x8d:
+      case 0x8e:
+      case 0x8f:
+      case 0x90:
+      case 0x91:
+      case 0x92:
+      case 0x93:
+      case 0x94:
+      case 0x95:
+      case 0x96:
+      case 0x97:
+      case 0x98:
+      case 0x99:
+      case 0x9a:
+      case 0x9b:
+      case 0x9c:
+      case 0x9d:
+      case 0x9e:
+      case 0x9f:
+      case 0xa0:
+      case 0xa1:
+      case 0xa2:
+      case 0xa3:
+      case 0xa4:
+      case 0xa5:
+      case 0xa6:
+      case 0xa7:
+        this.logNotImplemented(byte);
+        break;
+      case 0xa8:
+      case 0xa9:
+      case 0xaa:
+      case 0xab:
+      case 0xac:
+      case 0xad:
+      case 0xae:
+      case 0xaf:
+        this.opXorR8(byte);
+        break;
+      case 0xb0:
+      case 0xb1:
+      case 0xb2:
+      case 0xb3:
+      case 0xb4:
+      case 0xb5:
+      case 0xb6:
+      case 0xb7:
+      case 0xb8:
+      case 0xb9:
+      case 0xba:
+      case 0xbb:
+      case 0xbc:
+      case 0xbd:
+      case 0xbe:
+      case 0xbf:
+      case 0xc0:
+        this.logNotImplemented(byte);
+        break;
+      case 0xc1:
+      case 0xd1:
+      case 0xe1:
+      case 0xf1:
+        this.opPop(byte);
+        break;
+      case 0xc2:
+      case 0xc3:
+      case 0xc4:
+        this.logNotImplemented(byte);
+        break;
+      case 0xc5:
+      case 0xd5:
+      case 0xe5:
+      case 0xf5:
+        this.opPush(byte);
+        break;
+      case 0xc6:
+      case 0xc7:
+      case 0xc8:
+      case 0xc9:
+      case 0xca:
+        this.logNotImplemented(byte);
+        break;
+      case 0xcb:
+        this.opPrefix(byte);
+        break;
+      case 0xcc:
+        this.logNotImplemented(byte);
+        break;
+      case 0xcd:
+        this.opCall(byte);
+        break;
+      case 0xce:
+      case 0xcf:
+      case 0xd0:
+      case 0xd1:
+      case 0xd2:
+      case 0xd3:
+      case 0xd4:
+      case 0xd5:
+      case 0xd6:
+      case 0xd7:
+      case 0xd8:
+      case 0xd9:
+      case 0xda:
+      case 0xdb:
+      case 0xdc:
+      case 0xdd:
+      case 0xde:
+      case 0xdf:
+        this.logNotImplemented(byte);
+        break;
+      case 0xe0:
+        this.opLdhA8(byte);
+        break;
+      case 0xe1:
+        this.logNotImplemented(byte);
+        break;
+      case 0xe2:
+        this.opLdAtoAddrC(byte);
+        break;
+      case 0xe3:
+      case 0xe4:
+      case 0xe5:
+      case 0xe6:
+      case 0xe7:
+      case 0xe8:
+      case 0xe9:
+      case 0xea:
+      case 0xeb:
+      case 0xec:
+      case 0xed:
+      case 0xee:
+      case 0xef:
+      case 0xf0:
+      case 0xf1:
+      case 0xf2:
+      case 0xf3:
+      case 0xf4:
+      case 0xf5:
+      case 0xf6:
+      case 0xf7:
+      case 0xf8:
+      case 0xf9:
+      case 0xfa:
+      case 0xfb:
+      case 0xfc:
+      case 0xfd:
+      case 0xfe:
+      case 0xff:
+        this.logNotImplemented(byte);
+        break;
+    }
+  }
+
+  opBit(byte: number) {
+    const register = this.getBits(byte, 0, 2);
+    const bit = this.getBits(byte, 3, 5);
+    if (register === 0x6) {
+      // (HL)
+    } else {
+      return this.getBits(this.regs[register], bit, bit);
+    }
+  }
+
+  executeOpPrefixed(byte: number) {
+    switch (byte) {
+      case 0x00:
+      case 0x01:
+      case 0x02:
+      case 0x03:
+      case 0x04:
+      case 0x05:
+      case 0x06:
+      case 0x07:
+      case 0x08:
+      case 0x09:
+      case 0x0a:
+      case 0x0b:
+      case 0x0c:
+      case 0x0d:
+      case 0x0e:
+      case 0x0f:
+        this.logNotImplemented(byte);
+        break;
+      case 0x10:
+      case 0x11:
+      case 0x12:
+      case 0x13:
+      case 0x14:
+      case 0x15:
+      case 0x16:
+      case 0x17:
+        this.opRL(byte);
+        break;
+      case 0x18:
+      case 0x19:
+      case 0x1a:
+      case 0x1b:
+      case 0x1c:
+      case 0x1d:
+      case 0x1e:
+      case 0x1f:
+      case 0x20:
+      case 0x21:
+      case 0x22:
+      case 0x23:
+      case 0x24:
+      case 0x25:
+      case 0x26:
+      case 0x27:
+      case 0x28:
+      case 0x29:
+      case 0x2a:
+      case 0x2b:
+      case 0x2c:
+      case 0x2d:
+      case 0x2e:
+      case 0x2f:
+      case 0x30:
+      case 0x31:
+      case 0x32:
+      case 0x33:
+      case 0x34:
+      case 0x35:
+      case 0x36:
+      case 0x37:
+      case 0x38:
+      case 0x39:
+      case 0x3a:
+      case 0x3b:
+      case 0x3c:
+      case 0x3d:
+      case 0x3e:
+      case 0x3f:
+        this.logNotImplemented(byte);
+        break;
+      case 0x40:
+      case 0x41:
+      case 0x42:
+      case 0x43:
+      case 0x44:
+      case 0x45:
+      case 0x46:
+      case 0x47:
+      case 0x48:
+      case 0x49:
+      case 0x4a:
+      case 0x4b:
+      case 0x4c:
+      case 0x4d:
+      case 0x4e:
+      case 0x4f:
+      case 0x50:
+      case 0x51:
+      case 0x52:
+      case 0x53:
+      case 0x54:
+      case 0x55:
+      case 0x56:
+      case 0x57:
+      case 0x58:
+      case 0x59:
+      case 0x5a:
+      case 0x5b:
+      case 0x5c:
+      case 0x5d:
+      case 0x5e:
+      case 0x5f:
+      case 0x60:
+      case 0x61:
+      case 0x62:
+      case 0x63:
+      case 0x64:
+      case 0x65:
+      case 0x66:
+      case 0x67:
+      case 0x68:
+      case 0x69:
+      case 0x6a:
+      case 0x6b:
+      case 0x6c:
+      case 0x6d:
+      case 0x6e:
+      case 0x6f:
+      case 0x70:
+      case 0x71:
+      case 0x72:
+      case 0x73:
+      case 0x74:
+      case 0x75:
+      case 0x76:
+      case 0x77:
+      case 0x78:
+      case 0x79:
+      case 0x7a:
+      case 0x7b:
+      case 0x7c:
+      case 0x7d:
+      case 0x7e:
+      case 0x7f:
+        this.opBit(byte);
+        break;
+      case 0x80:
+      case 0x81:
+      case 0x82:
+      case 0x83:
+      case 0x84:
+      case 0x85:
+      case 0x86:
+      case 0x87:
+      case 0x88:
+      case 0x89:
+      case 0x8a:
+      case 0x8b:
+      case 0x8c:
+      case 0x8d:
+      case 0x8e:
+      case 0x8f:
+      case 0x90:
+      case 0x91:
+      case 0x92:
+      case 0x93:
+      case 0x94:
+      case 0x95:
+      case 0x96:
+      case 0x97:
+      case 0x98:
+      case 0x99:
+      case 0x9a:
+      case 0x9b:
+      case 0x9c:
+      case 0x9d:
+      case 0x9e:
+      case 0x9f:
+      case 0xa0:
+      case 0xa1:
+      case 0xa2:
+      case 0xa3:
+      case 0xa4:
+      case 0xa5:
+      case 0xa6:
+      case 0xa7:
+      case 0xa8:
+      case 0xa9:
+      case 0xaa:
+      case 0xab:
+      case 0xac:
+      case 0xad:
+      case 0xae:
+      case 0xaf:
+      case 0xb0:
+      case 0xb1:
+      case 0xb2:
+      case 0xb3:
+      case 0xb4:
+      case 0xb5:
+      case 0xb6:
+      case 0xb7:
+      case 0xb8:
+      case 0xb9:
+      case 0xba:
+      case 0xbb:
+      case 0xbc:
+      case 0xbd:
+      case 0xbe:
+      case 0xbf:
+      case 0xc0:
+      case 0xc1:
+      case 0xc2:
+      case 0xc3:
+      case 0xc4:
+      case 0xc5:
+      case 0xc6:
+      case 0xc7:
+      case 0xc8:
+      case 0xc9:
+      case 0xca:
+      case 0xcb:
+      case 0xcc:
+      case 0xcd:
+      case 0xce:
+      case 0xcf:
+      case 0xd0:
+      case 0xd1:
+      case 0xd2:
+      case 0xd3:
+      case 0xd4:
+      case 0xd5:
+      case 0xd6:
+      case 0xd7:
+      case 0xd8:
+      case 0xd9:
+      case 0xda:
+      case 0xdb:
+      case 0xdc:
+      case 0xdd:
+      case 0xde:
+      case 0xdf:
+      case 0xe0:
+      case 0xe1:
+      case 0xe2:
+      case 0xe3:
+      case 0xe4:
+      case 0xe5:
+      case 0xe6:
+      case 0xe7:
+      case 0xe8:
+      case 0xe9:
+      case 0xea:
+      case 0xeb:
+      case 0xec:
+      case 0xed:
+      case 0xee:
+      case 0xef:
+      case 0xf0:
+      case 0xf1:
+      case 0xf2:
+      case 0xf3:
+      case 0xf4:
+      case 0xf5:
+      case 0xf6:
+      case 0xf7:
+      case 0xf8:
+      case 0xf9:
+      case 0xfa:
+      case 0xfb:
+      case 0xfc:
+      case 0xfd:
+      case 0xfe:
+      case 0xff:
+        this.logNotImplemented(byte);
+        break;
+    }
+  }
+
   run() {
     while (true) {
       if (this.PC >= this.memory.length) {
@@ -353,698 +1098,11 @@ export class CPU {
       }
 
       const byte = this.memory[this.PC++];
-      switch (byte) {
-        case 0x00:
-          this.log(byte, "nop");
-          break;
-        case 0x01:
-        case 0x11:
-        case 0x21:
-        case 0x31:
-          this.opLdD16ToR16(byte);
-          break;
-        case 0x02:
-        case 0x12:
-        case 0x22:
-        case 0x32:
-          this.opLdR8ToA16(byte);
-          break;
-        case 0x03:
-        case 0x13:
-        case 0x23:
-        case 0x33:
-          this.opInc16(byte);
-          break;
-        case 0x04:
-        case 0x14:
-        case 0x24:
-        case 0x34:
-          this.opInc8(byte);
-          break;
-        case 0x05:
-        case 0x15:
-        case 0x25:
-        case 0x35:
-          this.opDec8(byte);
-          break;
-        case 0x06:
-        case 0x16:
-        case 0x26:
-        case 0x36:
-          this.opLdD8ToR8(byte);
-          break;
-        case 0x07:
-          this.opRLCA(byte);
-          break;
-        case 0x08:
-          this.opLdSPToA16(byte);
-          break;
-        case 0x09:
-        case 0x19:
-        case 0x29:
-          this.opAddR16ToHL(byte);
-          break;
-        case 0x0a:
-        case 0x1a:
-        case 0x2a:
-          this.opLdA16ToA(byte);
-          break;
-        case 0x0b:
-        case 0x1b:
-        case 0x2b:
-          this.opDec16(byte);
-          break;
-        case 0x0c:
-        case 0x1c:
-        case 0x2c:
-          this.opInc8(byte + 1);
-          break;
-        case 0x0d:
-        case 0x1d:
-        case 0x2d:
-          this.opDec8(byte + 1);
-          break;
-        case 0x0e:
-        case 0x1e:
-        case 0x2e:
-          this.opLdD8ToR8(byte + 1);
-          break;
-        case 0x0f:
-          this.opRRCA(byte);
-          break;
-        case 0x10:
-          this.opStop(byte);
-          break;
-        case 0x17:
-          this.opRLA(byte);
-          break;
-        case 0x18:
-          this.opJRE(byte);
-          break;
-        case 0x1f:
-          this.opRRA(byte);
-          break;
-        case 0x20:
-        case 0x28:
-        case 0x30:
-          this.opJRC(byte);
-          break;
-        case 0x27:
-          // TODO: DAA https://ehaskins.com/2018-01-30%20Z80%20DAA/
-          this.logNotImplemented(byte);
-          break;
-        case 0x2f:
-          this.opCPL(byte);
-          break;
-        case 0x37:
-          this.logNotImplemented(byte);
-          break;
-        case 0x38:
-          this.logNotImplemented(byte);
-          break;
-        case 0x39:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x3f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x40:
-          this.logNotImplemented(byte);
-          break;
-        case 0x41:
-          this.logNotImplemented(byte);
-          break;
-        case 0x42:
-          this.logNotImplemented(byte);
-          break;
-        case 0x43:
-          this.logNotImplemented(byte);
-          break;
-        case 0x44:
-          this.logNotImplemented(byte);
-          break;
-        case 0x45:
-          this.logNotImplemented(byte);
-          break;
-        case 0x46:
-          this.logNotImplemented(byte);
-          break;
-        case 0x47:
-          this.logNotImplemented(byte);
-          break;
-        case 0x48:
-          this.logNotImplemented(byte);
-          break;
-        case 0x49:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x4f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x50:
-          this.logNotImplemented(byte);
-          break;
-        case 0x51:
-          this.logNotImplemented(byte);
-          break;
-        case 0x52:
-          this.logNotImplemented(byte);
-          break;
-        case 0x53:
-          this.logNotImplemented(byte);
-          break;
-        case 0x54:
-          this.logNotImplemented(byte);
-          break;
-        case 0x55:
-          this.logNotImplemented(byte);
-          break;
-        case 0x56:
-          this.logNotImplemented(byte);
-          break;
-        case 0x57:
-          this.logNotImplemented(byte);
-          break;
-        case 0x58:
-          this.logNotImplemented(byte);
-          break;
-        case 0x59:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x5f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x60:
-          this.logNotImplemented(byte);
-          break;
-        case 0x61:
-          this.logNotImplemented(byte);
-          break;
-        case 0x62:
-          this.logNotImplemented(byte);
-          break;
-        case 0x63:
-          this.logNotImplemented(byte);
-          break;
-        case 0x64:
-          this.logNotImplemented(byte);
-          break;
-        case 0x65:
-          this.logNotImplemented(byte);
-          break;
-        case 0x66:
-          this.logNotImplemented(byte);
-          break;
-        case 0x67:
-          this.logNotImplemented(byte);
-          break;
-        case 0x68:
-          this.logNotImplemented(byte);
-          break;
-        case 0x69:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x6f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x70:
-          this.logNotImplemented(byte);
-          break;
-        case 0x71:
-          this.logNotImplemented(byte);
-          break;
-        case 0x72:
-          this.logNotImplemented(byte);
-          break;
-        case 0x73:
-          this.logNotImplemented(byte);
-          break;
-        case 0x74:
-          this.logNotImplemented(byte);
-          break;
-        case 0x75:
-          this.logNotImplemented(byte);
-          break;
-        case 0x76:
-          this.logNotImplemented(byte);
-          break;
-        case 0x77:
-          this.logNotImplemented(byte);
-          break;
-        case 0x78:
-          this.logNotImplemented(byte);
-          break;
-        case 0x79:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x7f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x80:
-          this.logNotImplemented(byte);
-          break;
-        case 0x81:
-          this.logNotImplemented(byte);
-          break;
-        case 0x82:
-          this.logNotImplemented(byte);
-          break;
-        case 0x83:
-          this.logNotImplemented(byte);
-          break;
-        case 0x84:
-          this.logNotImplemented(byte);
-          break;
-        case 0x85:
-          this.logNotImplemented(byte);
-          break;
-        case 0x86:
-          this.logNotImplemented(byte);
-          break;
-        case 0x87:
-          this.logNotImplemented(byte);
-          break;
-        case 0x88:
-          this.logNotImplemented(byte);
-          break;
-        case 0x89:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x8f:
-          this.logNotImplemented(byte);
-          break;
-        case 0x90:
-          this.logNotImplemented(byte);
-          break;
-        case 0x91:
-          this.logNotImplemented(byte);
-          break;
-        case 0x92:
-          this.logNotImplemented(byte);
-          break;
-        case 0x93:
-          this.logNotImplemented(byte);
-          break;
-        case 0x94:
-          this.logNotImplemented(byte);
-          break;
-        case 0x95:
-          this.logNotImplemented(byte);
-          break;
-        case 0x96:
-          this.logNotImplemented(byte);
-          break;
-        case 0x97:
-          this.logNotImplemented(byte);
-          break;
-        case 0x98:
-          this.logNotImplemented(byte);
-          break;
-        case 0x99:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9a:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9b:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9c:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9d:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9e:
-          this.logNotImplemented(byte);
-          break;
-        case 0x9f:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xa8:
-        case 0xa9:
-        case 0xaa:
-        case 0xab:
-        case 0xac:
-        case 0xad:
-        case 0xae:
-        case 0xaf:
-          this.opXorR8(byte);
-          break;
-        case 0xb0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb8:
-          this.logNotImplemented(byte);
-          break;
-        case 0xb9:
-          this.logNotImplemented(byte);
-          break;
-        case 0xba:
-          this.logNotImplemented(byte);
-          break;
-        case 0xbb:
-          this.logNotImplemented(byte);
-          break;
-        case 0xbc:
-          this.logNotImplemented(byte);
-          break;
-        case 0xbd:
-          this.logNotImplemented(byte);
-          break;
-        case 0xbe:
-          this.logNotImplemented(byte);
-          break;
-        case 0xbf:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc8:
-          this.logNotImplemented(byte);
-          break;
-        case 0xc9:
-          this.logNotImplemented(byte);
-          break;
-        case 0xca:
-          this.logNotImplemented(byte);
-          break;
-        case 0xcb:
-          this.logNotImplemented(byte);
-          break;
-        case 0xcc:
-          this.logNotImplemented(byte);
-          break;
-        case 0xcd:
-          this.logNotImplemented(byte);
-          break;
-        case 0xce:
-          this.logNotImplemented(byte);
-          break;
-        case 0xcf:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd8:
-          this.logNotImplemented(byte);
-          break;
-        case 0xd9:
-          this.logNotImplemented(byte);
-          break;
-        case 0xda:
-          this.logNotImplemented(byte);
-          break;
-        case 0xdb:
-          this.logNotImplemented(byte);
-          break;
-        case 0xdc:
-          this.logNotImplemented(byte);
-          break;
-        case 0xdd:
-          this.logNotImplemented(byte);
-          break;
-        case 0xde:
-          this.logNotImplemented(byte);
-          break;
-        case 0xdf:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe8:
-          this.logNotImplemented(byte);
-          break;
-        case 0xe9:
-          this.logNotImplemented(byte);
-          break;
-        case 0xea:
-          this.logNotImplemented(byte);
-          break;
-        case 0xeb:
-          this.logNotImplemented(byte);
-          break;
-        case 0xec:
-          this.logNotImplemented(byte);
-          break;
-        case 0xed:
-          this.logNotImplemented(byte);
-          break;
-        case 0xee:
-          this.logNotImplemented(byte);
-          break;
-        case 0xef:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf0:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf1:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf2:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf3:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf4:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf5:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf6:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf7:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf8:
-          this.logNotImplemented(byte);
-          break;
-        case 0xf9:
-          this.logNotImplemented(byte);
-          break;
-        case 0xfa:
-          this.logNotImplemented(byte);
-          break;
-        case 0xfb:
-          this.logNotImplemented(byte);
-          break;
-        case 0xfc:
-          this.logNotImplemented(byte);
-          break;
-        case 0xfd:
-          this.logNotImplemented(byte);
-          break;
-        case 0xfe:
-          this.logNotImplemented(byte);
-          break;
-        case 0xff:
-          this.logNotImplemented(byte);
-          break;
+      if (this.prefix) {
+        this.executeOpPrefixed(byte);
+        this.prefix = false;
+      } else {
+        this.executeOp(byte);
       }
     }
   }
