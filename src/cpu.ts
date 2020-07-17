@@ -1,3 +1,5 @@
+import * as utils from "./utils.js";
+
 export class CPU {
   // reg indexes in regs
   static B = 0;
@@ -89,21 +91,15 @@ export class CPU {
     return `0b${bin}`;
   }
 
-  hexString(x: number): string {
-    let bin = x.toString(16);
-    bin = bin.padStart(2, "0");
-    return `0x${bin}`;
-  }
-
   log(byte: number, msg: string) {
     console.log(`${byte}: ${msg}`);
   }
 
   logNotImplemented(byte: number) {
     throw new Error(
-      `${this.hexString(this.PC)}: unknown ${
+      `${utils.hexString(this.PC)}: unknown ${
         this.prefix ? "prefixed" : ""
-      } instruction ${this.binString(byte)} ${this.hexString(byte)}`
+      } instruction ${this.binString(byte)} ${utils.hexString(byte)}`
     );
   }
 
@@ -1116,20 +1112,21 @@ export class CPU {
     }
   }
 
-  run() {
-    while (true) {
-      if (this.PC >= this.memory.length) {
-        console.log("Trying to read outside of memory, stopping CPU.");
-        break;
-      }
-
-      const byte = this.memory[this.PC++];
-      if (this.prefix) {
-        this.executeOpPrefixed(byte);
-        this.prefix = false;
-      } else {
-        this.executeOp(byte);
-      }
+  tick() {
+    if (this.PC >= this.memory.length) {
+      console.log("Trying to read outside of memory, stopping CPU.");
+      return false;
     }
+
+    const byte = this.memory[this.PC++];
+
+    if (this.prefix) {
+      this.executeOpPrefixed(byte);
+      this.prefix = false;
+    } else {
+      this.executeOp(byte);
+    }
+
+    return true;
   }
 }
