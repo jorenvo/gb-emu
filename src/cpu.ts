@@ -29,6 +29,41 @@ export class CPU {
     this.prefix = false;
   }
 
+  getCombinedRegister(r1: number, r2: number): number {
+    return (this.regs[r1] << 8) | this.regs[r2];
+  }
+
+  setCombinedRegister(r1: number, r2: number, val: number) {
+    this.regs[r1] = val >> 8;
+    this.regs[r2] = val & 0xff;
+  }
+
+  // Fake 16 bit registers
+  get HL() {
+    return this.getCombinedRegister(CPU.H, CPU.L);
+  }
+
+  set HL(x: number) {
+    this.setCombinedRegister(CPU.H, CPU.L, x);
+  }
+
+  get AF() {
+    return this.getCombinedRegister(CPU.A, CPU.F);
+  }
+
+  set AF(x: number) {
+    this.setCombinedRegister(CPU.A, CPU.F, x);
+  }
+
+  // Fake 8 bit registers
+  get HLIndirect() {
+    return this.memory[this.HL];
+  }
+
+  set HLIndirect(x: number) {
+    this.memory[this.HL] = x;
+  }
+
   // 0b10101010
   //   ^      ^
   //  to:7 from:0
@@ -89,27 +124,10 @@ export class CPU {
     const register = byte * 2;
     const d8 = this.memory[this.PC++];
     if (byte === 0x36) {
-      this.memory[this.getHL()] = d8;
+      this.HLIndirect = d8;
     } else {
       this.regs[register] = d8;
     }
-  }
-
-  getHL() {
-    return (this.regs[CPU.H] << 8) | this.regs[CPU.L];
-  }
-
-  storeHL(d16: number) {
-    this.regs[CPU.H] = d16 >> 8;
-    this.regs[CPU.L] = d16 & 0xff;
-  }
-
-  incrementHL() {
-    this.storeHL(this.getHL() + 1);
-  }
-
-  decrementHL() {
-    this.storeHL(this.getHL() - 1);
   }
 
   opLdR8ToA16(byte: number) {
@@ -136,10 +154,10 @@ export class CPU {
 
     switch (byte) {
       case 0x22:
-        this.incrementHL();
+        ++this.HL;
         break;
       case 0x32:
-        this.decrementHL();
+        --this.HL;
         break;
     }
   }
@@ -153,10 +171,10 @@ export class CPU {
 
     switch (byte) {
       case 0x2a:
-        this.incrementHL();
+        ++this.HL;
         break;
       case 0x3a:
-        this.decrementHL();
+        --this.HL;
         break;
     }
   }
@@ -183,9 +201,9 @@ export class CPU {
     const destReg = this.getBits(byte, 3, 5);
 
     if (srcReg === 6) {
-      this.regs[destReg] = this.memory[this.getHL()];
+      this.regs[destReg] = this.HLIndirect;
     } else if (destReg === 6) {
-      this.memory[this.getHL()] = this.regs[srcReg];
+      this.HLIndirect = this.regs[srcReg];
     } else {
       this.regs[destReg] = this.regs[srcReg];
     }
@@ -247,7 +265,7 @@ export class CPU {
 
   opInc8(byte: number) {
     if (byte === 0x34) {
-      let addr = this.memory[this.getHL()];
+      let addr = this.HLIndirect;
       this.setHalfCarryFlag(this.memory[addr], 1);
       this.memory[addr] += 1;
       this.setZeroFlag(this.memory[addr] === 0 ? 1 : 0);
@@ -263,7 +281,7 @@ export class CPU {
 
   opDec8(byte: number) {
     if (byte === 0x35) {
-      let addr = this.memory[this.getHL()];
+      let addr = this.HLIndirect;
       this.setHalfCarryFlag(this.memory[addr], -1);
       this.memory[addr] -= 1;
       this.setZeroFlag(this.memory[addr] === 0 ? 1 : 0);
@@ -328,8 +346,8 @@ export class CPU {
     const register = byte & 0xf;
     let value = 0;
     if (register === 6) {
-      value = this.rotateLeft(this.memory[this.getHL()]);
-      this.memory[this.getHL()] = value;
+      value = this.rotateLeft(this.HLIndirect);
+      this.HLIndirect = value;
     } else {
       value = this.rotateLeft(this.regs[register]);
       this.regs[register] = value;
@@ -406,7 +424,7 @@ export class CPU {
 
   opXorR8(byte: number) {
     if (byte === 0x7e) {
-      this.regs[CPU.A] ^= this.memory[this.getHL()];
+      this.regs[CPU.A] ^= this.HLIndirect;
     } else {
       const register = this.getBits(byte, 4, 5);
       this.regs[CPU.A] ^= this.regs[register];
