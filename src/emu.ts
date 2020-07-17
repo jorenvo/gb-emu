@@ -27,8 +27,56 @@ async function handleROM(event: Event) {
   mainLoop(cpu);
 }
 
+function updateRegs(cpu: CPU) {
+  let s = `PC: ${utils.hexString(cpu.PC, 16)}  `;
+  s += `SP: ${utils.hexString(cpu.SP, 16)}  `;
+
+  s += `B: ${utils.hexString(cpu.regs[CPU.B])}  `;
+  s += `C: ${utils.hexString(cpu.regs[CPU.C])}  `;
+  s += `D: ${utils.hexString(cpu.regs[CPU.D])}  `;
+  s += `E: ${utils.hexString(cpu.regs[CPU.E])}  `;
+  s += `H: ${utils.hexString(cpu.regs[CPU.H])}  `;
+  s += `L: ${utils.hexString(cpu.regs[CPU.L])}  `;
+  s += `F: ${utils.hexString(cpu.regs[CPU.F])}  `;
+  s += `A: ${utils.hexString(cpu.regs[CPU.A])}  `;
+
+  document.getElementById("regs")!.innerText = s;
+}
+
+function createMemoryDiv(addr: number, byte: number) {
+  const newDiv = document.createElement("div");
+  newDiv.innerText = `${utils.hexString(addr)}: ${utils.hexString(
+    byte
+  )} ${utils.binString(byte)}`;
+  return newDiv;
+}
+
+function updateMemory(PC: number, memory: Uint8Array) {
+  const memoryDiv = document.getElementById("memory")!;
+  memoryDiv.innerHTML = "";
+
+  const bytesBefore = Math.min(4, PC - 1);
+  for (let addr = PC - bytesBefore; addr <= PC - 1; addr++) {
+    memoryDiv.appendChild(createMemoryDiv(addr, memory[addr]));
+  }
+
+  const currentMemory = createMemoryDiv(PC, memory[PC]);
+  currentMemory.style.color = "#2e7bff";
+  memoryDiv.appendChild(currentMemory);
+
+  const bytesAfter = Math.min(4, memory.length - 1 - PC);
+  for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
+    memoryDiv.appendChild(createMemoryDiv(addr, memory[addr]));
+  }
+}
+
+function updateUI(cpu: CPU) {
+  updateRegs(cpu);
+  updateMemory(cpu.PC, cpu.memory);
+}
+
 async function mainLoop(cpu: CPU) {
   if (!cpu.tick()) return;
-  document.getElementById("PC")!.innerText = utils.hexString(cpu.PC);
+  updateUI(cpu);
   window.setTimeout(() => mainLoop(cpu), 1_000);
 }

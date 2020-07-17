@@ -1,7 +1,13 @@
-export function hexString(x: number): string {
-  let bin = x.toString(16);
-  bin = bin.padStart(2, "0");
-  return `0x${bin}`;
+export function hexString(x: number, bits = 8): string {
+  let hex = x.toString(16);
+  hex = hex.padStart(bits / 4, "0");
+  return `0x${hex}`;
+}
+
+export function binString(x: number): string {
+  let bin = x.toString(2);
+  bin = bin.padStart(8, "0");
+  return `0b${bin}`;
 }
 
 export function formatArrayAsHex(array: Uint8Array): string {
