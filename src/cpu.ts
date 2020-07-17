@@ -445,6 +445,12 @@ export class CPU {
     this.PC = (addrHigh << 8) | addrLow;
   }
 
+  opRet(_byte: number) {
+    const high = this.memory[this.SP--];
+    const low = this.memory[this.SP--];
+    this.PC = (high << 8) | low;
+  }
+
   opPush(byte: number) {
     let low = 0;
     let high = 0;
@@ -752,6 +758,8 @@ export class CPU {
       case 0xc7:
       case 0xc8:
       case 0xc9:
+        this.opRet(byte);
+        break;
       case 0xca:
         this.logNotImplemented(byte);
         break;
