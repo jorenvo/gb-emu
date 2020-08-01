@@ -1,5 +1,8 @@
-import * as utils from "./utils.js";
-import { CPU } from "./cpu.js";
+import * as utils from "./utils";
+import { CPU } from "./cpu";
+import { Memory } from "./memory";
+import { Instruction } from "./instruction";
+import { Disassembler } from "./disassembler";
 
 const inputElement = document.getElementById("rom")!;
 inputElement.addEventListener("change", handleROM, false);
@@ -16,6 +19,33 @@ function readFile(file: File): Promise<Uint8Array> {
   });
 }
 
+function disassemble(bytes: Uint8Array): Instruction[] {
+  const instructions = [];
+  let i = 0;
+
+  while (i < bytes.length) {
+    const newInstruction = Disassembler.buildInstruction(i, bytes);
+    i += newInstruction.size();
+    instructions.push(newInstruction);
+  }
+
+  return instructions;
+}
+
+function addressToInstruction(
+  instructions: Instruction[]
+): Map<number, Instruction> {
+  let res = new Map();
+  let addr = 0;
+
+  for (let instruction of instructions) {
+    res.set(addr, instruction);
+    addr += instruction.size();
+  }
+
+  return res;
+}
+
 async function handleROM(event: Event) {
   const target = event.target as HTMLInputElement;
   const rom = target.files![0];
@@ -23,8 +53,11 @@ async function handleROM(event: Event) {
   const bytes = await readFile(rom);
   // const nintendoLogo = bytes.slice(0x104, 0x133 + 1);
   // console.log(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
-  const cpu = new CPU(bytes);
-  mainLoop(cpu);
+
+  const instructions = disassemble(bytes);
+  const memory = new Memory(bytes);
+  const cpu = new CPU(addressToInstruction(instructions));
+  mainLoop(cpu, memory);
 }
 
 function updateRegs(cpu: CPU) {
@@ -51,32 +84,32 @@ function createMemoryDiv(addr: number, byte: number) {
   return newDiv;
 }
 
-function updateMemory(PC: number, memory: Uint8Array) {
+function updateMemory(PC: number, memory: Memory) {
   const memoryDiv = document.getElementById("memory")!;
   memoryDiv.innerHTML = "";
 
   const bytesBefore = Math.min(4, PC - 1);
   for (let addr = PC - bytesBefore; addr <= PC - 1; addr++) {
-    memoryDiv.appendChild(createMemoryDiv(addr, memory[addr]));
+    memoryDiv.appendChild(createMemoryDiv(addr, memory.getByte(addr)));
   }
 
-  const currentMemory = createMemoryDiv(PC, memory[PC]);
+  const currentMemory = createMemoryDiv(PC, memory.getByte(PC));
   currentMemory.style.color = "#2e7bff";
   memoryDiv.appendChild(currentMemory);
 
-  const bytesAfter = Math.min(4, memory.length - 1 - PC);
+  const bytesAfter = Math.min(4, memory.bytes.length - 1 - PC);
   for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
-    memoryDiv.appendChild(createMemoryDiv(addr, memory[addr]));
+    memoryDiv.appendChild(createMemoryDiv(addr, memory.getByte(addr)));
   }
 }
 
-function updateUI(cpu: CPU) {
+function updateUI(cpu: CPU, memory: Memory) {
   updateRegs(cpu);
-  updateMemory(cpu.PC, cpu.memory);
+  updateMemory(cpu.PC, memory);
 }
 
-async function mainLoop(cpu: CPU) {
+async function mainLoop(cpu: CPU, memory: Memory) {
   if (!cpu.tick()) return;
-  updateUI(cpu);
-  window.setTimeout(() => mainLoop(cpu), 1_000);
+  updateUI(cpu, memory);
+  window.setTimeout(() => mainLoop(cpu, memory), 1_000);
 }

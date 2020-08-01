@@ -18,3 +18,26 @@ export function formatArrayAsHex(array: Uint8Array): string {
     )
     .trimEnd();
 }
+
+export function log(byte: number, msg: string) {
+  console.log(`${byte}: ${msg}`);
+}
+
+// 0b10101010
+//   ^      ^
+//  to:7 from:0
+export function getBits(byte: number, from: number, to: number): number {
+  const length = to - from;
+  const mask = (1 << (length + 1)) - 1;
+  return (byte >> from) & mask;
+}
+
+export function twosComplementToNumber(x: number): number {
+  const msb = x >> 7;
+  if (msb === 1) {
+    // don't use ~ because numbers are signed
+    return -(x ^ 0xff) - 1;
+  } else {
+    return x;
+  }
+}
