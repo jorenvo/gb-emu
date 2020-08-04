@@ -61,7 +61,7 @@ export class OpLdD16ToR16 extends Instruction {
     if (memory.getByte(this.address) === 0x31) {
       cpu.SP = (d16High << 8) | d16Low;
     } else {
-      const register = cpu.getBits(memory.getByte(this.address), 4, 5) * 2;
+      const register = utils.getBits(memory.getByte(this.address), 4, 5) * 2;
       cpu.regs[register] = d16High;
       cpu.regs[register + 1] = d16Low;
       this.moveSPToNext(cpu);
@@ -137,7 +137,7 @@ export class OpLdR8ToA16 extends Instruction {
         register = 4;
         break;
       default:
-        cpu.log(
+        utils.log(
           memory.getByte(this.address),
           "opLdR8ToA16 with unknown memory.getByte(this.address)"
         );
@@ -242,13 +242,13 @@ export class OpLdR8ToR8 extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const srcReg = cpu.getBits(memory.getByte(this.address), 0, 2);
-    const destReg = cpu.getBits(memory.getByte(this.address), 3, 5);
+    const srcReg = utils.getBits(memory.getByte(this.address), 0, 2);
+    const destReg = utils.getBits(memory.getByte(this.address), 3, 5);
 
     if (srcReg === 6) {
-      cpu.regs[destReg] = cpu.HLIndirect;
+      cpu.regs[destReg] = cpu.HL;
     } else if (destReg === 6) {
-      cpu.HLIndirect = cpu.regs[srcReg];
+      cpu.HL = cpu.regs[srcReg];
     } else {
       cpu.regs[destReg] = cpu.regs[srcReg];
     }
@@ -259,12 +259,12 @@ export class OpLdR8ToR8 extends Instruction {
   }
 }
 
-export class OpDecInc16 extends Instruction {
+export abstract class OpDecInc16 extends Instruction {
   size() {
     return 0; // TODO
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  do(cpu: CPU, memory: Memory, inc: boolean) {
     // TODO: SP will be 0x3, check if that works
     const register = memory.getByte(this.address) * 2;
     const high = cpu.regs[register];
@@ -281,16 +281,12 @@ export class OpDecInc16 extends Instruction {
   }
 }
 
-export class OpInc16 extends Instruction {
-  size() {
-    return 0; // TODO
-  }
-
+export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory) {
     if (memory.getByte(this.address) === 0x33) {
       ++cpu.SP;
     } else {
-      cpu.opDecInc16(memory.getByte(this.address), true);
+      super.do(cpu, memory, true);
     }
   }
 
@@ -299,13 +295,9 @@ export class OpInc16 extends Instruction {
   }
 }
 
-export class OpDec16 extends Instruction {
-  size() {
-    return 0; // TODO
-  }
-
+export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory) {
-    cpu.opDecInc16(memory.getByte(this.address), false);
+    super.do(cpu, memory, false); // TODO no special case for SP like in Inc?
   }
 
   disassemble(memory: Memory) {
@@ -320,9 +312,9 @@ export class OpInc8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     if (memory.getByte(this.address) === 0x34) {
-      let addr = cpu.HLIndirect;
+      let addr = cpu.HL;
       cpu.setHalfCarryFlag(memory.getByte(addr), 1);
-      memory.getByte(addr) += 1;
+      memory.setByte(addr, memory.getByte(addr) + 1);
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
     } else {
       const register = memory.getByte(this.address) * 2;
@@ -346,9 +338,9 @@ export class OpDec8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     if (memory.getByte(this.address) === 0x35) {
-      let addr = cpu.HLIndirect;
+      let addr = cpu.HL;
       cpu.setHalfCarryFlag(memory.getByte(addr), -1);
-      memory.getByte(addr) -= 1;
+      memory.setByte(addr, memory.getByte(addr) - 1);
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
     } else {
       const register = memory.getByte(this.address) * 2;
@@ -437,8 +429,8 @@ export class OpRL extends Instruction {
     const register = memory.getByte(this.address) & 0xf;
     let value = 0;
     if (register === 6) {
-      value = cpu.rotateLeft(cpu.HLIndirect);
-      cpu.HLIndirect = value;
+      value = cpu.rotateLeft(cpu.HL);
+      cpu.HL = value;
     } else {
       value = cpu.rotateLeft(cpu.regs[register]);
       cpu.regs[register] = value;
@@ -502,7 +494,7 @@ export class OpStop extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    cpu.log(memory.getByte(this.address), "TODO: stop");
+    utils.log(memory.getByte(this.address), "TODO: stop");
   }
 
   disassemble(memory: Memory) {
@@ -517,7 +509,7 @@ export class OpJRE extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     const relativeOffset = cpu.regs[CPU.E];
-    cpu.PC += cpu.twosComplementToNumber(relativeOffset);
+    cpu.PC += utils.twosComplementToNumber(relativeOffset);
   }
 
   disassemble(memory: Memory) {
@@ -533,7 +525,7 @@ export class OpJRC extends Instruction {
   exec(cpu: CPU, memory: Memory) {
     // On https://gbdev.io/gb-opcodes/optables/classic this memory.getByte(this.address) is an
     // r8, but pretty sure it should be a d8.
-    const relativeOffset = cpu.twosComplementToNumber(memory.getByte(cpu.PC++));
+    const relativeOffset = utils.twosComplementToNumber(memory.getByte(cpu.PC++));
     let condition = false;
     switch (memory.getByte(this.address)) {
       case 0x20:
@@ -549,7 +541,7 @@ export class OpJRC extends Instruction {
         condition = cpu.getCarryFlag() === 0;
         break;
       default:
-        cpu.log(memory.getByte(this.address), "JRC condition not implement");
+        utils.log(memory.getByte(this.address), "JRC condition not implement");
     }
 
     if (condition) {
@@ -585,9 +577,9 @@ export class OpXorR8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     if (memory.getByte(this.address) === 0x7e) {
-      cpu.regs[CPU.A] ^= cpu.HLIndirect;
+      cpu.regs[CPU.A] ^= cpu.HL;
     } else {
-      const register = cpu.getBits(memory.getByte(this.address), 4, 5);
+      const register = utils.getBits(memory.getByte(this.address), 4, 5);
       cpu.regs[CPU.A] ^= cpu.regs[register];
     }
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
@@ -649,7 +641,7 @@ export class OpPush extends Instruction {
       high = cpu.regs[CPU.A];
       low = cpu.regs[CPU.F];
     } else {
-      const register = cpu.getBits(memory.getByte(this.address), 3, 5);
+      const register = utils.getBits(memory.getByte(this.address), 3, 5);
       high = cpu.regs[register];
       low = cpu.regs[register + 1];
     }
@@ -673,7 +665,7 @@ export class OpPop extends Instruction {
       cpu.regs[CPU.A] = memory.getByte(cpu.SP--);
       cpu.regs[CPU.F] = memory.getByte(cpu.SP--);
     } else {
-      const register = cpu.getBits(memory.getByte(this.address), 3, 5);
+      const register = utils.getBits(memory.getByte(this.address), 3, 5);
       cpu.regs[register] = memory.getByte(cpu.SP--);
       cpu.regs[register + 1] = memory.getByte(cpu.SP--);
     }
@@ -704,12 +696,12 @@ export class OpBit extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = cpu.getBits(memory.getByte(this.address), 0, 2);
-    const bit = cpu.getBits(memory.getByte(this.address), 3, 5);
+    const register = utils.getBits(memory.getByte(this.address), 0, 2);
+    const bit = utils.getBits(memory.getByte(this.address), 3, 5);
     if (register === 0x6) {
       // (HL)
     } else {
-      return cpu.getBits(cpu.regs[register], bit, bit);
+      return utils.getBits(cpu.regs[register], bit, bit);
     }
   }
 

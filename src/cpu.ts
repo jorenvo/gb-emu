@@ -1,5 +1,6 @@
 import * as utils from "./utils";
 import { Instruction } from "./instruction";
+import { Memory } from "./memory";
 
 export class CPU {
   // reg indexes in regs
@@ -102,7 +103,7 @@ export class CPU {
     return [eightBit, regValue];
   }
 
-  tick() {
+  tick(memory: Memory) {
     const currentInstruction = this.instructions.get(this.PC);
     if (currentInstruction === undefined) {
       const hexSP = utils.hexString(this.SP, 16);
@@ -112,7 +113,7 @@ export class CPU {
       return false;
     }
 
-    currentInstruction.exec(this);
+    currentInstruction.exec(this, memory);
     return true;
   }
 }

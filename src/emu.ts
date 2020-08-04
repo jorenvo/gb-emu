@@ -109,7 +109,7 @@ function updateUI(cpu: CPU, memory: Memory) {
 }
 
 async function mainLoop(cpu: CPU, memory: Memory) {
-  if (!cpu.tick()) return;
+  if (!cpu.tick(memory)) return;
   updateUI(cpu, memory);
   window.setTimeout(() => mainLoop(cpu, memory), 1_000);
 }
