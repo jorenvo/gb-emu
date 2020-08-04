@@ -1,5 +1,5 @@
-import * as instruction from "./instruction";
-import * as utils from "./utils";
+import * as instruction from "./instruction.js";
+import * as utils from "./utils.js";
 
 export class Disassembler {
   static logNotImplemented(address: number, byte: number, prefixed = false) {

@@ -1,6 +1,6 @@
-import { CPU } from "./cpu";
-import { Memory } from "./memory";
-import * as utils from "./utils";
+import { CPU } from "./cpu.js";
+import { Memory } from "./memory.js";
+import * as utils from "./utils.js";
 
 export abstract class Instruction {
   protected address: number;

@@ -1,6 +1,6 @@
-import * as utils from "./utils";
-import { Instruction } from "./instruction";
-import { Memory } from "./memory";
+import * as utils from "./utils.js";
+import { Instruction } from "./instruction.js";
+import { Memory } from "./memory.js";
 
 export class CPU {
   // reg indexes in regs

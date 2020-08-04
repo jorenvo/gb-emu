@@ -1,8 +1,8 @@
-import * as utils from "./utils";
-import { CPU } from "./cpu";
-import { Memory } from "./memory";
-import { Instruction } from "./instruction";
-import { Disassembler } from "./disassembler";
+import * as utils from "./utils.js";
+import { CPU } from "./cpu.js";
+import { Memory } from "./memory.js";
+import { Instruction } from "./instruction.js";
+import { Disassembler } from "./disassembler.js";
 
 const inputElement = document.getElementById("rom")!;
 inputElement.addEventListener("change", handleROM, false);
