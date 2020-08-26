@@ -2,8 +2,8 @@ import "mocha";
 import * as assert from "assert";
 import * as utils from "./utils";
 
-describe("getBits", function() {
-  it("should correctly extract bits", function() {
+describe("getBits", function () {
+  it("should correctly extract bits", function () {
     const byte = 0b01101010;
     assert.equal(utils.getBits(byte, 6, 6), 0b1);
     assert.equal(utils.getBits(byte, 5, 7), 0b011);
@@ -13,8 +13,8 @@ describe("getBits", function() {
   });
 });
 
-describe("2s complement", function() {
-  it("should correctly convert 2s complement", function() {
+describe("2s complement", function () {
+  it("should correctly convert 2s complement", function () {
     assert.equal(utils.twosComplementToNumber(0b0000_0000), 0);
     assert.equal(utils.twosComplementToNumber(0b0000_0001), 1);
     assert.equal(utils.twosComplementToNumber(0b0000_0010), 2);

@@ -4,8 +4,8 @@ import * as instruction from "./instruction";
 import { CPU } from "./cpu";
 import { Memory } from "./memory";
 
-describe("OpLdD16ToR16", function() {
-  it("should correctly load", function() {
+describe("OpLdD16ToR16", function () {
+  it("should correctly load", function () {
     const ld = new instruction.OpLdD16ToR16(0x00);
     const memory = new Memory(new Uint8Array([0x21, 0x20, 0x21]));
     const cpu = new CPU(new Map([[0x00, ld]]));
@@ -21,8 +21,19 @@ describe("OpLdD16ToR16", function() {
   });
 });
 
-describe("rotations", function() {
-  it("should correctly rotate left", function() {
+describe("OpLdD8ToR8", function () {
+  it("should correctly disassemble", function () {
+    const ld = new instruction.OpLdD8ToR8(0x00);
+    const memory = new Memory(new Uint8Array([0x16, 0x34]));
+    assert.equal("LD D, $0x34", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x36, 0x34]);
+    assert.equal("LD (HL), $0x34", ld.disassemble(memory));
+  });
+});
+
+describe("rotations", function () {
+  it("should correctly rotate left", function () {
     const memory = new Memory(new Uint8Array());
     const cpu = new CPU(new Map());
     const opRLCA = new instruction.OpRLCA(0x00);
@@ -46,7 +57,7 @@ describe("rotations", function() {
     assert.equal(cpu.getCarryFlag(), 0);
   });
 
-  it("should correctly rotate right", function() {
+  it("should correctly rotate right", function () {
     const memory = new Memory(new Uint8Array());
     const cpu = new CPU(new Map());
     const opRRCA = new instruction.OpRRCA(0x00);

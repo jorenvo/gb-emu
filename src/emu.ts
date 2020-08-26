@@ -9,9 +9,9 @@ inputElement.addEventListener("change", handleROM, false);
 
 // Can't use File.arrayBuffer() because it's not supported in Safari
 function readFile(file: File): Promise<Uint8Array> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       const buffer = event.target!.result as ArrayBuffer;
       resolve(new Uint8Array(buffer));
     };
@@ -25,6 +25,15 @@ function disassemble(bytes: Uint8Array): Instruction[] {
 
   while (i < bytes.length) {
     const newInstruction = Disassembler.buildInstruction(i, bytes);
+    const size = newInstruction.size();
+    if (size === 0) {
+      throw new Error(
+        `Encountered unimplemented instruction: ${newInstruction.disassemble(
+          new Memory(new Uint8Array())
+        )}`
+      );
+    }
+
     i += newInstruction.size();
     instructions.push(newInstruction);
   }
@@ -54,9 +63,11 @@ async function handleROM(event: Event) {
   // const nintendoLogo = bytes.slice(0x104, 0x133 + 1);
   // console.log(`Nintendo logo: ${formatArrayAsHex(nintendoLogo)}`);
 
+  console.log("handling rom");
   const instructions = disassemble(bytes);
   const memory = new Memory(bytes);
   const cpu = new CPU(addressToInstruction(instructions));
+  console.log("starting main loop");
   mainLoop(cpu, memory);
 }
 
@@ -110,6 +121,7 @@ function updateUI(cpu: CPU, memory: Memory) {
 
 async function mainLoop(cpu: CPU, memory: Memory) {
   if (!cpu.tick(memory)) return;
+  console.log("main loop");
   updateUI(cpu, memory);
   window.setTimeout(() => mainLoop(cpu, memory), 1_000);
 }
