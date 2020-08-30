@@ -299,19 +299,25 @@ export class OpLdAtoAddrC extends Instruction {
 
 export class OpLdSPToA16 extends Instruction {
   size() {
-    return 0; // TODO
+    return 3;
+  }
+
+  _a16(memory: Memory) {
+    const a16Low = memory.getByte(this.address);
+    const a16High = memory.getByte(this.address + 1);
+    return (a16High << 8) | a16Low;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const a16Low = memory.getByte(cpu.PC++);
-    const a16High = memory.getByte(cpu.PC++);
-    const a16 = (a16High << 8) | a16Low;
-    memory.setByte(a16, cpu.SP & 0xff); // TODO: this order is correct, should we always store LSB before MSB?
+    const a16 = this._a16(memory);
+
+    // TODO: this order is correct, should we always store LSB before MSB?
+    memory.setByte(a16, cpu.SP & 0xff);
     memory.setByte(a16 + 1, cpu.SP >> 8);
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    return `LD $${utils.hexString(this._a16(memory), 16)}, SP`;
   }
 }
 
