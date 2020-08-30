@@ -675,21 +675,26 @@ export class OpRRA extends Instruction {
 
 export class OpAddR16ToHL extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
+  }
+
+  _getReg(memory: Memory) {
+    return (memory.getByte(this.address) >> 4) * 2;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = memory.getByte(this.address) * 2;
-    const r16 = (cpu.regs[register] << 8) | cpu.regs[register + 1];
-    let hl = (cpu.regs[CPU.H] << 8) | cpu.regs[CPU.H];
+    const register = this._getReg(memory);
+    const r16 = cpu.getCombinedRegister(register, register + 1);
+    let hl = cpu.getHL();
     cpu.setHalfCarryFlag(r16, hl);
     cpu.setCarryFlag(r16, hl);
-    hl += r16;
+    cpu.setHL(hl + r16);
     cpu.setSubtractFlag(0);
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    const reg = this.getStringForR16(this._getReg(memory));
+    return `ADD HL, ${reg}`;
   }
 }
 
