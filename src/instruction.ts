@@ -486,14 +486,42 @@ export class OpInc8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getStringForR8(this._getReg(memory));
+    let reg = "";
+    if (memory.getByte(this.address) === 0x34) {
+      reg = "(HL)";
+    } else {
+      reg = this.getStringForR8(this._getReg(memory));
+    }
+
     return `INC ${reg}`;
   }
 }
 
 export class OpDec8 extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
+  }
+
+  _getReg(memory: Memory) {
+    const opcode = memory.getByte(this.address);
+    switch (opcode) {
+      case 0x05:
+        return 0;
+      case 0x15:
+        return 2;
+      case 0x25:
+        return 4;
+      case 0x0d:
+        return 1;
+      case 0x1d:
+        return 3;
+      case 0x2d:
+        return 5;
+      case 0x3d:
+        return 7;
+      default:
+        throw new Error(`Unknown register for opcode ${opcode}`);
+    }
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -513,7 +541,14 @@ export class OpDec8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let reg = "";
+    if (memory.getByte(this.address) === 0x35) {
+      reg = "(HL)";
+    } else {
+      reg = this.getStringForR8(this._getReg(memory));
+    }
+
+    return `DEC ${reg}`;
   }
 }
 
