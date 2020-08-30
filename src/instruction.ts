@@ -654,10 +654,10 @@ export class OpRL extends Instruction {
 
 export class OpRRA extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, _memory: Memory) {
     const lsb = cpu.regs[CPU.A] & 1;
     cpu.regs[CPU.A] >>= 1;
     cpu.regs[CPU.A] |= lsb << 7;
@@ -668,8 +668,8 @@ export class OpRRA extends Instruction {
     cpu.setZeroFlag(0);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "RRA";
   }
 }
 
