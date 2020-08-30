@@ -174,19 +174,20 @@ export class OpLdR8ToA16 extends Instruction {
         break;
       case 0x22:
       case 0x32:
+      case 0x70:
+      case 0x71:
+      case 0x72:
+      case 0x73:
+      case 0x74:
+      case 0x75:
       case 0x77:
         register = 4;
         break;
-      default:
-        utils.log(
-          memory.getByte(this.address),
-          "opLdR8ToA16 with unknown memory.getByte(this.address)"
-        );
     }
     const high = cpu.regs[register];
     const low = cpu.regs[register + 1];
     let addr = (high << 8) | low;
-    memory.setByte(addr, cpu.regs[CPU.A]);
+    memory.setByte(addr, cpu.regs[memory.getByte(this.address & 0b1111)]);
 
     switch (memory.getByte(this.address)) {
       case 0x22:
@@ -199,7 +200,41 @@ export class OpLdR8ToA16 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let dest = "";
+    const byte = memory.getByte(this.address);
+    switch (byte) {
+      case 0x02:
+        dest = "BC";
+        break;
+      case 0x12:
+        dest = "DE";
+        break;
+      case 0x22:
+        dest = "HL+";
+        break;
+      case 0x32:
+        dest = "HL-";
+        break;
+      case 0x70:
+      case 0x71:
+      case 0x72:
+      case 0x73:
+      case 0x74:
+      case 0x75:
+      case 0x77:
+        dest = "HL";
+        break;
+      default:
+        utils.log(memory.getByte(this.address), "unknown opLdR8ToA16");
+    }
+
+    let src = "A";
+    if (byte >> 4 === 7) {
+      const reg = byte & 0b1111;
+      src = this.getStringForReg(reg);
+    }
+
+    return `LD (${dest}) ${src}`;
   }
 }
 

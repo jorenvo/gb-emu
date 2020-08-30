@@ -301,6 +301,12 @@ export class Disassembler {
       case 0x12:
       case 0x22:
       case 0x32:
+      case 0x70:
+      case 0x71:
+      case 0x72:
+      case 0x73:
+      case 0x74:
+      case 0x75:
       case 0x77:
         return new instruction.OpLdR8ToA16(byte);
       case 0x03:
@@ -433,12 +439,6 @@ export class Disassembler {
       case 0x6d:
       case 0x6e:
       case 0x6f:
-      case 0x70:
-      case 0x71:
-      case 0x72:
-      case 0x73:
-      case 0x74:
-      case 0x75:
       case 0x78:
       case 0x79:
       case 0x7a:
