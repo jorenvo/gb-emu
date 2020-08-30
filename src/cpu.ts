@@ -43,19 +43,19 @@ export class CPU {
   }
 
   // Fake 16 bit registers
-  get HL() {
+  getHL() {
     return this.getCombinedRegister(CPU.H, CPU.L);
   }
 
-  set HL(x: number) {
+  setHL(x: number) {
     this.setCombinedRegister(CPU.H, CPU.L, x);
   }
 
-  get AF() {
+  getAF() {
     return this.getCombinedRegister(CPU.A, CPU.F);
   }
 
-  set AF(x: number) {
+  setAF(x: number) {
     this.setCombinedRegister(CPU.A, CPU.F, x);
   }
 

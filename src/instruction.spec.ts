@@ -15,9 +15,9 @@ describe("OpLdD16ToR16", function () {
 
     assert.equal("LD HL, $0x2021", ld.disassemble(memory));
 
-    assert.equal(cpu.HL, 0);
+    assert.equal(cpu.getHL(), 0);
     ld.exec(cpu, memory);
-    assert.equal(cpu.HL, 0x2021);
+    assert.equal(cpu.getHL(), 0x2021);
   });
 });
 
@@ -29,6 +29,20 @@ describe("OpLdD8ToR8", function () {
 
     memory.bytes = new Uint8Array([0x36, 0x34]);
     assert.equal("LD (HL), $0x34", ld.disassemble(memory));
+  });
+});
+
+describe("OpLdD8ToR8", function () {
+  it("should correctly disassemble", function () {
+    const ld = new instruction.OpLdR8ToR8(0x00);
+    const memory = new Memory(new Uint8Array([0x62]));
+    assert.equal("LD H, D", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x74]);
+    assert.equal("LD (HL), H", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x7e]);
+    assert.equal("LD A, (HL)", ld.disassemble(memory));
   });
 });
 
