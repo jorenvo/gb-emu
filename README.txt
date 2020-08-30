@@ -14,3 +14,4 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
+- Decide who modifies the PC: abstract instruction, implemented instruction or cpu?
