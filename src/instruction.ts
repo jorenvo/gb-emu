@@ -617,11 +617,15 @@ export class OpRLA extends Instruction {
 
 export class OpRL extends Instruction {
   size() {
-    return 0; // TODO
+    return 2;
+  }
+
+  _getReg(memory: Memory) {
+    return memory.getByte(this.address + 1) & 0xf;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = memory.getByte(this.address) & 0xf;
+    const register = this._getReg(memory);
     let value = 0;
     if (register === 6) {
       value = cpu.rotateLeft(cpu.getHL());
@@ -638,7 +642,13 @@ export class OpRL extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    const reg = this._getReg(memory);
+    let regString = "(HL)";
+    if (reg !== 6) {
+      regString = this.getStringForR8(reg);
+    }
+
+    return `RL ${regString}`;
   }
 }
 
