@@ -240,7 +240,7 @@ export class OpLdR8ToA16 extends Instruction {
 
 export class OpLdA16ToA extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -261,7 +261,25 @@ export class OpLdA16ToA extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let src = "";
+    switch (memory.getByte(this.address)) {
+      case 0x0a:
+        src = "BC";
+        break;
+      case 0x1a:
+        src = "DE";
+        break;
+      case 0x2a:
+        src = "HL+";
+        break;
+      case 0x3a:
+        src = "HL-";
+        break;
+      default:
+        utils.log(memory.getByte(this.address), "unknown OpLdA16ToA");
+    }
+
+    return `LD A, (${src})`;
   }
 }
 
