@@ -554,7 +554,7 @@ export class OpDec8 extends Instruction {
 
 export class OpRLCA extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -570,14 +570,14 @@ export class OpRLCA extends Instruction {
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "RLCA";
   }
 }
 
 export class OpRRCA extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -591,14 +591,14 @@ export class OpRRCA extends Instruction {
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "RRCA";
   }
 }
 
 export class OpRLA extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -610,8 +610,8 @@ export class OpRLA extends Instruction {
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "RLA";
   }
 }
 
