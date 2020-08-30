@@ -323,16 +323,20 @@ export class OpLdSPToA16 extends Instruction {
 
 export class OpLdhA8 extends Instruction {
   size() {
-    return 0; // TODO
+    return 2;
+  }
+
+  _getAddr(memory: Memory) {
+    return memory.getByte(this.address + 1);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const lowAddr = memory.getByte(cpu.PC++);
+    const lowAddr = this._getAddr(memory);
     memory.setByte(0xff00 | lowAddr, cpu.regs[CPU.A]);
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    return `LDH ($${utils.hexString(this._getAddr(memory))}), A`;
   }
 }
 
