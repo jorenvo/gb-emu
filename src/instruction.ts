@@ -285,15 +285,15 @@ export class OpLdA16ToA extends Instruction {
 
 export class OpLdAtoAddrC extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    memory.setByte(CPU.C, cpu.regs[CPU.A]);
+    memory.setByte(cpu.regs[CPU.C], cpu.regs[CPU.A]);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "LD (C), A";
   }
 }
 
