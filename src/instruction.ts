@@ -732,15 +732,14 @@ export class OpJR extends Instruction {
 
 export class OpJRC extends Instruction {
   size() {
-    return 0; // TODO
+    return 2;
+  }
+
+  private getRelativeOffset(memory: Memory) {
+    return utils.twosComplementToNumber(memory.getByte(this.address + 1));
   }
 
   exec(cpu: CPU, memory: Memory) {
-    // On https://gbdev.io/gb-opcodes/optables/classic this memory.getByte(this.address) is an
-    // r8, but pretty sure it should be a d8.
-    const relativeOffset = utils.twosComplementToNumber(
-      memory.getByte(cpu.PC++)
-    );
     let condition = false;
     switch (memory.getByte(this.address)) {
       case 0x20:
@@ -760,12 +759,30 @@ export class OpJRC extends Instruction {
     }
 
     if (condition) {
-      cpu.PC += relativeOffset;
+      cpu.PC += this.getRelativeOffset(memory);
     }
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let condition = "";
+    switch (memory.getByte(this.address)) {
+      case 0x20:
+        condition = "NZ";
+        break;
+      case 0x30:
+        condition = "NC";
+        break;
+      case 0x28:
+        condition = "Z";
+        break;
+      case 0x38:
+        condition = "C";
+        break;
+      default:
+        condition = "UNS";
+        break;
+    }
+    return `JR ${condition} $${utils.hexString(this.getRelativeOffset(memory))}`;
   }
 }
 
