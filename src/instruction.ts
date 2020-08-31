@@ -782,23 +782,25 @@ export class OpJRC extends Instruction {
         condition = "UNS";
         break;
     }
-    return `JR ${condition} $${utils.hexString(this.getRelativeOffset(memory))}`;
+    return `JR ${condition} $${utils.hexString(
+      this.getRelativeOffset(memory)
+    )}`;
   }
 }
 
 export class OpCPL extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, _memory: Memory) {
     cpu.regs[CPU.A] ^= 0xff;
     cpu.setZeroFlag(1);
     cpu.setSubtractFlag(1);
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "CPL";
   }
 }
 
