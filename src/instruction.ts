@@ -601,7 +601,7 @@ export class OpRLA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, _memory: Memory) {
     cpu.regs[CPU.A] = cpu.rotateLeft(cpu.regs[CPU.A]);
     cpu.setCarryFlagDirect(cpu.regs[CPU.A] >> 7);
 
@@ -700,30 +700,33 @@ export class OpAddR16ToHL extends Instruction {
 
 export class OpStop extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(_cpu: CPU, memory: Memory) {
     utils.log(memory.getByte(this.address), "TODO: stop");
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "STOP";
   }
 }
 
-export class OpJRE extends Instruction {
+export class OpJR extends Instruction {
   size() {
-    return 0; // TODO
+    return 2;
+  }
+
+  private getRelativeOffset(memory: Memory) {
+    return utils.twosComplementToNumber(memory.getByte(this.address + 1));
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const relativeOffset = cpu.regs[CPU.E];
-    cpu.PC += utils.twosComplementToNumber(relativeOffset);
+    cpu.PC += this.getRelativeOffset(memory);
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    return `JR $${utils.hexString(this.getRelativeOffset(memory))}`;
   }
 }
 

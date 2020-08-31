@@ -367,7 +367,7 @@ export class Disassembler {
       case 0x17:
         return new instruction.OpRLA(byte);
       case 0x18:
-        return new instruction.OpJRE(byte);
+        return new instruction.OpJR(byte);
       case 0x1f:
         return new instruction.OpRRA(byte);
       case 0x20:
