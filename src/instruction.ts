@@ -883,6 +883,10 @@ export class OpPush extends Instruction {
     return 1;
   }
 
+  _getR16(memory: Memory) {
+    return utils.getBits(memory.getByte(this.address), 3, 5);
+  }
+
   exec(cpu: CPU, memory: Memory) {
     let low = 0;
     let high = 0;
@@ -890,7 +894,7 @@ export class OpPush extends Instruction {
       high = cpu.regs[CPU.A];
       low = cpu.regs[CPU.F];
     } else {
-      const register = utils.getBits(memory.getByte(this.address), 3, 5);
+      const register = this._getR16(memory);
       high = cpu.regs[register];
       low = cpu.regs[register + 1];
     }
@@ -900,14 +904,18 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(memory.getByte(this.address));
+    const r16 = this.getStringForR16(this._getR16(memory));
     return `PUSH ${r16}`;
   }
 }
 
 export class OpPop extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
+  }
+
+  _getR16(memory: Memory) {
+    return utils.getBits(memory.getByte(this.address), 3, 5);
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -915,14 +923,15 @@ export class OpPop extends Instruction {
       cpu.regs[CPU.A] = memory.getByte(cpu.SP--);
       cpu.regs[CPU.F] = memory.getByte(cpu.SP--);
     } else {
-      const register = utils.getBits(memory.getByte(this.address), 3, 5);
+      const register = this._getR16(memory);
       cpu.regs[register] = memory.getByte(cpu.SP--);
       cpu.regs[register + 1] = memory.getByte(cpu.SP--);
     }
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    const r16 = this.getStringForR16(this._getR16(memory));
+    return `POP ${r16}`;
   }
 }
 
