@@ -46,6 +46,8 @@ export abstract class Instruction {
         return "HL";
       case 3:
         return "SP";
+      case 3:
+        return "AF";
       default:
         throw new Error(`Register ${n} doesn't exist.`);
     }
@@ -878,7 +880,7 @@ export class OpRet extends Instruction {
 
 export class OpPush extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -898,7 +900,8 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    const r16 = this.getStringForR16(memory.getByte(this.address));
+    return `PUSH ${r16}`;
   }
 }
 
