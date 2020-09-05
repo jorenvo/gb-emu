@@ -806,11 +806,15 @@ export class OpCPL extends Instruction {
 
 export class OpXorR8 extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
+  }
+
+  _isHL(memory: Memory) {
+    return memory.getByte(this.address) === 0x7e;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    if (memory.getByte(this.address) === 0x7e) {
+    if (this._isHL(memory)) {
       cpu.regs[CPU.A] ^= cpu.getHL();
     } else {
       const register = utils.getBits(memory.getByte(this.address), 4, 5);
@@ -823,7 +827,13 @@ export class OpXorR8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let reg = "(HL)";
+    if (!this._isHL(memory)) {
+      let byte = memory.getByte(this.address);
+      reg = this.getStringForR8(byte);
+    }
+
+    return `XOR ${reg}`;
   }
 }
 
