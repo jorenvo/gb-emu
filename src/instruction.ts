@@ -935,36 +935,38 @@ export class OpPop extends Instruction {
   }
 }
 
-export class OpPrefix extends Instruction {
-  size() {
-    return 0; // TODO
-  }
-
-  exec(cpu: CPU, memory: Memory) {
-    cpu.prefix = true;
-  }
-
-  disassemble(memory: Memory) {
-    return `TODO`;
-  }
-}
-
 export class OpBit extends Instruction {
   size() {
-    return 0; // TODO
+    return 2;
+  }
+
+  _getReg(memory: Memory) {
+    return utils.getBits(memory.getByte(this.address), 0, 2);
+  }
+
+  _getBit(memory: Memory) {
+    return utils.getBits(memory.getByte(this.address), 3, 5);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = utils.getBits(memory.getByte(this.address), 0, 2);
-    const bit = utils.getBits(memory.getByte(this.address), 3, 5);
+    const register = this._getReg(memory);
+    const bit = this._getBit(memory);
     if (register === 0x6) {
       // (HL)
+      throw new Error("Unimplemented BIT instruction");
     } else {
       return utils.getBits(cpu.regs[register], bit, bit);
     }
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    const regNr = this._getReg(memory);
+    let reg = "(HL)";
+    if (regNr !== 0x6) {
+      reg = this.getStringForR8(regNr);
+    }
+    const bit = this._getBit(memory);
+
+    return `BIT ${bit}, ${reg}`;
   }
 }

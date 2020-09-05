@@ -30,7 +30,6 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this.regs = new Uint8Array(new Array(8));
     this.instructions = instructions;
-    this.prefix = false;
   }
 
   getCombinedRegister(r1: number, r2: number): number {
