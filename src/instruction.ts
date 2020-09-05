@@ -847,7 +847,7 @@ export class OpCall extends Instruction {
     const addrHigh = memory.getByte(this.address + 1);
     return (addrHigh << 8) | addrLow;
   }
-  
+
   exec(cpu: CPU, memory: Memory) {
     memory.setByte(cpu.SP--, cpu.PC >> 8);
     memory.setByte(cpu.SP--, cpu.PC & 0xff);
@@ -862,7 +862,7 @@ export class OpCall extends Instruction {
 
 export class OpRet extends Instruction {
   size() {
-    return 0; // TODO
+    return 1;
   }
 
   exec(cpu: CPU, memory: Memory) {
@@ -871,8 +871,8 @@ export class OpRet extends Instruction {
     cpu.PC = (high << 8) | low;
   }
 
-  disassemble(memory: Memory) {
-    return `TODO`;
+  disassemble(_memory: Memory) {
+    return "RET";
   }
 }
 
