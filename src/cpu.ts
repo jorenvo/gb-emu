@@ -18,7 +18,6 @@ export class CPU {
 
   regs: Uint8Array;
   instructions: Map<number, Instruction>;
-  prefix: boolean;
 
   constructor(instructions: Map<number, Instruction>) {
     this.SP = 0xfffe;

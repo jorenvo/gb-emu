@@ -14,7 +14,7 @@ export class Disassembler {
     address: number,
     bytes: Uint8Array
   ): instruction.Instruction {
-    const byte = bytes[address];
+    const byte = bytes[address + 1];
     switch (byte) {
       case 0x00:
       case 0x01:
@@ -606,7 +606,10 @@ export class Disassembler {
       case 0xfb:
       case 0xfc:
       case 0xfd:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xfe:
+        return new instruction.OpCPD8(address);
       case 0xff:
       default:
         Disassembler.logNotImplemented(address, byte, !"prefixed");

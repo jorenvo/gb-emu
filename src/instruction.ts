@@ -970,3 +970,26 @@ export class OpBit extends Instruction {
     return `BIT ${bit}, ${reg}`;
   }
 }
+
+export class OpCPD8 extends Instruction {
+  size() {
+    return 2;
+  }
+
+  _getD8(memory: Memory) {
+    return memory.getByte(this.address + 1);
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const d8 = this._getD8(memory);
+    cpu.setSubtractFlag(1);
+    cpu.setHalfCarryFlag(cpu.regs[CPU.A], d8);
+    cpu.setCarryFlag(cpu.regs[CPU.A], d8);
+    cpu.setZeroFlag(cpu.regs[CPU.A] - d8 === 0 ? 1 : 0);
+  }
+
+  disassemble(memory: Memory) {
+    const d8 = this._getD8(memory);
+    return `CP $${utils.hexString(d8)}`;
+  }
+}
