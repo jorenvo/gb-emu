@@ -839,21 +839,24 @@ export class OpXorR8 extends Instruction {
 
 export class OpCall extends Instruction {
   size() {
-    return 0; // TODO
+    return 3;
   }
 
+  _getAddr(memory: Memory) {
+    const addrLow = memory.getByte(this.address);
+    const addrHigh = memory.getByte(this.address + 1);
+    return (addrHigh << 8) | addrLow;
+  }
+  
   exec(cpu: CPU, memory: Memory) {
-    const addrLow = memory.getByte(cpu.PC++);
-    const addrHigh = memory.getByte(cpu.PC++);
-
     memory.setByte(cpu.SP--, cpu.PC >> 8);
     memory.setByte(cpu.SP--, cpu.PC & 0xff);
-
-    cpu.PC = (addrHigh << 8) | addrLow;
+    cpu.PC = this._getAddr(memory);
   }
 
   disassemble(memory: Memory) {
-    return `TODO`;
+    let addr = this._getAddr(memory);
+    return `CALL $${utils.hexString(addr, 16)}`;
   }
 }
 
