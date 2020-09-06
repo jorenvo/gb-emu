@@ -862,6 +862,19 @@ export class OpCall extends Instruction {
   }
 }
 
+export class OpCallIfZero extends OpCall {
+  exec(cpu: CPU, memory: Memory) {
+    if (cpu.getZeroFlag()) {
+      super.exec(cpu, memory);
+    }
+  }
+
+  disassemble(memory: Memory) {
+    let addr = this._getAddr(memory);
+    return `CALL Z, $${utils.hexString(addr, 16)}`;
+  }
+}
+
 export class OpRet extends Instruction {
   size() {
     return 1;
@@ -1033,5 +1046,63 @@ export class OpLdhA8toA extends Instruction {
   disassemble(memory: Memory) {
     const addr = this._getAddr(memory);
     return `LDH A, ($${utils.hexString(addr)})`;
+  }
+}
+
+export class OpSubR8 extends Instruction {
+  size() {
+    return 1;
+  }
+
+  _getReg(memory: Memory) {
+    const opcode = memory.getByte(this.address);
+    return opcode & 0xf;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const reg = this._getReg(memory);
+    const toSub = reg === 0x6 ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+
+    cpu.setHalfCarryFlagSubtract(cpu.regs[CPU.A], toSub);
+    cpu.setCarryFlagSubtract(cpu.regs[CPU.A], toSub);
+    cpu.regs[CPU.A] = utils.wrapping8BitSub(cpu.regs[CPU.A], toSub);
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setSubtractFlag(1);
+  }
+
+  disassemble(memory: Memory) {
+    const regNr = this._getReg(memory);
+    let reg = "(HL)";
+    if (regNr !== 0x6) {
+      reg = this.getStringForR8(regNr);
+    }
+    return `SUB ${reg}`;
+  }
+}
+
+export class OpAddCarryD8 extends Instruction {
+  size() {
+    return 2;
+  }
+
+  _getToAdd(memory: Memory) {
+    return memory.getByte(this.address + 1);
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const toAdd = utils.wrapping8BitAdd(
+      this._getToAdd(memory),
+      cpu.getCarryFlag()
+    );
+    cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
+    cpu.setCarryFlagAdd(cpu.regs[CPU.A], toAdd);
+    cpu.regs[CPU.A] = utils.wrapping8BitAdd(cpu.regs[CPU.A], toAdd);
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setSubtractFlag(0);
+  }
+
+  disassemble(memory: Memory) {
+    const toAdd = this._getToAdd(memory);
+    return `ADC A, $${utils.hexString(toAdd)}`;
   }
 }

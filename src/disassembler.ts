@@ -465,6 +465,8 @@ export class Disassembler {
       case 0x8d:
       case 0x8e:
       case 0x8f:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0x90:
       case 0x91:
       case 0x92:
@@ -473,6 +475,7 @@ export class Disassembler {
       case 0x95:
       case 0x96:
       case 0x97:
+        return new instruction.OpSubR8(byte);
       case 0x98:
       case 0x99:
       case 0x9a:
@@ -548,11 +551,11 @@ export class Disassembler {
       case 0xcb:
         return this.buildPrefixedInstruction(address, bytes);
       case 0xcc:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpCallIfZero(byte);
       case 0xcd:
         return new instruction.OpCall(byte);
       case 0xce:
+        return new instruction.OpAddCarryD8(byte);
       case 0xcf:
       case 0xd0:
       case 0xd1:

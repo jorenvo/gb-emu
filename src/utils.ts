@@ -41,3 +41,17 @@ export function twosComplementToNumber(x: number): number {
     return x;
   }
 }
+
+export function wrapping8BitSub(a: number, b: number): number {
+  if (a >= b) {
+    return a - b;
+  } else {
+    // 0 - 1 => 255
+    // 5 - 7 => 254
+    return 256 - (b - a);
+  }
+}
+
+export function wrapping8BitAdd(a: number, b: number): number {
+  return (a + b) % 256;
+}
