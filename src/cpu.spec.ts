@@ -17,10 +17,10 @@ describe("flags", function () {
     const cpu = new CPU(new Map());
     assert.equal(cpu.getHalfCarryFlag(), 0);
 
-    cpu.setHalfCarryFlag(0b1000, 0b0100);
+    cpu.setHalfCarryFlagAdd(0b1000, 0b0100);
     assert.equal(cpu.getHalfCarryFlag(), 0);
 
-    cpu.setHalfCarryFlag(0b1100, 0b0100);
+    cpu.setHalfCarryFlagAdd(0b1100, 0b0100);
     assert.equal(cpu.getHalfCarryFlag(), 1);
   });
 });

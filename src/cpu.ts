@@ -69,8 +69,13 @@ export class CPU {
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1011_1111) | (subFlag << 6);
   }
 
-  setHalfCarryFlag(a: number, b: number) {
+  setHalfCarryFlagAdd(a: number, b: number) {
     const halfCarryFlag = (a & 0xf) + (b & 0xf) >= 0x10 ? 1 : 0;
+    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
+  }
+
+  setHalfCarryFlagSubtract(a: number, b: number) {
+    const halfCarryFlag = (b & 0xf) > (a & 0xf) ? 1 : 0;
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
   }
 
@@ -82,8 +87,13 @@ export class CPU {
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1110_1111) | (carryFlag << 4);
   }
 
-  setCarryFlag(a: number, b: number) {
+  setCarryFlagAdd(a: number, b: number) {
     const carryFlag = a + b > 0xff ? 1 : 0;
+    this.setCarryFlagDirect(carryFlag);
+  }
+
+  setCarryFlagSubtract(a: number, b: number) {
+    const carryFlag = b > a ? 1 : 0;
     this.setCarryFlagDirect(carryFlag);
   }
 
