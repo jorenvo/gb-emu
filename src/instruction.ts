@@ -1080,6 +1080,37 @@ export class OpSubR8 extends Instruction {
   }
 }
 
+export class OpAddR8 extends Instruction {
+  size() {
+    return 1;
+  }
+
+  _getReg(memory: Memory) {
+    const opcode = memory.getByte(this.address);
+    return opcode & 0xf;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const reg = this._getReg(memory);
+    const toAdd = reg === 0x6 ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+
+    cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
+    cpu.setCarryFlagAdd(cpu.regs[CPU.A], toAdd);
+    cpu.regs[CPU.A] = utils.wrapping8BitAdd(cpu.regs[CPU.A], toAdd);
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setSubtractFlag(0);
+  }
+
+  disassemble(memory: Memory) {
+    const regNr = this._getReg(memory);
+    let reg = "(HL)";
+    if (regNr !== 0x6) {
+      reg = this.getStringForR8(regNr);
+    }
+    return `ADD ${reg}`;
+  }
+}
+
 export class OpAddCarryD8 extends Instruction {
   size() {
     return 2;

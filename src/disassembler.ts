@@ -449,6 +449,8 @@ export class Disassembler {
       case 0x7f:
         return new instruction.OpLdR8ToR8(byte);
       case 0x76:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0x80:
       case 0x81:
       case 0x82:
@@ -457,6 +459,7 @@ export class Disassembler {
       case 0x85:
       case 0x86:
       case 0x87:
+        return new instruction.OpAddR8(byte);
       case 0x88:
       case 0x89:
       case 0x8a:
