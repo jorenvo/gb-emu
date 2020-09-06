@@ -993,3 +993,45 @@ export class OpCPD8 extends Instruction {
     return `CP $${utils.hexString(d8)}`;
   }
 }
+
+export class OpLdAToA16 extends Instruction {
+  size() {
+    return 3;
+  }
+
+  _getAddr(memory: Memory) {
+    const lsb = memory.getByte(this.address + 1);
+    const msb = memory.getByte(this.address + 2);
+    return (msb << 8) | lsb;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const addr = this._getAddr(memory);
+    memory.setByte(addr, cpu.regs[CPU.A]);
+  }
+
+  disassemble(memory: Memory) {
+    const addr = this._getAddr(memory);
+    return `LD $${utils.hexString(addr, 16)}, A`;
+  }
+}
+
+export class OpLdhA8toA extends Instruction {
+  size() {
+    return 2;
+  }
+
+  _getAddr(memory: Memory) {
+    return memory.getByte(this.address + 1);
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const addr = this._getAddr(memory);
+    cpu.regs[CPU.A] = memory.getByte(addr);
+  }
+
+  disassemble(memory: Memory) {
+    const addr = this._getAddr(memory);
+    return `LDH A, ($${utils.hexString(addr)})`;
+  }
+}

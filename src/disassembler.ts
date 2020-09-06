@@ -586,13 +586,19 @@ export class Disassembler {
       case 0xe7:
       case 0xe8:
       case 0xe9:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xea:
+        return new instruction.OpLdAToA16(byte);
       case 0xeb:
       case 0xec:
       case 0xed:
       case 0xee:
       case 0xef:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xf0:
+        return new instruction.OpLdhA8toA(byte);
       case 0xf1:
       case 0xf2:
       case 0xf3:
