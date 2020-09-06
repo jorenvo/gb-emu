@@ -70,8 +70,12 @@ export class CPU {
   }
 
   setHalfCarryFlag(a: number, b: number) {
-    const halfCarryFlag = (a & 0xf) + (b & 0xf) === 0x10 ? 1 : 0;
+    const halfCarryFlag = (a & 0xf) + (b & 0xf) >= 0x10 ? 1 : 0;
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
+  }
+
+  getHalfCarryFlag(): number {
+    return (this.regs[CPU.F] & 0b0010_0000) > 0 ? 1 : 0;
   }
 
   setCarryFlagDirect(carryFlag: number) {
