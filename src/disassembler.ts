@@ -468,8 +468,7 @@ export class Disassembler {
       case 0x8d:
       case 0x8e:
       case 0x8f:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpAddCarryR8(byte);
       case 0x90:
       case 0x91:
       case 0x92:
@@ -487,6 +486,7 @@ export class Disassembler {
       case 0x9d:
       case 0x9e:
       case 0x9f:
+        return new instruction.OpSubCarryR8(byte);
       case 0xa0:
       case 0xa1:
       case 0xa2:
@@ -573,7 +573,10 @@ export class Disassembler {
       case 0xda:
       case 0xdb:
       case 0xdc:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xdd:
+        return new instruction.OpUnknown(byte);
       case 0xde:
       case 0xdf:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
