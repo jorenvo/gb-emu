@@ -9,10 +9,6 @@ export abstract class Instruction {
     this.address = address;
   }
 
-  movePCToNext(cpu: CPU) {
-    cpu.PC += this.size();
-  }
-
   getStringForR8(n: number) {
     switch (n) {
       case 0:
@@ -50,6 +46,15 @@ export abstract class Instruction {
         return "AF";
       default:
         throw new Error(`Register ${n} doesn't exist.`);
+    }
+  }
+
+  execAndIncrementPC(cpu: CPU, memory: Memory) {
+    const originalPC = cpu.PC;
+    this.exec(cpu, memory);
+
+    if (originalPC === cpu.PC) {
+      cpu.PC += this.size();
     }
   }
 
@@ -122,7 +127,6 @@ export class OpLdD16ToR16 extends Instruction {
       cpu.regs[register] = d16High;
       cpu.regs[register + 1] = d16Low;
     }
-    this.movePCToNext(cpu);
   }
 
   disassemble(memory: Memory) {
@@ -177,7 +181,6 @@ export class OpLdD8ToR8 extends Instruction {
     } else {
       cpu.regs[register] = d8;
     }
-    this.movePCToNext(cpu);
   }
 
   disassemble(memory: Memory) {
@@ -828,15 +831,19 @@ export class OpXorR8 extends Instruction {
     return 1;
   }
 
-  _isHL(memory: Memory) {
+  private isHL(memory: Memory) {
     return memory.getByte(this.address) === 0x7e;
   }
 
+  private getReg(memory: Memory) {
+    return utils.getBits(memory.getByte(this.address), 4, 5);
+  }
+
   exec(cpu: CPU, memory: Memory) {
-    if (this._isHL(memory)) {
+    if (this.isHL(memory)) {
       cpu.regs[CPU.A] ^= cpu.getHL();
     } else {
-      const register = utils.getBits(memory.getByte(this.address), 4, 5);
+      const register = this.getReg(memory);
       cpu.regs[CPU.A] ^= cpu.regs[register];
     }
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
@@ -847,9 +854,8 @@ export class OpXorR8 extends Instruction {
 
   disassemble(memory: Memory) {
     let reg = "(HL)";
-    if (!this._isHL(memory)) {
-      let byte = memory.getByte(this.address);
-      reg = this.getStringForR8(byte);
+    if (!this.isHL(memory)) {
+      reg = this.getStringForR8(this.getReg(memory));
     }
 
     return `XOR ${reg}`;

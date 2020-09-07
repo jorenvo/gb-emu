@@ -66,9 +66,10 @@ async function handleROM(event: Event) {
   console.log("handling rom");
   const instructions = disassemble(bytes);
   const memory = new Memory(bytes);
-  const cpu = new CPU(addressToInstruction(instructions));
+  const addrToInstruction = addressToInstruction(instructions);
+  const cpu = new CPU(addrToInstruction);
   console.log("starting main loop");
-  mainLoop(cpu, memory);
+  mainLoop(cpu, memory, addrToInstruction);
 }
 
 function updateRegs(cpu: CPU) {
@@ -87,41 +88,49 @@ function updateRegs(cpu: CPU) {
   document.getElementById("regs")!.innerText = s;
 }
 
-function createMemoryDiv(addr: number, byte: number) {
+function createMemoryDiv(addr: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
+  const byte = memory.getByte(addr);
   const newDiv = document.createElement("div");
+  const instruction = addrToInstruction.get(addr);
+  
   newDiv.innerText = `${utils.hexString(addr)}: ${utils.hexString(
     byte
   )} ${utils.binString(byte)}`;
+
+  if (instruction) {
+    newDiv.innerText += ` ${instruction.disassemble(memory)}`;
+  }
+
   return newDiv;
 }
 
-function updateMemory(PC: number, memory: Memory) {
+function updateMemory(PC: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
   const memoryDiv = document.getElementById("memory")!;
   memoryDiv.innerHTML = "";
 
   const bytesBefore = Math.min(4, PC - 1);
   for (let addr = PC - bytesBefore; addr <= PC - 1; addr++) {
-    memoryDiv.appendChild(createMemoryDiv(addr, memory.getByte(addr)));
+    memoryDiv.appendChild(createMemoryDiv(addr, memory, addrToInstruction));
   }
 
-  const currentMemory = createMemoryDiv(PC, memory.getByte(PC));
+  const currentMemory = createMemoryDiv(PC, memory, addrToInstruction);
   currentMemory.style.color = "#2e7bff";
   memoryDiv.appendChild(currentMemory);
 
   const bytesAfter = Math.min(4, memory.bytes.length - 1 - PC);
   for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
-    memoryDiv.appendChild(createMemoryDiv(addr, memory.getByte(addr)));
+    memoryDiv.appendChild(createMemoryDiv(addr, memory, addrToInstruction));
   }
 }
 
-function updateUI(cpu: CPU, memory: Memory) {
+function updateUI(cpu: CPU, memory: Memory, addrToInstruction: Map<number, Instruction>) {
   updateRegs(cpu);
-  updateMemory(cpu.PC, memory);
+  updateMemory(cpu.PC, memory, addrToInstruction);
 }
 
-async function mainLoop(cpu: CPU, memory: Memory) {
+async function mainLoop(cpu: CPU, memory: Memory, addrToInstruction: Map<number, Instruction>) {
   if (!cpu.tick(memory)) return;
   console.log("main loop");
-  updateUI(cpu, memory);
-  window.setTimeout(() => mainLoop(cpu, memory), 1_000);
+  updateUI(cpu, memory, addrToInstruction);
+  window.setTimeout(() => mainLoop(cpu, memory, addrToInstruction), 1_000);
 }

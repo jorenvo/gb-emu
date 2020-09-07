@@ -129,7 +129,7 @@ export class CPU {
       return false;
     }
 
-    currentInstruction.exec(this, memory);
+    currentInstruction.execAndIncrementPC(this, memory);
     return true;
   }
 }
