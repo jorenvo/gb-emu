@@ -34,7 +34,7 @@ function disassemble(bytes: Uint8Array): Instruction[] {
       );
     }
 
-    i += newInstruction.size();
+    i += size;
     instructions.push(newInstruction);
   }
 

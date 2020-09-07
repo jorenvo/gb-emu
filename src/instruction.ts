@@ -92,7 +92,7 @@ export class OpNop extends Instruction {
 export class OpUnknown extends Instruction {
   constructor(address: number) {
     super(address);
-    console.log(`Unknown instruction at ${utils.hexString(address, 16)}`)
+    console.log(`Unknown instruction at ${utils.hexString(address, 16)}`);
   }
 
   size() {
@@ -1001,26 +1001,50 @@ export class OpBit extends Instruction {
   }
 }
 
-export class OpCPD8 extends Instruction {
-  size() {
-    return 2;
-  }
-
-  _getD8(memory: Memory) {
-    return memory.getByte(this.address + 1);
-  }
+export abstract class OpCP extends Instruction {
+  protected abstract getToCompare(cpu: CPU, memory: Memory): number;
 
   exec(cpu: CPU, memory: Memory) {
-    const d8 = this._getD8(memory);
+    const d8 = this.getToCompare(cpu, memory);
     cpu.setSubtractFlag(1);
     cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], d8);
     cpu.setCarryFlagAdd(cpu.regs[CPU.A], d8);
     cpu.setZeroFlag(cpu.regs[CPU.A] - d8 === 0 ? 1 : 0);
   }
+}
+
+export class OpCPD8 extends OpCP {
+  size() {
+    return 2;
+  }
+
+  protected getToCompare(_cpu: CPU, memory: Memory): number {
+    return memory.getByte(this.address + 1);
+  }
 
   disassemble(memory: Memory) {
-    const d8 = this._getD8(memory);
+    const d8 = memory.getByte(this.address + 1);
     return `CP $${utils.hexString(d8)}`;
+  }
+}
+
+export class OpCPR8 extends OpCP {
+  size() {
+    return 1;
+  }
+
+  private getReg(memory: Memory) {
+    return memory.getByte(this.address) & 0b111;
+  }
+  
+  protected getToCompare(cpu: CPU, memory: Memory): number {
+    const reg = this.getReg(memory);
+    return cpu.regs[reg];
+  }
+
+  disassemble(memory: Memory) {
+    const reg = this.getReg(memory);
+    return `CP ${this.getStringForR8(reg)}`;
   }
 }
 
@@ -1178,5 +1202,35 @@ export class OpAddCarryD8 extends Instruction {
   disassemble(memory: Memory) {
     const toAdd = this._getToAdd(memory);
     return `ADC A, $${utils.hexString(toAdd)}`;
+  }
+}
+
+export class OpAndR8 extends Instruction {
+  size() {
+    return 1;
+  }
+
+  private getReg(memory: Memory) {
+    const opcode = memory.getByte(this.address);
+    return opcode & 0xf;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const reg = this.getReg(memory);
+    const toAnd = reg === 0x6 ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+    cpu.regs[CPU.A] &= toAnd;
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setSubtractFlag(0);
+    cpu.setHalfCarryFlagDirect(1);
+    cpu.setCarryFlagDirect(0);
+  }
+
+  disassemble(memory: Memory) {
+    const regNr = this.getReg(memory);
+    let reg = "(HL)";
+    if (regNr !== 0x6) {
+      reg = this.getStringForR8(regNr);
+    }
+    return `AND ${reg}`;
   }
 }
