@@ -455,7 +455,6 @@ export class OpInc16 extends OpDecInc16 {
   }
 
   disassemble(memory: Memory) {
-    console.log(utils.hexString(memory.getByte(this.address)));
     const reg = this.getStringForR16(memory.getByte(this.address) >> 4);
     return `INC ${reg}`;
   }
