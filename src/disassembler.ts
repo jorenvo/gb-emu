@@ -42,7 +42,7 @@ export class Disassembler {
       case 0x15:
       case 0x16:
       case 0x17:
-        return new instruction.OpRL(byte);
+        return new instruction.OpRL(address);
       case 0x18:
       case 0x19:
       case 0x1a:
@@ -149,7 +149,7 @@ export class Disassembler {
       case 0x7d:
       case 0x7e:
       case 0x7f:
-        return new instruction.OpBit(byte);
+        return new instruction.OpBit(address);
       case 0x80:
       case 0x81:
       case 0x82:
@@ -308,79 +308,79 @@ export class Disassembler {
       case 0x74:
       case 0x75:
       case 0x77:
-        return new instruction.OpLdR8ToA16(byte);
+        return new instruction.OpLdR8ToA16(address);
       case 0x03:
       case 0x13:
       case 0x23:
       case 0x33:
-        return new instruction.OpInc16(byte);
+        return new instruction.OpInc16(address);
       case 0x04:
       case 0x14:
       case 0x24:
       case 0x34:
-        return new instruction.OpInc8(byte);
+        return new instruction.OpInc8(address);
       case 0x05:
       case 0x15:
       case 0x25:
       case 0x35:
-        return new instruction.OpDec8(byte);
+        return new instruction.OpDec8(address);
       case 0x06:
       case 0x16:
       case 0x26:
       case 0x36:
-        return new instruction.OpLdD8ToR8(byte);
+        return new instruction.OpLdD8ToR8(address);
       case 0x07:
-        return new instruction.OpRLCA(byte);
+        return new instruction.OpRLCA(address);
       case 0x08:
-        return new instruction.OpLdSPToA16(byte);
+        return new instruction.OpLdSPToA16(address);
       case 0x09:
       case 0x19:
       case 0x29:
-        return new instruction.OpAddR16ToHL(byte);
+        return new instruction.OpAddR16ToHL(address);
       case 0x0a:
       case 0x1a:
       case 0x2a:
-        return new instruction.OpLdA16ToA(byte);
+        return new instruction.OpLdA16ToA(address);
       case 0x0b:
       case 0x1b:
       case 0x2b:
-        return new instruction.OpDec16(byte);
+        return new instruction.OpDec16(address);
       case 0x0c:
       case 0x1c:
       case 0x2c:
       case 0x3c:
-        return new instruction.OpInc8(byte + 1);
+        return new instruction.OpInc8(address);
       case 0x0d:
       case 0x1d:
       case 0x2d:
       case 0x3d:
-        return new instruction.OpDec8(byte + 1);
+        return new instruction.OpDec8(address);
       case 0x0e:
       case 0x1e:
       case 0x2e:
       case 0x3e:
-        return new instruction.OpLdD8ToR8(byte + 1);
+        return new instruction.OpLdD8ToR8(address);
       case 0x0f:
-        return new instruction.OpRRCA(byte);
+        return new instruction.OpRRCA(address);
       case 0x10:
-        return new instruction.OpStop(byte);
+        return new instruction.OpStop(address);
       case 0x17:
-        return new instruction.OpRLA(byte);
+        return new instruction.OpRLA(address);
       case 0x18:
-        return new instruction.OpJR(byte);
+        return new instruction.OpJR(address);
       case 0x1f:
-        return new instruction.OpRRA(byte);
+        return new instruction.OpRRA(address);
       case 0x20:
       case 0x28:
       case 0x30:
       case 0x38:
-        return new instruction.OpJRC(byte);
+        return new instruction.OpJRC(address);
       case 0x27:
         // TODO: DAA https://ehaskins.com/2018-01-30%20Z80%20DAA/
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0x2f:
-        return new instruction.OpCPL(byte);
+        return new instruction.OpCPL(address);
       case 0x37:
         // TODO: SCF
         Disassembler.logNotImplemented(address, byte, !"prefixed");
@@ -447,7 +447,7 @@ export class Disassembler {
       case 0x7d:
       case 0x7e:
       case 0x7f:
-        return new instruction.OpLdR8ToR8(byte);
+        return new instruction.OpLdR8ToR8(address);
       case 0x76:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
@@ -459,7 +459,7 @@ export class Disassembler {
       case 0x85:
       case 0x86:
       case 0x87:
-        return new instruction.OpAddR8(byte);
+        return new instruction.OpAddR8(address);
       case 0x88:
       case 0x89:
       case 0x8a:
@@ -468,7 +468,7 @@ export class Disassembler {
       case 0x8d:
       case 0x8e:
       case 0x8f:
-        return new instruction.OpAddCarryR8(byte);
+        return new instruction.OpAddCarryR8(address);
       case 0x90:
       case 0x91:
       case 0x92:
@@ -477,7 +477,7 @@ export class Disassembler {
       case 0x95:
       case 0x96:
       case 0x97:
-        return new instruction.OpSubR8(byte);
+        return new instruction.OpSubR8(address);
       case 0x98:
       case 0x99:
       case 0x9a:
@@ -486,7 +486,7 @@ export class Disassembler {
       case 0x9d:
       case 0x9e:
       case 0x9f:
-        return new instruction.OpSubCarryR8(byte);
+        return new instruction.OpSubCarryR8(address);
       case 0xa0:
       case 0xa1:
       case 0xa2:
@@ -495,7 +495,7 @@ export class Disassembler {
       case 0xa5:
       case 0xa6:
       case 0xa7:
-        return new instruction.OpAndR8(byte);
+        return new instruction.OpAndR8(address);
       case 0xa8:
       case 0xa9:
       case 0xaa:
@@ -504,7 +504,7 @@ export class Disassembler {
       case 0xad:
       case 0xae:
       case 0xaf:
-        return new instruction.OpXorR8(byte);
+        return new instruction.OpXorR8(address);
       case 0xb0:
       case 0xb1:
       case 0xb2:
@@ -523,7 +523,7 @@ export class Disassembler {
       case 0xbd:
       case 0xbe:
       case 0xbf:
-        return new instruction.OpCPR8(byte);
+        return new instruction.OpCPR8(address);
       case 0xc0:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
@@ -531,7 +531,7 @@ export class Disassembler {
       case 0xd1:
       case 0xe1:
       case 0xf1:
-        return new instruction.OpPop(byte);
+        return new instruction.OpPop(address);
       case 0xc2:
       case 0xc3:
       case 0xc4:
@@ -541,7 +541,7 @@ export class Disassembler {
       case 0xd5:
       case 0xe5:
       case 0xf5:
-        return new instruction.OpPush(byte);
+        return new instruction.OpPush(address);
       case 0xc6:
       case 0xc7:
       case 0xc8:
@@ -549,18 +549,18 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xc9:
       case 0xd9:
-        return new instruction.OpRet(byte);
+        return new instruction.OpRet(address);
       case 0xca:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xcb:
         return this.buildPrefixedInstruction(address, bytes);
       case 0xcc:
-        return new instruction.OpCallIfZero(byte);
+        return new instruction.OpCallIfZero(address);
       case 0xcd:
-        return new instruction.OpCall(byte);
+        return new instruction.OpCall(address);
       case 0xce:
-        return new instruction.OpAddCarryD8(byte);
+        return new instruction.OpAddCarryD8(address);
       case 0xcf:
       case 0xd0:
       case 0xd1:
@@ -578,18 +578,18 @@ export class Disassembler {
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xdd:
-        return new instruction.OpUnknown(byte);
+        return new instruction.OpUnknown(address);
       case 0xde:
       case 0xdf:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xe0:
-        return new instruction.OpLdhA8(byte);
+        return new instruction.OpLdhA8(address);
       case 0xe1:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xe2:
-        return new instruction.OpLdAtoAddrC(byte);
+        return new instruction.OpLdAtoAddrC(address);
       case 0xe3:
       case 0xe4:
       case 0xe5:
@@ -600,7 +600,7 @@ export class Disassembler {
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xea:
-        return new instruction.OpLdAToA16(byte);
+        return new instruction.OpLdAToA16(address);
       case 0xeb:
       case 0xec:
       case 0xed:
@@ -609,7 +609,7 @@ export class Disassembler {
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xf0:
-        return new instruction.OpLdhA8toA(byte);
+        return new instruction.OpLdhA8toA(address);
       case 0xf1:
       case 0xf2:
       case 0xf3:

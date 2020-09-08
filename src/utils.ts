@@ -20,7 +20,7 @@ export function formatArrayAsHex(array: Uint8Array): string {
 }
 
 export function log(byte: number, msg: string) {
-  console.log(`${byte}: ${msg}`);
+  console.log(`${hexString(byte)}: ${msg}`);
 }
 
 // 0b10101010

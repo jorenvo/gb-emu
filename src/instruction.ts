@@ -58,6 +58,10 @@ export abstract class Instruction {
     }
   }
 
+  getAddress() {
+    return this.address;
+  }
+
   abstract size(): number;
   abstract exec(cpu: CPU, memory: Memory): void;
   abstract disassemble(memory: Memory): string;
@@ -262,7 +266,10 @@ export class OpLdR8ToA16 extends Instruction {
         dest = "HL";
         break;
       default:
-        utils.log(memory.getByte(this.address), "unknown opLdR8ToA16");
+        utils.log(
+          byte,
+          `unknown opLdR8ToA16 at ${utils.hexString(this.address, 16)}`
+        );
     }
 
     let src = "A";
@@ -271,7 +278,7 @@ export class OpLdR8ToA16 extends Instruction {
       src = this.getStringForR8(reg);
     }
 
-    return `LD (${dest}) ${src}`;
+    return `LD (${dest}), ${src}`;
   }
 }
 
@@ -448,6 +455,7 @@ export class OpInc16 extends OpDecInc16 {
   }
 
   disassemble(memory: Memory) {
+    console.log(utils.hexString(memory.getByte(this.address)));
     const reg = this.getStringForR16(memory.getByte(this.address) >> 4);
     return `INC ${reg}`;
   }
@@ -1042,7 +1050,7 @@ export class OpCPR8 extends OpCP {
   private getReg(memory: Memory) {
     return memory.getByte(this.address) & 0b111;
   }
-  
+
   protected getToCompare(cpu: CPU, memory: Memory): number {
     const reg = this.getReg(memory);
     return cpu.regs[reg];

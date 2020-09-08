@@ -45,11 +45,9 @@ function addressToInstruction(
   instructions: Instruction[]
 ): Map<number, Instruction> {
   let res = new Map();
-  let addr = 0;
 
   for (let instruction of instructions) {
-    res.set(addr, instruction);
-    addr += instruction.size();
+    res.set(instruction.getAddress(), instruction);
   }
 
   return res;
@@ -91,12 +89,14 @@ function updateRegs(cpu: CPU) {
 function createMemoryDiv(addr: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
   const byte = memory.getByte(addr);
   const newDiv = document.createElement("div");
-  const instruction = addrToInstruction.get(addr);
+
+  if (addr === undefined || byte === undefined) debugger;
   
   newDiv.innerText = `${utils.hexString(addr)}: ${utils.hexString(
     byte
   )} ${utils.binString(byte)}`;
 
+  const instruction = addrToInstruction.get(addr);
   if (instruction) {
     newDiv.innerText += ` ${instruction.disassemble(memory)}`;
   }
@@ -105,10 +105,11 @@ function createMemoryDiv(addr: number, memory: Memory, addrToInstruction: Map<nu
 }
 
 function updateMemory(PC: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
+  const contextInstructions = 16;
   const memoryDiv = document.getElementById("memory")!;
   memoryDiv.innerHTML = "";
 
-  const bytesBefore = Math.min(4, PC - 1);
+  const bytesBefore = Math.min(contextInstructions, PC);
   for (let addr = PC - bytesBefore; addr <= PC - 1; addr++) {
     memoryDiv.appendChild(createMemoryDiv(addr, memory, addrToInstruction));
   }
@@ -117,7 +118,7 @@ function updateMemory(PC: number, memory: Memory, addrToInstruction: Map<number,
   currentMemory.style.color = "#2e7bff";
   memoryDiv.appendChild(currentMemory);
 
-  const bytesAfter = Math.min(4, memory.bytes.length - 1 - PC);
+  const bytesAfter = Math.min(contextInstructions, memory.bytes.length - 1 - PC);
   for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
     memoryDiv.appendChild(createMemoryDiv(addr, memory, addrToInstruction));
   }
