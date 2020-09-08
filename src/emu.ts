@@ -86,12 +86,16 @@ function updateRegs(cpu: CPU) {
   document.getElementById("regs")!.innerText = s;
 }
 
-function createMemoryDiv(addr: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
+function createMemoryDiv(
+  addr: number,
+  memory: Memory,
+  addrToInstruction: Map<number, Instruction>
+) {
   const byte = memory.getByte(addr);
   const newDiv = document.createElement("div");
 
   if (addr === undefined || byte === undefined) debugger;
-  
+
   newDiv.innerText = `${utils.hexString(addr)}: ${utils.hexString(
     byte
   )} ${utils.binString(byte)}`;
@@ -104,7 +108,11 @@ function createMemoryDiv(addr: number, memory: Memory, addrToInstruction: Map<nu
   return newDiv;
 }
 
-function updateMemory(PC: number, memory: Memory, addrToInstruction: Map<number, Instruction>) {
+function updateMemory(
+  PC: number,
+  memory: Memory,
+  addrToInstruction: Map<number, Instruction>
+) {
   const contextInstructions = 16;
   const memoryDiv = document.getElementById("memory")!;
   memoryDiv.innerHTML = "";
@@ -118,20 +126,33 @@ function updateMemory(PC: number, memory: Memory, addrToInstruction: Map<number,
   currentMemory.style.color = "#2e7bff";
   memoryDiv.appendChild(currentMemory);
 
-  const bytesAfter = Math.min(contextInstructions, memory.bytes.length - 1 - PC);
+  const bytesAfter = Math.min(
+    contextInstructions,
+    memory.bytes.length - 1 - PC
+  );
   for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
     memoryDiv.appendChild(createMemoryDiv(addr, memory, addrToInstruction));
   }
 }
 
-function updateUI(cpu: CPU, memory: Memory, addrToInstruction: Map<number, Instruction>) {
+function updateUI(
+  cpu: CPU,
+  memory: Memory,
+  addrToInstruction: Map<number, Instruction>
+) {
   updateRegs(cpu);
   updateMemory(cpu.PC, memory, addrToInstruction);
 }
 
-async function mainLoop(cpu: CPU, memory: Memory, addrToInstruction: Map<number, Instruction>) {
-  if (!cpu.tick(memory)) return;
+async function mainLoop(
+  cpu: CPU,
+  memory: Memory,
+  addrToInstruction: Map<number, Instruction>
+) {
   console.log("main loop");
   updateUI(cpu, memory, addrToInstruction);
-  window.setTimeout(() => mainLoop(cpu, memory, addrToInstruction), 1_000);
+  if (!cpu.tick(memory)) return;
+  if (cpu.PC === 0x100) console.log("Should load cartridge rom now");
+
+  window.setTimeout(() => mainLoop(cpu, memory, addrToInstruction), 5_000);
 }
