@@ -113,7 +113,7 @@ function updateMemory(
   memory: Memory,
   addrToInstruction: Map<number, Instruction>
 ) {
-  const contextInstructions = 16;
+  const contextInstructions = 8;
   const memoryDiv = document.getElementById("memory")!;
   memoryDiv.innerHTML = "";
 
@@ -154,5 +154,5 @@ async function mainLoop(
   if (!cpu.tick(memory)) return;
   if (cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
-  window.setTimeout(() => mainLoop(cpu, memory, addrToInstruction), 5_000);
+  window.setTimeout(() => mainLoop(cpu, memory, addrToInstruction), 100);
 }

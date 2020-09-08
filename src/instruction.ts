@@ -875,14 +875,15 @@ export class OpCall extends Instruction {
   }
 
   _getAddr(memory: Memory) {
-    const addrLow = memory.getByte(this.address);
-    const addrHigh = memory.getByte(this.address + 1);
+    const addrLow = memory.getByte(this.address + 1);
+    const addrHigh = memory.getByte(this.address + 2);
     return (addrHigh << 8) | addrLow;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    memory.setByte(cpu.SP--, cpu.PC >> 8);
-    memory.setByte(cpu.SP--, cpu.PC & 0xff);
+    memory.setByte(--cpu.SP, cpu.PC >> 8);
+    memory.setByte(--cpu.SP, cpu.PC & 0xff);
+    console.log(`Should return to ${cpu.PC}`)
     cpu.PC = this._getAddr(memory);
   }
 
@@ -911,9 +912,10 @@ export class OpRet extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const high = memory.getByte(cpu.SP--);
-    const low = memory.getByte(cpu.SP--);
+    const high = memory.getByte(cpu.SP++);
+    const low = memory.getByte(cpu.SP++);
     cpu.PC = (high << 8) | low;
+    console.log(`Returning to ${cpu.PC}`)
   }
 
   disassemble(_memory: Memory) {
