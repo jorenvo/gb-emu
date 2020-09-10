@@ -113,7 +113,7 @@ export class Emulator {
     this.updateMemory();
   }
 
-  async run() {
+  run() {
     console.log("main loop");
     this.updateUI();
     if (!this.cpu.tick(this.memory)) return;
