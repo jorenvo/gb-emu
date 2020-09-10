@@ -1,3 +1,5 @@
+I won't accept contributions at this time. The fun is figuring things out myself!
+
 Useful links
 ============
 https://gbdev.io/list.html
