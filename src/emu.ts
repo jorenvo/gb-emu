@@ -105,7 +105,13 @@ export class Emulator {
     }
 
     const currentMemory = this.createMemoryDiv(PC);
-    currentMemory.style.color = "#2e7bff";
+
+    if (this.paused) {
+      currentMemory.style.color = "#ffb22e";
+    } else {
+      currentMemory.style.color = "#2e7bff";
+    }
+
     memoryDiv.appendChild(currentMemory);
 
     const bytesAfter = Math.min(
@@ -124,12 +130,12 @@ export class Emulator {
 
   run() {
     console.log("main loop");
-    this.updateUI();
-
     if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
       this.paused = true;
     }
-    
+
+    this.updateUI();
+
     if (!this.cpu.tick(this.memory)) return;
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
