@@ -9,11 +9,20 @@ export class Emulator {
   private cpu: CPU;
   private memory: Memory;
 
+  // debugger related
+  private paused: boolean;
+  private breakpoint: number | undefined;
+
   constructor(bytes: Uint8Array) {
     const instructions = this.disassemble(bytes);
     this.instructionMap = this.addressToInstruction(instructions);
     this.cpu = new CPU(this.instructionMap);
     this.memory = new Memory(bytes);
+    this.paused = false;
+  }
+
+  setBreakpoint(addr: number) {
+    this.breakpoint = addr;
   }
 
   private disassemble(bytes: Uint8Array): Instruction[] {
@@ -116,9 +125,16 @@ export class Emulator {
   run() {
     console.log("main loop");
     this.updateUI();
+
+    if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
+      this.paused = true;
+    }
+    
     if (!this.cpu.tick(this.memory)) return;
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
-    window.setTimeout(() => this.run(), 100);
+    if (!this.paused) {
+      window.setTimeout(() => this.run(), 100);
+    }
   }
 }
