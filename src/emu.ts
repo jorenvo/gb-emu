@@ -9,6 +9,10 @@ export class Emulator {
   private cpu: CPU;
   private memory: Memory;
 
+  // ui related
+  private addrToMemoryDiv: Map<number, HTMLDivElement>;
+  private memoryPC: HTMLDivElement | undefined;
+
   // debugger related
   paused: boolean;
   breakpoint: number | undefined;
@@ -19,6 +23,7 @@ export class Emulator {
     this.cpu = new CPU(this.instructionMap);
     this.memory = new Memory(bytes);
     this.paused = false;
+    this.addrToMemoryDiv = this.renderMemory();
   }
 
   setBreakpoint(addr: number) {
@@ -93,23 +98,39 @@ export class Emulator {
     return newDiv;
   }
 
-  private updateMemory() {
-    const PC = this.cpu.PC;
+  private renderMemory(): Map<number, HTMLDivElement> {
+    const addrToMemoryDiv = new Map();
     const memoryDiv = document.getElementById("memory")!;
     memoryDiv.innerHTML = "";
 
     for (let addr = 0; addr <= 0xff; addr++) {
       const addrDiv = this.createMemoryDiv(addr);
-      if (addr === PC) {
-        if (this.paused) {
-          addrDiv.style.color = "#ffb22e";
-        } else {
-          addrDiv.style.color = "#2e7bff";
-        }
-      }
-
       memoryDiv.appendChild(addrDiv);
+      addrToMemoryDiv.set(addr, addrDiv);
     }
+
+    return addrToMemoryDiv;
+  }
+
+  private updateMemory() {
+    let color = "#2e7bff";
+    if (this.paused) {
+      color = "#ffb22e";
+    }
+
+    if (this.memoryPC) {
+      this.memoryPC.style.color = "black";
+    }
+
+    const memoryDiv = this.addrToMemoryDiv.get(this.cpu.PC);
+    if (memoryDiv === undefined) {
+      throw new Error(
+        `PC (${utils.hexString(this.cpu.PC, 16)}) not aligned with instruction.`
+      );
+    }
+
+    this.memoryPC = memoryDiv;
+    this.memoryPC.style.color = color;
   }
 
   private updateStack() {
