@@ -1112,7 +1112,7 @@ export class OpSubR8 extends Instruction {
 
   private getReg(memory: Memory) {
     const opcode = memory.getByte(this.address);
-    return opcode & 0xf;
+    return opcode & 0b111;
   }
 
   protected getToSubtract(cpu: CPU, memory: Memory) {
