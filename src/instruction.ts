@@ -883,7 +883,7 @@ export class OpCall extends Instruction {
   exec(cpu: CPU, memory: Memory) {
     memory.setByte(--cpu.SP, cpu.PC >> 8);
     memory.setByte(--cpu.SP, cpu.PC & 0xff);
-    console.log(`Should return to ${cpu.PC}`)
+    console.log(`Should return to ${cpu.PC}`);
     cpu.PC = this._getAddr(memory);
   }
 
@@ -912,10 +912,10 @@ export class OpRet extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const high = memory.getByte(cpu.SP++);
     const low = memory.getByte(cpu.SP++);
+    const high = memory.getByte(cpu.SP++);
     cpu.PC = (high << 8) | low;
-    console.log(`Returning to ${cpu.PC}`)
+    console.log(`Returning to ${cpu.PC} (${high} ${low})`);
   }
 
   disassemble(_memory: Memory) {
@@ -965,12 +965,12 @@ export class OpPop extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     if (memory.getByte(this.address) === 0xf1) {
-      cpu.regs[CPU.A] = memory.getByte(cpu.SP--);
-      cpu.regs[CPU.F] = memory.getByte(cpu.SP--);
+      cpu.regs[CPU.F] = memory.getByte(cpu.SP++);
+      cpu.regs[CPU.A] = memory.getByte(cpu.SP++);
     } else {
       const register = this._getR16(memory);
-      cpu.regs[register] = memory.getByte(cpu.SP--);
-      cpu.regs[register + 1] = memory.getByte(cpu.SP--);
+      cpu.regs[register + 1] = memory.getByte(cpu.SP++);
+      cpu.regs[register] = memory.getByte(cpu.SP++);
     }
   }
 
