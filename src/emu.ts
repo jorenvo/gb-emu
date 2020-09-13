@@ -126,7 +126,7 @@ export class Emulator {
   private updateStack() {
     const stackDiv = document.getElementById("stack")!;
     const sp = this.cpu.SP;
-    const context = 2;
+    const context = 3;
     stackDiv.innerHTML = "";
 
     for (
@@ -134,7 +134,12 @@ export class Emulator {
       addr <= Math.min(sp + context, this.memory.getSize() - 1);
       addr++
     ) {
-      stackDiv.appendChild(this.createMemoryDiv(addr));
+      const memoryDiv = this.createMemoryDiv(addr);
+      if (addr === sp) {
+        memoryDiv.style.color = "#2e7bff";
+      }
+
+      stackDiv.appendChild(memoryDiv);
     }
   }
 
