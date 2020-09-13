@@ -123,9 +123,25 @@ export class Emulator {
     }
   }
 
+  private updateStack() {
+    const stackDiv = document.getElementById("stack")!;
+    const sp = this.cpu.SP;
+    const context = 2;
+    stackDiv.innerHTML = "";
+
+    for (
+      let addr = Math.max(0, sp - context);
+      addr <= Math.min(sp + context, this.memory.getSize() - 1);
+      addr++
+    ) {
+      stackDiv.appendChild(this.createMemoryDiv(addr));
+    }
+  }
+
   private updateUI() {
     this.updateRegs();
     this.updateMemory();
+    this.updateStack();
   }
 
   run() {

@@ -7,3 +7,16 @@
 #regs {
   margin-top: 10px;
 }
+
+.debugColumns {
+    display: flex;
+    width: 500px;
+}
+
+.debugColumns > div {
+    margin-right: 10px;
+}
+
+#memory {
+    width: 60%;
+}
