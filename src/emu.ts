@@ -10,8 +10,8 @@ export class Emulator {
   private memory: Memory;
 
   // debugger related
-  private paused: boolean;
-  private breakpoint: number | undefined;
+  paused: boolean;
+  breakpoint: number | undefined;
 
   constructor(bytes: Uint8Array) {
     const instructions = this.disassemble(bytes);
@@ -95,31 +95,20 @@ export class Emulator {
 
   private updateMemory() {
     const PC = this.cpu.PC;
-    const contextInstructions = 8;
     const memoryDiv = document.getElementById("memory")!;
     memoryDiv.innerHTML = "";
 
-    const bytesBefore = Math.min(contextInstructions, PC);
-    for (let addr = PC - bytesBefore; addr <= PC - 1; addr++) {
-      memoryDiv.appendChild(this.createMemoryDiv(addr));
-    }
+    for (let addr = 0; addr <= 0xff; addr++) {
+      const addrDiv = this.createMemoryDiv(addr);
+      if (addr === PC) {
+        if (this.paused) {
+          addrDiv.style.color = "#ffb22e";
+        } else {
+          addrDiv.style.color = "#2e7bff";
+        }
+      }
 
-    const currentMemory = this.createMemoryDiv(PC);
-
-    if (this.paused) {
-      currentMemory.style.color = "#ffb22e";
-    } else {
-      currentMemory.style.color = "#2e7bff";
-    }
-
-    memoryDiv.appendChild(currentMemory);
-
-    const bytesAfter = Math.min(
-      contextInstructions,
-      this.memory.bytes.length - 1 - PC
-    );
-    for (let addr = PC + 1; addr <= PC + bytesAfter; addr++) {
-      memoryDiv.appendChild(this.createMemoryDiv(addr));
+      memoryDiv.appendChild(addrDiv);
     }
   }
 
@@ -150,7 +139,6 @@ export class Emulator {
   }
 
   run() {
-    console.log("main loop");
     if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
       this.paused = true;
     }
