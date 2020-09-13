@@ -131,6 +131,11 @@ export class Emulator {
 
     this.memoryPC = memoryDiv;
     this.memoryPC.style.color = color;
+
+    this.memoryPC.scrollIntoView();
+
+    const memoryContainer = document.getElementById("memory")!;
+    memoryContainer.scrollTop -= memoryContainer.clientHeight / 2;
   }
 
   private updateStack() {
