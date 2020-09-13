@@ -16,5 +16,3 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
-- Decide who modifies the PC: abstract instruction, implemented instruction or cpu?
-  - Idea: do it in abstract instruction, save PC, run exec, if same then increment, otherwise don't
