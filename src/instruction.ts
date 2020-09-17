@@ -995,18 +995,18 @@ export class OpBit extends Instruction {
   // 0x6c 0b0 1 1 0 1 1 0 0  BIT 5, H
   // 0x7b 0b0 1 1 1 1 0 1 1  BIT 7, E
   // 0x7c 0b0 1 1 1 1 1 0 0  BIT 7, H
-  _getReg(memory: Memory) {
+  private getReg(memory: Memory) {
     return utils.getBits(this.getNext16Bits(memory), 0, 2);
   }
 
-  _getBit(memory: Memory) {
+  private getBit(memory: Memory) {
     const byte = this.getNext8Bits(memory);
     return utils.getBits(byte, 4, 5) * 2 + utils.getBits(byte, 3, 3);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = this._getReg(memory);
-    const bit = this._getBit(memory);
+    const register = this.getReg(memory);
+    const bit = this.getBit(memory);
     if (register === 0x6) {
       // (HL)
       throw new Error("Unimplemented BIT instruction");
@@ -1016,12 +1016,12 @@ export class OpBit extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const regNr = this._getReg(memory);
+    const regNr = this.getReg(memory);
     let reg = "(HL)";
     if (regNr !== 0x6) {
       reg = this.getStringForR8(regNr);
     }
-    const bit = this._getBit(memory);
+    const bit = this.getBit(memory);
 
     return `BIT ${bit}, ${reg}`;
   }
