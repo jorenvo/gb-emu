@@ -560,7 +560,7 @@ export class OpDec8 extends Instruction {
       memory.setByte(addr, memory.getByte(addr) - 1);
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
     } else {
-      const register = memory.getByte(this.address) * 2;
+      const register = this._getReg(memory);
       cpu.setHalfCarryFlagAdd(cpu.regs[register], -1);
       cpu.regs[register] -= 1;
       cpu.setZeroFlag(cpu.regs[register] === 0 ? 1 : 0);
