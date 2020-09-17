@@ -62,6 +62,13 @@ export abstract class Instruction {
     return this.address;
   }
 
+  getNext16Bits(memory: Memory) {
+    // Loads the next 16 bits (little-endian)
+    const low = memory.getByte(this.address + 1);
+    const high = memory.getByte(this.address + 2);
+    return (high << 8) | low;
+  }
+
   abstract size(): number;
   abstract exec(cpu: CPU, memory: Memory): void;
   abstract disassemble(memory: Memory): string;
@@ -121,15 +128,14 @@ export class OpLdD16ToR16 extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const d16High = memory.getByte(this.address + 1);
-    const d16Low = memory.getByte(this.address + 2);
+    const d16 = this.getNext16Bits(memory);
 
     if (memory.getByte(this.address) === 0x31) {
-      cpu.SP = (d16High << 8) | d16Low;
+      cpu.SP = d16;
     } else {
       const register = utils.getBits(memory.getByte(this.address), 4, 5) * 2;
-      cpu.regs[register] = d16High;
-      cpu.regs[register + 1] = d16Low;
+      cpu.regs[register] = d16 >> 8;
+      cpu.regs[register + 1] = d16 & 0xff;
     }
   }
 
@@ -152,11 +158,7 @@ export class OpLdD16ToR16 extends Instruction {
         throw new Error("Unknown register!");
     }
 
-    const d16Hex = utils.hexString(
-      (memory.getByte(this.address + 1) << 8) |
-        memory.getByte(this.address + 2),
-      16
-    );
+    const d16Hex = utils.hexString(this.getNext16Bits(memory), 16);
     return `LD ${reg}, $${d16Hex}`;
   }
 }
@@ -346,14 +348,8 @@ export class OpLdSPToA16 extends Instruction {
     return 3;
   }
 
-  _a16(memory: Memory) {
-    const a16Low = memory.getByte(this.address);
-    const a16High = memory.getByte(this.address + 1);
-    return (a16High << 8) | a16Low;
-  }
-
   exec(cpu: CPU, memory: Memory) {
-    const a16 = this._a16(memory);
+    const a16 = this.getNext16Bits(memory);
 
     // TODO: this order is correct, should we always store LSB before MSB?
     memory.setByte(a16, cpu.SP & 0xff);
@@ -361,7 +357,7 @@ export class OpLdSPToA16 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `LD $${utils.hexString(this._a16(memory), 16)}, SP`;
+    return `LD $${utils.hexString(this.getNext16Bits(memory), 16)}, SP`;
   }
 }
 
@@ -874,21 +870,15 @@ export class OpCall extends Instruction {
     return 3;
   }
 
-  _getAddr(memory: Memory) {
-    const addrLow = memory.getByte(this.address + 1);
-    const addrHigh = memory.getByte(this.address + 2);
-    return (addrHigh << 8) | addrLow;
-  }
-
   exec(cpu: CPU, memory: Memory) {
     memory.setByte(--cpu.SP, cpu.PC >> 8);
     memory.setByte(--cpu.SP, cpu.PC & 0xff);
     console.log(`Should return to ${cpu.PC}`);
-    cpu.PC = this._getAddr(memory);
+    cpu.PC = this.getNext16Bits(memory);
   }
 
   disassemble(memory: Memory) {
-    let addr = this._getAddr(memory);
+    let addr = this.getNext16Bits(memory);
     return `CALL $${utils.hexString(addr, 16)}`;
   }
 }
@@ -901,7 +891,7 @@ export class OpCallIfZero extends OpCall {
   }
 
   disassemble(memory: Memory) {
-    let addr = this._getAddr(memory);
+    let addr = this.getNext16Bits(memory);
     return `CALL Z, $${utils.hexString(addr, 16)}`;
   }
 }
@@ -1068,19 +1058,13 @@ export class OpLdAToA16 extends Instruction {
     return 3;
   }
 
-  _getAddr(memory: Memory) {
-    const lsb = memory.getByte(this.address + 1);
-    const msb = memory.getByte(this.address + 2);
-    return (msb << 8) | lsb;
-  }
-
   exec(cpu: CPU, memory: Memory) {
-    const addr = this._getAddr(memory);
+    const addr = this.getNext16Bits(memory);
     memory.setByte(addr, cpu.regs[CPU.A]);
   }
 
   disassemble(memory: Memory) {
-    const addr = this._getAddr(memory);
+    const addr = this.getNext16Bits(memory);
     return `LD $${utils.hexString(addr, 16)}, A`;
   }
 }
