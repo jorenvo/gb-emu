@@ -847,7 +847,7 @@ export class OpXorR8 extends Instruction {
   }
 
   private getReg(memory: Memory) {
-    return utils.getBits(this.getByte(memory), 4, 5);
+    return this.getByte(memory) & 0b111;
   }
 
   exec(cpu: CPU, memory: Memory) {
