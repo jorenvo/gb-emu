@@ -95,3 +95,30 @@ describe("rotations", function () {
     assert.equal(cpu.getCarryFlag(), 1);
   });
 });
+
+describe("bit extractions", function () {
+  it("should correctly disassemble bit ops", function () {
+    function getMemory(opcode: number) {
+      return new Memory(new Uint8Array([0xcb, opcode]));
+    }
+    const opBit = new instruction.OpBit(0x00);
+
+    let memory = getMemory(0x7c);
+    assert.equal(opBit.disassemble(memory), "BIT 7, H");
+
+    memory = getMemory(0x78);
+    assert.equal(opBit.disassemble(memory), "BIT 7, B");
+
+    memory = getMemory(0x59);
+    assert.equal(opBit.disassemble(memory), "BIT 3, C");
+
+    memory = getMemory(0x53);
+    assert.equal(opBit.disassemble(memory), "BIT 2, E");
+
+    memory = getMemory(0x66);
+    assert.equal(opBit.disassemble(memory), "BIT 4, (HL)");
+
+    memory = getMemory(0x4e);
+    assert.equal(opBit.disassemble(memory), "BIT 1, (HL)");
+  })
+});

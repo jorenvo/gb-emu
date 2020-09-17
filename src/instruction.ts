@@ -983,12 +983,25 @@ export class OpBit extends Instruction {
     return 2;
   }
 
+  // E: 3
+  // H: 4
+  //        7 6 5 4 3 2 1 0
+  // 0x63 0b0 1 1 0 0 0 1 1  BIT 4, E
+  // 0x64 0b0 1 1 0 0 1 0 0  BIT 4, H
+  // 0x73 0b0 1 1 1 0 0 1 1  BIT 6, E
+  // 0x74 0b0 1 1 1 0 1 0 0  BIT 6, H
+  // ----------------------
+  // 0x6b 0b0 1 1 0 1 0 1 1  BIT 5, E
+  // 0x6c 0b0 1 1 0 1 1 0 0  BIT 5, H
+  // 0x7b 0b0 1 1 1 1 0 1 1  BIT 7, E
+  // 0x7c 0b0 1 1 1 1 1 0 0  BIT 7, H
   _getReg(memory: Memory) {
-    return utils.getBits(this.getByte(memory), 0, 2);
+    return utils.getBits(this.getNext16Bits(memory), 0, 2);
   }
 
   _getBit(memory: Memory) {
-    return utils.getBits(this.getByte(memory), 3, 5);
+    const byte = this.getNext8Bits(memory);
+    return utils.getBits(byte, 4, 5) * 2 + utils.getBits(byte, 3, 3);
   }
 
   exec(cpu: CPU, memory: Memory) {
