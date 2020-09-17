@@ -19,7 +19,12 @@ function runEmulator(bytes: Uint8Array) {
   next.addEventListener("click", () => emu.run());
 
   const pause = document.getElementById("pause")!;
-  pause.addEventListener("click", () => (emu.paused = true));
+  pause.addEventListener("click", () => {
+    emu.paused = !emu.paused;
+    if (!emu.paused) {
+      emu.run();
+    }
+  });
 
   emu.run();
 }
