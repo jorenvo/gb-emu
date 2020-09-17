@@ -13,11 +13,11 @@ describe("OpLdD16ToR16", function () {
     cpu.SP = 0;
     assert.equal(cpu.SP, 0);
 
-    assert.equal("LD HL, $0x2021", ld.disassemble(memory));
+    assert.equal("LD HL, $0x2120", ld.disassemble(memory));
 
     assert.equal(cpu.getHL(), 0);
     ld.exec(cpu, memory);
-    assert.equal(cpu.getHL(), 0x2021);
+    assert.equal(cpu.getHL(), 0x2120);
   });
 });
 
