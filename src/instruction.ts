@@ -179,11 +179,17 @@ export class OpLdD8ToR8 extends Instruction {
     return 2;
   }
 
-  getRegister(memory: Memory) {
-    return (this.getByte(memory) >> 4) * 2;
+  private getRegister(memory: Memory) {
+    const byte = this.getByte(memory);
+    let reg = (byte >> 4) * 2;
+    if ((byte & 0xf) === 0xe) {
+      ++reg;
+    }
+
+    return reg;
   }
 
-  isHL(memory: Memory) {
+  private isHL(memory: Memory) {
     return this.getByte(memory) === 0x36;
   }
 
