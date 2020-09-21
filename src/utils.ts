@@ -1,7 +1,13 @@
 export function hexString(x: number, bits = 8): string {
-  let hex = x.toString(16);
+  const negative = x < 0;
+  let hex = Math.abs(x).toString(16);
   hex = hex.padStart(bits / 4, "0");
-  return `0x${hex}`;
+
+  if (negative) {
+    return `-0x${hex}`;
+  } else {
+    return `0x${hex}`;
+  }
 }
 
 export function binString(x: number): string {
