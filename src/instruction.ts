@@ -1112,7 +1112,7 @@ export class OpLdhA8toA extends Instruction {
 
   disassemble(memory: Memory) {
     const addr = this._getAddr(memory);
-    return `LDH A, ($${utils.hexString(addr)})`;
+    return `LDH A, ($0xff00+$${utils.hexString(addr)})`;
   }
 }
 
