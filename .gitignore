@@ -2,3 +2,4 @@ node_modules
 dist
 *.pem
 /src/roms.ts
+/compare_bootrom/mine.txt
