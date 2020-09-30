@@ -10,7 +10,7 @@
 
 .debugColumns {
     display: flex;
-    width: 500px;
+    width: 600px;
 }
 
 .debugColumns > div {
@@ -18,7 +18,7 @@
 }
 
 #memory {
-    width: 60%;
+    width: 65%;
     max-height: 400px;
     overflow-y: scroll;
 }
