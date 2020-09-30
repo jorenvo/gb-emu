@@ -821,7 +821,7 @@ export class OpJRC extends Instruction {
         condition = "UNS";
         break;
     }
-    return `JR ${condition} $${utils.hexString(
+    return `JR ${condition}, $${utils.hexString(
       this.getRelativeOffset(memory)
     )}`;
   }
