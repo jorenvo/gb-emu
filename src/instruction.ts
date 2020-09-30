@@ -353,7 +353,7 @@ export class OpLdAtoAddrC extends Instruction {
   }
 
   disassemble(_memory: Memory) {
-    return "LD (C), A";
+    return "LD ($0xff00+C), A";
   }
 }
 
@@ -390,7 +390,7 @@ export class OpLdhA8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `LDH ($${utils.hexString(this._getAddr(memory))}), A`;
+    return `LDH ($0xff00+$${utils.hexString(this._getAddr(memory))}), A`;
   }
 }
 
