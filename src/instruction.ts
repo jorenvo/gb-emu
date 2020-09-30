@@ -761,7 +761,7 @@ export class OpJR extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    cpu.PC += this.getRelativeOffset(memory);
+    cpu.PC += this.size() + this.getRelativeOffset(memory);
   }
 
   disassemble(memory: Memory) {
@@ -798,7 +798,7 @@ export class OpJRC extends Instruction {
     }
 
     if (condition) {
-      cpu.PC += this.getRelativeOffset(memory);
+      cpu.PC += this.size() + this.getRelativeOffset(memory);
     }
   }
 
