@@ -8,6 +8,19 @@ function setBreakpoint(emu: Emulator) {
   emu.setBreakpoint(parseInt(val, 16));
 }
 
+function selectElementText(el: HTMLElement) {
+  const win = window;
+  var doc = win.document,
+    sel,
+    range;
+
+  sel = win.getSelection()!;
+  range = doc.createRange();
+  range.selectNodeContents(el);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
 function runEmulator(bytes: Uint8Array) {
   const emu = new Emulator(bytes);
 
@@ -24,6 +37,12 @@ function runEmulator(bytes: Uint8Array) {
     if (!emu.paused) {
       emu.run();
     }
+  });
+
+  const copy = document.getElementById("copy")!;
+  copy.addEventListener("click", () => {
+    selectElementText(document.getElementById("memory")!);
+    document.execCommand("copy");
   });
 
   emu.run();
