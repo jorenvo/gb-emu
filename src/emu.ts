@@ -129,8 +129,16 @@ export class Emulator {
       );
     }
 
+    const instruction = this.instructionMap.get(this.cpu.PC);
+    if (instruction === undefined) {
+      throw new Error(`PC ${this.cpu.PC} is not in instruction map.`);
+    }
+
     this.memoryPC = memoryDiv;
     this.memoryPC.style.color = color;
+
+    const execColor = Math.max(100, 255 - instruction.executions * 8);
+    this.memoryPC.style.backgroundColor = `rgb(${execColor}, 255, ${execColor})`;
 
     this.memoryPC.scrollIntoView();
 
@@ -175,7 +183,7 @@ export class Emulator {
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
     if (!this.paused) {
-      window.setTimeout(() => this.run(), 100);
+      window.setTimeout(() => this.run(), 25);
     }
   }
 }

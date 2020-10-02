@@ -4,9 +4,11 @@ import * as utils from "./utils.js";
 
 export abstract class Instruction {
   protected address: number;
+  executions: number;
 
   constructor(address: number) {
     this.address = address;
+    this.executions = 0;
   }
 
   getStringForR8(n: number) {
@@ -56,6 +58,8 @@ export abstract class Instruction {
     if (originalPC === cpu.PC) {
       cpu.PC += this.size();
     }
+
+    this.executions++;
   }
 
   getAddress() {
