@@ -889,9 +889,10 @@ export class OpCall extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    memory.setByte(--cpu.SP, cpu.PC >> 8);
-    memory.setByte(--cpu.SP, cpu.PC & 0xff);
-    console.log(`Should return to ${cpu.PC}`);
+    const nextPC = cpu.PC + this.size();
+    memory.setByte(--cpu.SP, nextPC >> 8);
+    memory.setByte(--cpu.SP, nextPC & 0xff);
+    console.log(`Should return to ${nextPC}`);
     cpu.PC = this.getNext16Bits(memory);
   }
 
