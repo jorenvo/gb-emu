@@ -1065,18 +1065,30 @@ export class OpCPR8 extends OpCP {
     return 1;
   }
 
+  private isHL(memory: Memory) {
+    return this.getByte(memory) === 0xbe;
+  }
+
   private getReg(memory: Memory) {
     return this.getByte(memory) & 0b111;
   }
 
   protected getToCompare(cpu: CPU, memory: Memory): number {
-    const reg = this.getReg(memory);
-    return cpu.regs[reg];
+    if (this.isHL(memory)) {
+      return memory.getByte(cpu.getHL());
+    } else {
+      const reg = this.getReg(memory);
+      return cpu.regs[reg];
+    }
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getReg(memory);
-    return `CP ${this.getStringForR8(reg)}`;
+    if (this.isHL(memory)) {
+      return "CP (HL)";
+    } else {
+      const reg = this.getReg(memory);
+      return `CP ${this.getStringForR8(reg)}`;
+    }
   }
 }
 
