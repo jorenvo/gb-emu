@@ -1092,7 +1092,7 @@ export class OpLdAToA16 extends Instruction {
 
   disassemble(memory: Memory) {
     const addr = this.getNext16Bits(memory);
-    return `LD $${utils.hexString(addr, 16)}, A`;
+    return `LD ($${utils.hexString(addr, 16)}), A`;
   }
 }
 
