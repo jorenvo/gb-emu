@@ -448,7 +448,7 @@ export abstract class OpDecInc16 extends Instruction {
 
   do(cpu: CPU, memory: Memory, inc: boolean) {
     // TODO: SP will be 0x3, check if that works
-    const register = this.getByte(memory) * 2;
+    const register = (this.getByte(memory) >> 4) * 2;
     const high = cpu.regs[register];
     const low = cpu.regs[register + 1];
 
@@ -463,6 +463,7 @@ export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory) {
     if (this.getByte(memory) === 0x33) {
       ++cpu.SP;
+      // TODO set flags
     } else {
       super.do(cpu, memory, true);
     }
