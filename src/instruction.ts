@@ -1023,7 +1023,11 @@ export class OpBit extends Instruction {
       // (HL)
       throw new Error("Unimplemented BIT instruction");
     } else {
-      return utils.getBits(cpu.regs[register], bit, bit);
+      const res = utils.getBits(cpu.regs[register], bit, bit);
+      cpu.setSubtractFlag(0);
+      cpu.setHalfCarryFlagDirect(1);
+      cpu.setZeroFlag(res === 0 ? 1 : 0);
+      return res;
     }
   }
 
