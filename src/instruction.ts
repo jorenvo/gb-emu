@@ -1125,7 +1125,7 @@ export class OpLdhA8toA extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     const addr = this._getAddr(memory);
-    cpu.regs[CPU.A] = memory.getByte(addr);
+    cpu.regs[CPU.A] = memory.getByte(0xff00 | addr);
   }
 
   disassemble(memory: Memory) {
