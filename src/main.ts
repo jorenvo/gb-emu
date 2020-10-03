@@ -36,13 +36,13 @@ function runEmulator(bytes: Uint8Array) {
   breakpoint.addEventListener("change", () => setBreakpoint(emu));
 
   const next = document.getElementById("next")!;
-  next.addEventListener("click", () => emu.run());
+  next.addEventListener("click", () => emu.run(true));
 
   const pause = document.getElementById("pause")!;
   pause.addEventListener("click", () => {
     emu.paused = !emu.paused;
     if (!emu.paused) {
-      emu.run();
+      emu.run(true);
     }
   });
 
@@ -52,7 +52,7 @@ function runEmulator(bytes: Uint8Array) {
     document.execCommand("copy");
   });
 
-  emu.run();
+  emu.run(true);
 }
 
 const loader = new Loader();
