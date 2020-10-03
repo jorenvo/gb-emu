@@ -120,5 +120,22 @@ describe("bit extractions", function () {
 
     memory = getMemory(0x4e);
     assert.equal(opBit.disassemble(memory), "BIT 1, (HL)");
+
+    // BIT 7, H
+    memory = getMemory(0x7c);
+    const cpu = new CPU(new Map());
+    cpu.setHL(0x8000);
+    assert.equal(cpu.regs[CPU.H], 0x80);
+    assert.equal(cpu.regs[CPU.L], 0x00);
+
+    assert.equal(cpu.getZeroFlag(), 0);
+    opBit.execAndIncrementPC(cpu, memory);
+    assert.equal(cpu.getZeroFlag(), 0);
+
+    cpu.setHL(0x8000 - 1);
+    assert.equal(cpu.regs[CPU.H], 0x7f);
+    assert.equal(cpu.regs[CPU.L], 0xff);
+    opBit.execAndIncrementPC(cpu, memory);
+    assert.equal(cpu.getZeroFlag(), 1);
   })
 });

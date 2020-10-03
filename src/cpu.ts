@@ -62,7 +62,7 @@ export class CPU {
   }
 
   getZeroFlag(): number {
-    return (this.regs[CPU.F] & 0b0111_1111) >> 8;
+    return this.regs[CPU.F] >> 7;
   }
 
   setSubtractFlag(subFlag: number) {
