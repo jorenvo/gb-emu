@@ -2,6 +2,12 @@ import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
 import { BOOTROM } from "./roms.js";
 
+declare global {
+  interface Window {
+    emu: any;
+  }
+}
+
 function setBreakpoint(emu: Emulator) {
   const breakpoint = document.getElementById("breakpoint")!;
   const val = (breakpoint as HTMLInputElement).value;
@@ -23,6 +29,7 @@ function selectElementText(el: HTMLElement) {
 
 function runEmulator(bytes: Uint8Array) {
   const emu = new Emulator(bytes);
+  window.emu = emu;
 
   setBreakpoint(emu);
   const breakpoint = document.getElementById("breakpoint")!;
