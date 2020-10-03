@@ -19,6 +19,8 @@ export class CPU {
   regs: Uint8Array;
   instructions: Map<number, Instruction>;
 
+  tickCounter: number;
+
   constructor(instructions: Map<number, Instruction>) {
     this.SP = 0xfffe;
     this.PC = 0;
@@ -29,6 +31,7 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this.regs = new Uint8Array(new Array(8));
     this.instructions = instructions;
+    this.tickCounter = 0;
   }
 
   getCombinedRegister(r1: number, r2: number): number {
@@ -130,6 +133,7 @@ export class CPU {
     }
 
     currentInstruction.execAndIncrementPC(this, memory);
+    this.tickCounter++;
     return true;
   }
 }

@@ -172,7 +172,7 @@ export class Emulator {
     this.updateStack();
   }
 
-  run(render: boolean) {
+  run() {
     if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
       this.paused = true;
     }
@@ -183,12 +183,10 @@ export class Emulator {
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
     if (!this.paused) {
-      if (render) {
-        for (let i = 0; i < 100; i++) {
-          this.run(false);
-        }
-
-        window.setTimeout(() => this.run(true), 1);
+      if (this.cpu.tickCounter % 100 === 0) {
+        window.setTimeout(() => this.run(), 1);
+      } else {
+        this.run();
       }
     }
   }
