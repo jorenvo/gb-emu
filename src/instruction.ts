@@ -787,16 +787,16 @@ export class OpJRC extends Instruction {
     let condition = false;
     switch (this.getByte(memory)) {
       case 0x20:
-        condition = cpu.getZeroFlag() !== 0;
-        break;
-      case 0x30:
-        condition = cpu.getCarryFlag() !== 0;
-        break;
-      case 0x28:
         condition = cpu.getZeroFlag() === 0;
         break;
-      case 0x38:
+      case 0x30:
         condition = cpu.getCarryFlag() === 0;
+        break;
+      case 0x28:
+        condition = cpu.getZeroFlag() !== 0;
+        break;
+      case 0x38:
+        condition = cpu.getCarryFlag() !== 0;
         break;
       default:
         utils.log(this.getByte(memory), "JRC condition not implement");
