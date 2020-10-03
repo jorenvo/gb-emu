@@ -137,5 +137,5 @@ describe("bit extractions", function () {
     assert.equal(cpu.regs[CPU.L], 0xff);
     opBit.execAndIncrementPC(cpu, memory);
     assert.equal(cpu.getZeroFlag(), 1);
-  })
+  });
 });
