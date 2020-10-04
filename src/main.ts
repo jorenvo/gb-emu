@@ -4,7 +4,7 @@ import { BOOTROM } from "./roms.js";
 
 declare global {
   interface Window {
-    emu: any;
+    emu: Emulator;
   }
 }
 
