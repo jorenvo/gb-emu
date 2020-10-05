@@ -313,8 +313,28 @@ export class OpLdA16ToA extends Instruction {
     return 1;
   }
 
+  private getSourceReg(memory: Memory) {
+    let src = 0;
+    switch (this.getByte(memory)) {
+      case 0x0a:
+        src = 0;
+        break;
+      case 0x1a:
+        src = 2;
+        break;
+      case 0x2a:
+      case 0x3a:
+        src = 4;
+        break;
+      default:
+        utils.log(this.getByte(memory), "unknown OpLdA16ToA");
+    }
+
+    return src;
+  }
+
   exec(cpu: CPU, memory: Memory) {
-    const register = this.getByte(memory) * 2;
+    const register = this.getSourceReg(memory);
     const aHigh = cpu.regs[register];
     const aLow = cpu.regs[register + 1];
     let addr = (aHigh << 8) | aLow;
