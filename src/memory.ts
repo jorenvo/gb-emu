@@ -1,3 +1,7 @@
+/*
+ * 0x8000-0x8fff: sprite pattern table
+ * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
+ */
 export class Memory {
   bytes: Uint8Array;
 
@@ -19,5 +23,29 @@ export class Memory {
 
   setByte(address: number, value: number) {
     this.bytes[address] = value;
+  }
+
+  getSCY() {
+    return this.bytes[0xff42];
+  }
+
+  getSCX() {
+    return this.bytes[0xff43];
+  }
+
+  getLY() {
+    return this.bytes[0xff44];
+  }
+
+  getLYC() {
+    return this.bytes[0xff45];
+  }
+
+  getWY() {
+    return this.bytes[0xff4a];
+  }
+
+  getWX() {
+    return this.bytes[0xff4b];
   }
 }

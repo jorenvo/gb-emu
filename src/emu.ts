@@ -80,6 +80,17 @@ export class Emulator {
     document.getElementById("regs")!.innerText = s;
   }
 
+  private updateMemRegs() {
+    let s = `LCDC: ${utils.binString(this.memory.getByte(0xff40))}  `;
+    s += `SCY: ${utils.hexString(this.memory.getSCY())}  `;
+    s += `SCX: ${utils.hexString(this.memory.getSCX())}  `;
+    s += `LY: ${utils.hexString(this.memory.getLY())}  `;
+    s += `LYC: ${utils.hexString(this.memory.getLYC())}  `;
+    s += `WY: ${utils.hexString(this.memory.getWY())}  `;
+    s += `WX: ${utils.hexString(this.memory.getWX())}  `;
+    document.getElementById("memRegs")!.innerText = s;
+  }
+
   private createMemoryDiv(addr: number) {
     const byte = this.memory.getByte(addr);
     const newDiv = document.createElement("div");
@@ -168,6 +179,7 @@ export class Emulator {
 
   private updateUI() {
     this.updateRegs();
+    this.updateMemRegs();
     this.updateMemory();
     this.updateStack();
   }
