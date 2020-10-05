@@ -248,7 +248,7 @@ export class OpLdR8ToA16 extends Instruction {
     const high = cpu.regs[destRegister];
     const low = cpu.regs[destRegister + 1];
     let addr = (high << 8) | low;
-    memory.setByte(addr, cpu.regs[memory.getByte(this.address & 0b1111)]);
+    memory.setByte(addr, cpu.regs[this.address & 0b1111]);
 
     switch (this.getByte(memory)) {
       case 0x22:
