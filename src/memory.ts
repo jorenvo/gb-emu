@@ -2,6 +2,7 @@ import * as utils from "./utils.js";
 
 /*
  * 0x8000-0x8fff: sprite pattern table
+ * 0x8000-0x97ff: ??? VRAM tile data
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
@@ -28,9 +29,14 @@ export class Memory {
       case 0xff46:
         const sourceStart = value * 0x100;
         utils.log(
-          address,
+          value,
           `starting DMA transfer of ${sourceStart}-${sourceStart + 0x9f}`
         );
+    }
+
+    if (address >= 0x8000 && address <= 0x97ff) {
+      console.log(value);
+      utils.log(value, `writing to VRAM @${utils.hexString(address, 16)}`);
     }
 
     this.bytes[address] = value;
