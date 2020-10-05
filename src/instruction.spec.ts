@@ -46,6 +46,29 @@ describe("OpLdD8ToR8", function () {
   });
 });
 
+describe("OpLdR8ToA16", function () {
+  it("should correctly disassemble", function () {
+    const ld = new instruction.OpLdR8ToA16(0x00);
+    const memory = new Memory(new Uint8Array([0x22]));
+    assert.equal("LD (HL+), A", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x02]);
+    assert.equal("LD (BC), A", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x70]);
+    assert.equal("LD (HL), B", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x74]);
+    assert.equal("LD (HL), H", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x75]);
+    assert.equal("LD (HL), L", ld.disassemble(memory));
+
+    memory.bytes = new Uint8Array([0x77]);
+    assert.equal("LD (HL), A", ld.disassemble(memory));
+  });
+});
+
 describe("rotations", function () {
   it("should correctly rotate left", function () {
     const memory = new Memory(new Uint8Array());
