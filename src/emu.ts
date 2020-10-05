@@ -88,6 +88,7 @@ export class Emulator {
     s += `LYC: ${utils.hexString(this.memory.getLYC())}  `;
     s += `WY: ${utils.hexString(this.memory.getWY())}  `;
     s += `WX: ${utils.hexString(this.memory.getWX())}  `;
+
     document.getElementById("memRegs")!.innerText = s;
   }
 
