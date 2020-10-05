@@ -899,7 +899,6 @@ export class OpCall extends Instruction {
     const nextPC = cpu.PC + this.size();
     memory.setByte(--cpu.SP, nextPC >> 8);
     memory.setByte(--cpu.SP, nextPC & 0xff);
-    console.log(`Should return to ${nextPC}`);
     cpu.PC = this.getNext16Bits(memory);
   }
 
@@ -931,7 +930,6 @@ export class OpRet extends Instruction {
     const low = memory.getByte(cpu.SP++);
     const high = memory.getByte(cpu.SP++);
     cpu.PC = (high << 8) | low;
-    console.log(`Returning to ${cpu.PC} (${high} ${low})`);
   }
 
   disassemble(_memory: Memory) {
