@@ -224,6 +224,15 @@ export class OpLdR8ToA16 extends Instruction {
     return 1;
   }
 
+  private getSourceReg(memory: Memory) {
+    const byte = this.getByte(memory);
+    let src = CPU.A;
+    if (byte >> 4 === 7) {
+      src = byte & 0b1111;
+    }
+    return src;
+  }
+
   exec(cpu: CPU, memory: Memory) {
     let destRegister = 0;
     switch (this.getByte(memory)) {
@@ -248,7 +257,8 @@ export class OpLdR8ToA16 extends Instruction {
     const high = cpu.regs[destRegister];
     const low = cpu.regs[destRegister + 1];
     let addr = (high << 8) | low;
-    memory.setByte(addr, cpu.regs[this.address & 0b1111]);
+
+    memory.setByte(addr, cpu.regs[this.getSourceReg(memory)]);
 
     switch (this.getByte(memory)) {
       case 0x22:
@@ -292,11 +302,7 @@ export class OpLdR8ToA16 extends Instruction {
         );
     }
 
-    let src = "A";
-    if (byte >> 4 === 7) {
-      const reg = byte & 0b1111;
-      src = this.getStringForR8(reg);
-    }
+    const src = this.getStringForR8(this.getSourceReg(memory));
 
     return `LD (${dest}), ${src}`;
   }
