@@ -225,13 +225,13 @@ export class OpLdR8ToA16 extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory) {
-    let register = 0;
+    let destRegister = 0;
     switch (this.getByte(memory)) {
       case 0x02:
-        register = 0;
+        destRegister = 0;
         break;
       case 0x12:
-        register = 2;
+        destRegister = 2;
         break;
       case 0x22:
       case 0x32:
@@ -242,11 +242,11 @@ export class OpLdR8ToA16 extends Instruction {
       case 0x74:
       case 0x75:
       case 0x77:
-        register = 4;
+        destRegister = 4;
         break;
     }
-    const high = cpu.regs[register];
-    const low = cpu.regs[register + 1];
+    const high = cpu.regs[destRegister];
+    const low = cpu.regs[destRegister + 1];
     let addr = (high << 8) | low;
     memory.setByte(addr, cpu.regs[memory.getByte(this.address & 0b1111)]);
 
