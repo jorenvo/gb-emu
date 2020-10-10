@@ -22,3 +22,8 @@
     max-height: 400px;
     overflow-y: scroll;
 }
+
+#video {
+    width: 160px;
+    height: 144px;
+}
