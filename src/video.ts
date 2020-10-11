@@ -7,13 +7,13 @@ export class Video {
   private ctx: CanvasRenderingContext2D;
   private colorMap: number[][];
 
-  constructor(memory: Memory) {
+  constructor(memory: Memory, canvas: HTMLCanvasElement) {
     this.memory = memory;
 
-    this.canvas = document.getElementById("video")! as HTMLCanvasElement;
+    this.canvas = canvas;
     this.canvas.width = 160;
     this.canvas.height = 144;
-    
+
     this.ctx = this.canvas.getContext("2d")!;
 
     this.colorMap = [
@@ -22,6 +22,10 @@ export class Video {
       [85, 85, 85, 255], // 0b10
       [0, 0, 0, 255], // 0b11
     ];
+  }
+
+  getColorMap() {
+    return this.colorMap;
   }
 
   private getTile(address: number) {
@@ -33,12 +37,7 @@ export class Video {
     return 0x8000 + address * 16;
   }
 
-  private renderTile(
-    image: ImageData,
-    tileStart: number,
-    x: number,
-    y: number
-  ) {
+  renderTile(image: ImageData, tileStart: number, x: number, y: number) {
     // for (let row = 0; row < 8; row++) {
     //   for (let col = 0; col < 8; col++) {
     //     const currentX = x + col;
@@ -52,26 +51,35 @@ export class Video {
     //   }
     // }
     // return;
-    
-    for (let row = 0; row < 8; row += 2) {
-      // lsb is first
-      const lsb = this.memory.getByte(tileStart + row);
-      const msb = this.memory.getByte(tileStart + row + 1);
 
+    for (let byte = 0; byte < 8; byte += 2) {
+      // lsb is first
+      const lsb = this.memory.getByte(tileStart + byte);
+      const msb = this.memory.getByte(tileStart + byte + 1);
+
+      // console.log(
+      //   `${utils.hexString(lsb)} @${tileStart + byte}, ${utils.hexString(
+      //     msb
+      //   )} @${tileStart + byte + 1}`
+      // );
+      let colors = "";
       for (let bit = 7; bit >= 0; bit--) {
         let colorGB =
           (utils.getBits(msb, bit, bit) << 1) | utils.getBits(lsb, bit, bit);
 
         let color = this.colorMap[colorGB];
+        colors += ` ${colorGB} @(`;
 
         const colorCoordX = x + Math.abs(bit - 7);
-        const colorCoordY = y + row;
+        const colorCoordY = y + byte / 2;
+        colors += `${colorCoordX}, ${colorCoordY})`;
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
         for (let i = 0; i < 4; i++) {
           image.data[dataOffset + i] = color[i];
         }
       }
+      // console.log(colors);
     }
   }
 

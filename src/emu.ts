@@ -24,7 +24,10 @@ export class Emulator {
     this.instructionMap = this.addressToInstruction(instructions);
     this.cpu = new CPU(this.instructionMap);
     this.memory = new Memory(bytes);
-    this.video = new Video(this.memory);
+    this.video = new Video(
+      this.memory,
+      document.getElementById("video")! as HTMLCanvasElement
+    );
     this.paused = false;
     this.addrToMemoryDiv = this.renderMemory();
   }
