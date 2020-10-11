@@ -1,6 +1,7 @@
 import * as utils from "./utils.js";
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
+import { Video } from "./video.js";
 import { Instruction } from "./instruction.js";
 import { Disassembler } from "./disassembler.js";
 
@@ -8,6 +9,7 @@ export class Emulator {
   private instructionMap: Map<number, Instruction>;
   private cpu: CPU;
   private memory: Memory;
+  private video: Video;
 
   // ui related
   private addrToMemoryDiv: Map<number, HTMLDivElement>;
@@ -22,6 +24,7 @@ export class Emulator {
     this.instructionMap = this.addressToInstruction(instructions);
     this.cpu = new CPU(this.instructionMap);
     this.memory = new Memory(bytes);
+    this.video = new Video(this.memory);
     this.paused = false;
     this.addrToMemoryDiv = this.renderMemory();
   }
@@ -81,7 +84,7 @@ export class Emulator {
   }
 
   private updateMemRegs() {
-    let s = `LCDC: ${utils.binString(this.memory.getByte(0xff40))}  `;
+    let s = `LCDC: ${utils.binString(this.memory.getLCDC())}  `;
     s += `SCY: ${utils.hexString(this.memory.getSCY())}  `;
     s += `SCX: ${utils.hexString(this.memory.getSCX())}  `;
     s += `LY: ${utils.hexString(this.memory.getLY())}  `;
@@ -185,6 +188,17 @@ export class Emulator {
     this.updateStack();
   }
 
+  private tick() {
+    if (!this.cpu.tick(this.memory)) return false;
+
+    // LCD enable
+    if (utils.getBits(this.memory.getLCDC(), 7, 7)) {
+      this.video.render();
+    }
+
+    return true;
+  }
+
   run() {
     if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
       this.paused = true;
@@ -192,11 +206,11 @@ export class Emulator {
 
     this.updateUI();
 
-    if (!this.cpu.tick(this.memory)) return;
+    if (!this.tick()) return;
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
     if (!this.paused) {
-      if (this.cpu.tickCounter % 100 === 0) {
+      if (this.cpu.tickCounter % 400 === 0) {
         window.setTimeout(() => this.run(), 1);
       } else {
         this.run();

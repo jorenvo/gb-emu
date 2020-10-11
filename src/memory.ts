@@ -84,10 +84,7 @@ export class Memory {
         );
     }
 
-    if (address >= 0x8000 && address <= 0x97ff) {
-      console.log(value);
-      utils.log(value, `writing to VRAM @${utils.hexString(address, 16)}`);
-    }
+    if (value === undefined) debugger;
 
     this.bytes[address] = value;
   }
@@ -114,5 +111,9 @@ export class Memory {
 
   getWX() {
     return this.bytes[0xff4b];
+  }
+
+  getLCDC() {
+    return this.bytes[0xff40];
   }
 }
