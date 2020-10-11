@@ -45,6 +45,10 @@ describe("Video subsystem", function () {
     expectedColorsTile[65] = colorMap[1];
     expectedColorsTile[66] = colorMap[2];
 
+    expectedColorsTile[72] = colorMap[0];
+    expectedColorsTile[73] = colorMap[2];
+    expectedColorsTile[74] = colorMap[1];
+
     video.renderTile(image, 0, 0, 0);
     video.renderTile(image, 16, 0, 8);
 
