@@ -32,7 +32,7 @@ describe("Video subsystem", function () {
       0xff, 0xff, 0xff, 0xff, // tile 4 row 1 & 2
       0xff, 0xff, 0xff, 0xff, // tile 4 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 4 row 5 & 6
-      0xff, 0xff, 0xff, 0xff, // tile 4 row 7 & 8
+      0xff, 0xff, 0x5f, 0x3f, // tile 4 row 7 & 8
     ]));
 
     const { document } = new JSDOM("<canvas>").window;
@@ -76,6 +76,11 @@ describe("Video subsystem", function () {
     expectedColorsTile[144] = colorMap[0];
     expectedColorsTile[145] = colorMap[2];
     expectedColorsTile[146] = colorMap[1];
+
+    // tile 4 last row
+    expectedColorsTile[248] = colorMap[0];
+    expectedColorsTile[249] = colorMap[1];
+    expectedColorsTile[250] = colorMap[2];
 
     video.renderTile(image, 0, 0, 0);
     video.renderTile(image, 16, 0, 8);
