@@ -52,7 +52,7 @@ export class Video {
     // }
     // return;
 
-    for (let byte = 0; byte < 8; byte += 2) {
+    for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
       const msb = this.memory.getByte(tileStart + byte + 1);
