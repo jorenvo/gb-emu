@@ -11,8 +11,8 @@ export class Video {
     this.memory = memory;
 
     this.canvas = canvas;
-    this.canvas.width = 160;
-    this.canvas.height = 144;
+    this.canvas.width = 256;
+    this.canvas.height = 256;
 
     this.ctx = this.canvas.getContext("2d")!;
 
@@ -101,7 +101,7 @@ export class Video {
   }
 
   render() {
-    const image = this.ctx.createImageData(160, 144);
+    const image = this.ctx.createImageData(256, 256);
     this.renderNormalBackground(image);
 
     if (utils.getBits(this.memory.getLCDC(), 5, 5)) {
