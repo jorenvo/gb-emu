@@ -21,7 +21,7 @@ describe("Video subsystem", function () {
       0xff, 0xff, 0xff, 0xff, // tile 1 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 1 row 5 & 6
       0xff, 0xff, 0xff, 0xff, // tile 1 row 7 & 8
-      0x5f, 0x3f, 0x3f, 0x5f, // tile 2 row 1 & 2
+      0x55, 0x33, 0x3f, 0x5f, // tile 2 row 1 & 2
       0xff, 0xff, 0xff, 0xff, // tile 2 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 2 row 5 & 6
       0xff, 0xff, 0xff, 0xff, // tile 2 row 7 & 8
@@ -56,6 +56,9 @@ describe("Video subsystem", function () {
     expectedColorsTile[8] = colorMap[0];
     expectedColorsTile[9] = colorMap[1];
     expectedColorsTile[10] = colorMap[2];
+    expectedColorsTile[12] = colorMap[0];
+    expectedColorsTile[13] = colorMap[1];
+    expectedColorsTile[14] = colorMap[2];
 
     // tile 1 second row
     expectedColorsTile[16] = colorMap[0];
@@ -82,10 +85,10 @@ describe("Video subsystem", function () {
     expectedColorsTile[249] = colorMap[1];
     expectedColorsTile[250] = colorMap[2];
 
-    video.renderTile(image, 0, 0, 0);
-    video.renderTile(image, 16, 0, 8);
-    video.renderTile(image, 32, 8, 0);
-    video.renderTile(image, 48, 8, 8);
+    video.renderTile(image, 0, 0, 0); // tile 1
+    video.renderTile(image, 16, 8, 0); // tile 2
+    video.renderTile(image, 32, 0, 8); // tile 3
+    video.renderTile(image, 48, 8, 8); // tile 4
 
     let colorIndex = 0;
     let offset = 0;
