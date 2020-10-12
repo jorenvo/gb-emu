@@ -1037,7 +1037,7 @@ export class OpBit extends Instruction {
 
   private getBit(memory: Memory) {
     const byte = this.getNext8Bits(memory);
-    return utils.getBits(byte, 4, 5) * 2 + utils.getBits(byte, 3, 3);
+    return utils.getBits(byte, 4, 5) * 2 + utils.getBit(byte, 3);
   }
 
   exec(cpu: CPU, memory: Memory) {

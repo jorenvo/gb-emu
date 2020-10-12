@@ -195,7 +195,7 @@ export class Emulator {
     if (!this.cpu.tick(this.memory)) return false;
 
     // LCD enable
-    if (utils.getBits(this.memory.getLCDC(), 7, 7)) {
+    if (utils.getBit(this.memory.getLCDC(), 7)) {
       this.video.render();
     }
 
