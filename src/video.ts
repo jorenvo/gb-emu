@@ -93,9 +93,7 @@ export class Video {
     for (let row = 0; row < 32; row++) {
       for (let col = 0; col < 32; col++) {
         let tilePointer = this.memory.getByte(tileMapStart + row * 32 + col);
-        if (tilePointer !== 0) {
-          this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8);
-        }
+        this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8);
       }
     }
   }
