@@ -30,7 +30,7 @@ export class Video {
 
   private getTile(address: number) {
     const lcdc = this.memory.getLCDC();
-    if (utils.getBits(lcdc, 4, 4) === 0) {
+    if (utils.getBit(lcdc, 4) === 0) {
       throw new Error("No support for 0x8800-0x97ff tile addressing mode yet.");
     }
 
@@ -64,8 +64,7 @@ export class Video {
       // );
       let colors = "";
       for (let bit = 7; bit >= 0; bit--) {
-        let colorGB =
-          (utils.getBits(msb, bit, bit) << 1) | utils.getBits(lsb, bit, bit);
+        let colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
 
         let color = this.colorMap[colorGB];
         colors += ` ${colorGB} @(`;
@@ -86,7 +85,7 @@ export class Video {
   private renderNormalBackground(image: ImageData) {
     const lcdc = this.memory.getLCDC();
     let tileMapStart = 0x9800;
-    if (utils.getBits(lcdc, 3, 3)) {
+    if (utils.getBit(lcdc, 3)) {
       tileMapStart = 0x9c00;
     }
 
@@ -102,7 +101,7 @@ export class Video {
     const image = this.ctx.createImageData(256, 256);
     this.renderNormalBackground(image);
 
-    if (utils.getBits(this.memory.getLCDC(), 5, 5)) {
+    if (utils.getBit(this.memory.getLCDC(), 5)) {
       utils.log(this.memory.getLCDC(), "render window");
     }
 

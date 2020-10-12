@@ -38,6 +38,10 @@ export function getBits(byte: number, from: number, to: number): number {
   return (byte >> from) & mask;
 }
 
+export function getBit(byte: number, bit: number): number {
+  return getBits(byte, bit, bit);
+}
+
 export function twosComplementToNumber(x: number): number {
   const msb = x >> 7;
   if (msb === 1) {
