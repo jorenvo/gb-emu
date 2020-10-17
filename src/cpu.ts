@@ -14,16 +14,17 @@ export class CPU {
   static A = 7;
 
   SP: number;
-  PC: number;
+  private PCInternal: number;
 
   regs: Uint8Array;
   instructions: Map<number, Instruction>;
 
+  prevPCs: number[];
   tickCounter: number;
 
   constructor(instructions: Map<number, Instruction>) {
     this.SP = 0xfffe;
-    this.PC = 0;
+    this.PCInternal = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
     // D (0x2)          E (0x3)
@@ -31,6 +32,8 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this.regs = new Uint8Array(new Array(8));
     this.instructions = instructions;
+
+    this.prevPCs = [];
     this.tickCounter = 0;
   }
 
@@ -41,6 +44,19 @@ export class CPU {
   setCombinedRegister(r1: number, r2: number, val: number) {
     this.regs[r1] = val >> 8;
     this.regs[r2] = val & 0xff;
+  }
+
+  set PC(newPC: number) {
+    while (this.prevPCs.length > 8) {
+      this.prevPCs.shift();
+    }
+
+    this.prevPCs.push(this.PCInternal);
+    this.PCInternal = newPC;
+  }
+
+  get PC() {
+    return this.PCInternal;
   }
 
   // Fake 16 bit registers

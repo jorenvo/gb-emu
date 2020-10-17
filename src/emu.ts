@@ -98,6 +98,11 @@ export class Emulator {
     document.getElementById("memRegs")!.innerText = s;
   }
 
+  private updatePrevPCs() {
+    let s = this.cpu.prevPCs.map((PC) => utils.hexString(PC, 16)).join(" ");
+    document.getElementById("prevPCs")!.innerText = "Prev PCs: " + s;
+  }
+
   private createMemoryDiv(addr: number) {
     const byte = this.memory.getByte(addr);
     const newDiv = document.createElement("div");
@@ -187,6 +192,7 @@ export class Emulator {
   private updateUI() {
     this.updateRegs();
     this.updateMemRegs();
+    this.updatePrevPCs();
     this.updateMemory();
     this.updateStack();
   }
