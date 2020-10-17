@@ -730,7 +730,7 @@ export class OpRRA extends Instruction {
   exec(cpu: CPU, _memory: Memory) {
     const lsb = cpu.regs[CPU.A] & 1;
     cpu.regs[CPU.A] >>= 1;
-    cpu.regs[CPU.A] |= lsb << 7;
+    cpu.regs[CPU.A] |= cpu.getCarryFlag() << 7;
     cpu.setCarryFlagDirect(lsb);
 
     cpu.setHalfCarryFlagAdd(0, 0);
