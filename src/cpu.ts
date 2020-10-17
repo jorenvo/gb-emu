@@ -124,6 +124,19 @@ export class CPU {
     return (this.regs[CPU.F] & 0b0001_0000) > 0 ? 1 : 0;
   }
 
+  rotateLeft(n: number): number {
+    const msb = n >> 7;
+    n <<= 1;
+    n |= this.getCarryFlag();
+
+    this.setCarryFlagDirect(msb);
+    this.setHalfCarryFlagAdd(0, 0);
+    this.setSubtractFlag(0);
+    this.setZeroFlag(0);
+
+    return n;
+  }
+
   tick(memory: Memory) {
     const currentInstruction = this.instructions.get(this.PC);
     if (currentInstruction === undefined) {

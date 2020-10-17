@@ -674,18 +674,7 @@ export class OpRLA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory) {
-    let regValue = cpu.regs[CPU.A];
-    const eightBit = regValue >> 7;
-
-    regValue <<= 1;
-    regValue |= cpu.getCarryFlag();
-    cpu.setCarryFlagDirect(eightBit);
-
-    cpu.regs[CPU.A] = regValue;
-
-    cpu.setHalfCarryFlagAdd(0, 0);
-    cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(0);
+    cpu.regs[CPU.A] = cpu.rotateLeft(cpu.regs[CPU.A]);
   }
 
   disassemble(_memory: Memory) {
@@ -704,19 +693,11 @@ export class OpRL extends Instruction {
 
   exec(cpu: CPU, memory: Memory) {
     const register = this._getReg(memory);
-    let value = 0;
     if (register === 6) {
-      value = cpu.rotateLeft(cpu.getHL());
-      cpu.setHL(value);
+      cpu.setHL(cpu.rotateLeft(cpu.getHL()));
     } else {
-      value = cpu.rotateLeft(cpu.regs[register]);
-      cpu.regs[register] = value;
+      cpu.regs[register] = cpu.rotateLeft(cpu.regs[register]);
     }
-
-    cpu.setCarryFlagDirect(value >> 7);
-    cpu.setHalfCarryFlagAdd(0, 0);
-    cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(value === 0 ? 1 : 0);
   }
 
   disassemble(memory: Memory) {
