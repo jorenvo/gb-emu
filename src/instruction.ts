@@ -650,15 +650,15 @@ export class OpRRCA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, _memory: Memory) {
     const lsb = cpu.regs[CPU.A] & 1;
     cpu.regs[CPU.A] >>= 1;
-    cpu.regs[CPU.A] |= cpu.getCarryFlag() << 7;
+    cpu.regs[CPU.A] |= lsb << 7;
     cpu.setCarryFlagDirect(lsb);
 
     cpu.setHalfCarryFlagAdd(0, 0);
     cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(0);
   }
 
   disassemble(_memory: Memory) {
