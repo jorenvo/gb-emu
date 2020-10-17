@@ -628,6 +628,15 @@ export class OpRLCA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory) {
+    let regValue = cpu.regs[CPU.A];
+    const eightBit = regValue >> 7;
+
+    regValue <<= 1;
+    regValue |= eightBit;
+
+    cpu.regs[CPU.A] = regValue;
+
+    cpu.setCarryFlagDirect(eightBit);
     cpu.setHalfCarryFlagAdd(0, 0);
     cpu.setSubtractFlag(0);
     cpu.setZeroFlag(0);
