@@ -124,20 +124,6 @@ export class CPU {
     return (this.regs[CPU.F] & 0b0001_0000) > 0 ? 1 : 0;
   }
 
-  rotateLeft(regValue: number): number {
-    const msb = regValue >> 7;
-    return (regValue << 1) | msb;
-  }
-
-  rotateLeftCarry(carry: number, regValue: number): [number, number] {
-    const eightBit = (regValue >> 7) & 1;
-    regValue <<= 1;
-    regValue &= 0b1111_1110;
-    regValue |= carry;
-
-    return [eightBit, regValue];
-  }
-
   tick(memory: Memory) {
     const currentInstruction = this.instructions.get(this.PC);
     if (currentInstruction === undefined) {

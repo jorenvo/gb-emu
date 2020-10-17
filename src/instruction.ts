@@ -627,17 +627,10 @@ export class OpRLCA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
-    const [carryBit, rotatedReg] = cpu.rotateLeftCarry(
-      cpu.getCarryFlag(),
-      cpu.regs[CPU.A]
-    );
-    cpu.regs[CPU.A] = rotatedReg;
-    cpu.setCarryFlagDirect(carryBit);
-
+  exec(cpu: CPU, _memory: Memory) {
     cpu.setHalfCarryFlagAdd(0, 0);
     cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(0);
   }
 
   disassemble(_memory: Memory) {
@@ -672,12 +665,18 @@ export class OpRLA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory) {
-    cpu.regs[CPU.A] = cpu.rotateLeft(cpu.regs[CPU.A]);
-    cpu.setCarryFlagDirect(cpu.regs[CPU.A] >> 7);
+    let regValue = cpu.regs[CPU.A];
+    const eightBit = regValue >> 7;
+
+    regValue <<= 1;
+    regValue |= cpu.getCarryFlag();
+    cpu.setCarryFlagDirect(eightBit);
+
+    cpu.regs[CPU.A] = regValue;
 
     cpu.setHalfCarryFlagAdd(0, 0);
     cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(0);
   }
 
   disassemble(_memory: Memory) {
