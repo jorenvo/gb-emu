@@ -38,47 +38,23 @@ export class Video {
   }
 
   renderTile(image: ImageData, tileStart: number, x: number, y: number) {
-    // for (let row = 0; row < 8; row++) {
-    //   for (let col = 0; col < 8; col++) {
-    //     const currentX = x + col;
-    //     const currentY = y + row;
-    //     const offset = (currentY * image.width + currentX) * 4;
-
-    //     image.data[offset + 0] = 128;
-    //     image.data[offset + 1] = 128;
-    //     image.data[offset + 2] = 128;
-    //     image.data[offset + 3] = 128;
-    //   }
-    // }
-    // return;
-
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
       const msb = this.memory.getByte(tileStart + byte + 1);
 
-      // console.log(
-      //   `${utils.hexString(lsb)} @${tileStart + byte}, ${utils.hexString(
-      //     msb
-      //   )} @${tileStart + byte + 1}`
-      // );
-      let colors = "";
       for (let bit = 7; bit >= 0; bit--) {
         let colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
 
         let color = this.colorMap[colorGB];
-        colors += ` ${colorGB} @(`;
-
         const colorCoordX = x + Math.abs(bit - 7);
         const colorCoordY = y + byte / 2;
-        colors += `${colorCoordX}, ${colorCoordY})`;
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
         for (let i = 0; i < 4; i++) {
           image.data[dataOffset + i] = color[i];
         }
       }
-      // console.log(colors);
     }
   }
 
