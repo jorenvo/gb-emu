@@ -214,8 +214,6 @@ export class Emulator {
       this.paused = true;
     }
 
-    // this.updateUI();
-
     const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
 
@@ -226,10 +224,14 @@ export class Emulator {
     while (startMs + elapsedMs < endMs) {
       elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
       this.video.handleLY(startMs + elapsedMs);
+      if (this.cpu.PC === 0x100) {
+        console.log("Should load cartridge rom now...")
+        this.updateUI();
+        return;
+      };
+
       ++i;
     }
-
-    if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
     this.renderVideo();
 
