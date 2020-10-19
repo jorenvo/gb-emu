@@ -12,9 +12,6 @@ export class Memory {
     this.bytes = new Uint8Array(0xffff);
     this.bytes.set(rom, 0);
 
-    // hacks
-    this.bytes[0xff44] = 0x90; // indicate screen frame is done
-
     // fake nintendo logo in cart
     this.bytes[0x104] = 0xce;
     this.bytes[0x105] = 0xed;
@@ -95,6 +92,10 @@ export class Memory {
 
   getSCX() {
     return this.bytes[0xff43];
+  }
+
+  setLY(x: number) {
+    this.bytes[0xff44] = x;
   }
 
   getLY() {

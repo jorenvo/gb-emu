@@ -15,6 +15,9 @@ export class Emulator {
   private addrToMemoryDiv: Map<number, HTMLDivElement>;
   private memoryPC: HTMLDivElement | undefined;
 
+  // run loop related
+  private runBudgetMs: number;
+
   // debugger related
   paused: boolean;
   breakpoint: number | undefined;
@@ -30,6 +33,8 @@ export class Emulator {
     );
     this.paused = false;
     this.addrToMemoryDiv = this.renderMemory();
+
+    this.runBudgetMs = (1 / 120) * 1_000;
   }
 
   setBreakpoint(addr: number) {
@@ -197,15 +202,11 @@ export class Emulator {
     this.updateStack();
   }
 
-  private tick() {
-    if (!this.cpu.tick(this.memory)) return false;
-
+  private renderVideo() {
     // LCD enable
     if (utils.getBit(this.memory.getLCDC(), 7)) {
       this.video.render();
     }
-
-    return true;
   }
 
   run() {
@@ -215,15 +216,24 @@ export class Emulator {
 
     this.updateUI();
 
-    if (!this.tick()) return;
+    let startMs = performance.now();
+    const endMs = startMs + this.runBudgetMs;
+    let elapsedMs = 0;
+
+    let i = 0;
+    while (startMs + elapsedMs < endMs) {
+      elapsedMs += this.cpu.tick(this.memory) / 4 / 1_000;
+      this.video.handleVBlank(startMs + elapsedMs);
+      ++i;
+    }
+
     if (this.cpu.PC === 0x100) console.log("Should load cartridge rom now");
 
+    this.renderVideo();
+
     if (!this.paused) {
-      if (this.cpu.tickCounter % 400 === 0) {
-        window.setTimeout(() => this.run(), 1);
-      } else {
-        this.run();
-      }
+      console.log(`${i} instructions in run, scheduling next one in ${endMs - performance.now()} ms`);
+      setTimeout(() => this.run(), endMs - performance.now());
     }
   }
 }

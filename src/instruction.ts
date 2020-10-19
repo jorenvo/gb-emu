@@ -51,15 +51,16 @@ export abstract class Instruction {
     }
   }
 
-  execAndIncrementPC(cpu: CPU, memory: Memory) {
+  execAndIncrementPC(cpu: CPU, memory: Memory): number {
     const originalPC = cpu.PC;
-    this.exec(cpu, memory);
+    const spentTStates = this.exec(cpu, memory);
 
     if (originalPC === cpu.PC) {
       cpu.PC += this.size();
     }
-
     this.executions++;
+
+    return spentTStates;
   }
 
   getAddress() {

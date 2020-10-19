@@ -7,6 +7,12 @@ export class Video {
   private ctx: CanvasRenderingContext2D;
   private colorMap: number[][];
 
+  private nextVBlankStartMs: number;
+  private nextVBlankStopMs: number | undefined;
+
+  private frameDurationMs: number;
+  private vBlankDurationMs: number;
+
   constructor(memory: Memory, canvas: HTMLCanvasElement) {
     this.memory = memory;
 
@@ -22,6 +28,24 @@ export class Video {
       [85, 85, 85, 255], // 0b10
       [0, 0, 0, 255], // 0b11
     ];
+
+    this.frameDurationMs = 1_000 / 59.73; // 59.73 Hz
+    this.vBlankDurationMs = 1.087; // 1087 us
+    this.nextVBlankStartMs = 0; // immediately start rendering
+  }
+
+  handleVBlank(timeMs: number) {
+    if (timeMs >= this.nextVBlankStartMs) {
+      this.nextVBlankStartMs = timeMs + this.frameDurationMs;
+      this.nextVBlankStopMs = timeMs + this.vBlankDurationMs;
+      this.memory.setLY(0x90);
+    } else if (
+      this.nextVBlankStopMs !== undefined &&
+      timeMs >= this.nextVBlankStopMs
+    ) {
+      this.nextVBlankStopMs = undefined;
+      this.memory.setLY(0x00);
+    }
   }
 
   getColorMap() {

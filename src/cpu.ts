@@ -140,15 +140,13 @@ export class CPU {
   tick(memory: Memory) {
     const currentInstruction = this.instructions.get(this.PC);
     if (currentInstruction === undefined) {
-      const hexSP = utils.hexString(this.SP, 16);
-      console.log(
-        `Trying to read outside of memory (SP: ${hexSP}), stopping CPU.`
+      const hexPC = utils.hexString(this.PC, 16);
+      throw new Error(
+        `Trying to read outside of memory (PC: ${hexPC}), stopping CPU.`
       );
-      return false;
     }
 
-    currentInstruction.execAndIncrementPC(this, memory);
     this.tickCounter++;
-    return true;
+    return currentInstruction.execAndIncrementPC(this, memory);
   }
 }
