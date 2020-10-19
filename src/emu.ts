@@ -214,7 +214,7 @@ export class Emulator {
       this.paused = true;
     }
 
-    this.updateUI();
+    // this.updateUI();
 
     let startMs = performance.now();
     const endMs = startMs + this.runBudgetMs;
@@ -222,8 +222,8 @@ export class Emulator {
 
     let i = 0;
     while (startMs + elapsedMs < endMs) {
-      elapsedMs += this.cpu.tick(this.memory) / 4 / 1_000;
-      this.video.handleVBlank(startMs + elapsedMs);
+      elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
+      this.video.handleLY(startMs + elapsedMs);
       ++i;
     }
 
@@ -232,7 +232,7 @@ export class Emulator {
     this.renderVideo();
 
     if (!this.paused) {
-      console.log(`${i} instructions in run, scheduling next one in ${endMs - performance.now()} ms`);
+      // console.log(`${i} instructions in run, scheduling next one in ${endMs - performance.now()} ms`);
       setTimeout(() => this.run(), endMs - performance.now());
     }
   }

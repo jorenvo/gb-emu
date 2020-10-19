@@ -68,6 +68,11 @@ export class Memory {
   }
 
   getByte(address: number): number {
+    // if (address === 0xff44) {
+    //   if (this.bytes[address] === 0)
+    //     console.log("Waiting for screen frame...");
+    // }
+
     return this.bytes[address];
   }
 

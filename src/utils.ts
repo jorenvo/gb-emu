@@ -65,3 +65,15 @@ export function wrapping8BitSub(a: number, b: number): number {
 export function wrapping8BitAdd(a: number, b: number): number {
   return (a + b) % 256;
 }
+
+const tCyclesPerSecond = 4_194_304;
+const tCyclesPerMillisecond = tCyclesPerSecond / 1_000;
+
+export function tCyclesToMs(tCycles: number): number {
+  return tCycles / tCyclesPerMillisecond;
+}
+
+// TODO: this isn't fully accurate
+export function mCyclesToMs(mCycles: number): number {
+  return tCyclesToMs(mCycles * 4);
+}

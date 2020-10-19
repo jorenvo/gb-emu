@@ -7,11 +7,12 @@ export class Video {
   private ctx: CanvasRenderingContext2D;
   private colorMap: number[][];
 
-  private nextVBlankStartMs: number;
+  private nextVLineStartMs: number;
   private nextVBlankStopMs: number | undefined;
 
-  private frameDurationMs: number;
-  private vBlankDurationMs: number;
+  // private frameDurationMs: number;
+  // private vBlankDurationMs: number;
+  private vLineRenderMs: number;
 
   constructor(memory: Memory, canvas: HTMLCanvasElement) {
     this.memory = memory;
@@ -29,22 +30,23 @@ export class Video {
       [0, 0, 0, 255], // 0b11
     ];
 
-    this.frameDurationMs = 1_000 / 59.73; // 59.73 Hz
-    this.vBlankDurationMs = 1.087; // 1087 us
-    this.nextVBlankStartMs = 0; // immediately start rendering
+    // this.frameDurationMs = 1_000 / 59.73; // 59.73 Hz
+    // this.vBlankDurationMs = 1.087; // 1087 us
+    this.nextVLineStartMs = 0; // immediately start rendering
+
+    this.vLineRenderMs = utils.mCyclesToMs(114);
   }
 
-  handleVBlank(timeMs: number) {
-    if (timeMs >= this.nextVBlankStartMs) {
-      this.nextVBlankStartMs = timeMs + this.frameDurationMs;
-      this.nextVBlankStopMs = timeMs + this.vBlankDurationMs;
-      this.memory.setLY(0x90);
-    } else if (
-      this.nextVBlankStopMs !== undefined &&
-      timeMs >= this.nextVBlankStopMs
-    ) {
-      this.nextVBlankStopMs = undefined;
-      this.memory.setLY(0x00);
+  handleLY(timeMs: number) {
+    if (timeMs >= this.nextVLineStartMs) {
+      let ly = this.memory.getLY();
+      if (ly > 153) {
+        this.memory.setLY(0);
+      } else {
+        this.memory.setLY(ly + 1);
+      }
+
+      this.nextVLineStartMs = timeMs + this.vLineRenderMs;
     }
   }
 
