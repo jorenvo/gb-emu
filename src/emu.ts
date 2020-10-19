@@ -216,9 +216,11 @@ export class Emulator {
 
     // this.updateUI();
 
-    let startMs = performance.now();
-    const endMs = startMs + this.runBudgetMs;
+    const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
+
+    this.updateUI();
+    const startMs = performance.now();
 
     let i = 0;
     while (startMs + elapsedMs < endMs) {
