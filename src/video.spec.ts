@@ -16,6 +16,7 @@ describe("Video subsystem", function () {
     // |  TILE 3  |  TILE 4  |
     // |          |          |
     // +----------+----------+
+    // prettier-ignore
     const memory = new Memory(new Uint8Array([
       0x5f, 0x3f, 0x3f, 0x5f, // tile 1 row 1 & 2
       0xff, 0xff, 0xff, 0xff, // tile 1 row 3 & 4

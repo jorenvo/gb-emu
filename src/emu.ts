@@ -225,10 +225,10 @@ export class Emulator {
       elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
       this.video.handleLY(startMs + elapsedMs);
       if (this.cpu.PC === 0x100) {
-        console.log("Should load cartridge rom now...")
+        console.log("Should load cartridge rom now...");
         this.updateUI();
         return;
-      };
+      }
 
       ++i;
     }

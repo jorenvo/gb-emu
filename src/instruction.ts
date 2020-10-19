@@ -1363,7 +1363,7 @@ export class OpAndR8 extends Instruction {
   private isHL(memory: Memory) {
     return this.getReg(memory) === 0x6;
   }
-  
+
   private getReg(memory: Memory) {
     const opcode = this.getByte(memory);
     return opcode & 0xf;
