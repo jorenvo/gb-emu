@@ -34,7 +34,7 @@ export class Emulator {
     this.paused = false;
     this.addrToMemoryDiv = this.renderMemory();
 
-    this.runBudgetMs = (1 / 120) * 1_000;
+    this.runBudgetMs = (1 / 60) * 1_000;
   }
 
   setBreakpoint(addr: number) {
