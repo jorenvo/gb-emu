@@ -56,7 +56,12 @@ function runEmulator(bytes: Uint8Array) {
 }
 
 const loader = new Loader();
-loader.readFile.then(runEmulator);
+loader.readFile.then((rom) => {
+  const fullRom = new Uint8Array(BOOTROM.length + rom.length);
+  fullRom.set(BOOTROM, 0);
+  fullRom.set(rom, BOOTROM.length);
+  runEmulator(fullRom);
+});
 
 const bootromButton = document.getElementById("loadBootrom")!;
 bootromButton.addEventListener("click", () => runEmulator(BOOTROM));
