@@ -428,18 +428,18 @@ export class OpLdhA8 extends Instruction {
     return 2;
   }
 
-  _getAddr(memory: Memory) {
+  private getAddr(memory: Memory) {
     return this.getNext8Bits(memory);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const lowAddr = this._getAddr(memory);
+    const lowAddr = this.getAddr(memory);
     memory.setByte(0xff00 | lowAddr, cpu.regs[CPU.A]);
     return 12;
   }
 
   disassemble(memory: Memory) {
-    return `LDH ($0xff00+$${utils.hexString(this._getAddr(memory))}), A`;
+    return `LDH ($0xff00+$${utils.hexString(this.getAddr(memory))}), A`;
   }
 }
 
@@ -448,17 +448,17 @@ export class OpLdR8ToR8 extends Instruction {
     return 1;
   }
 
-  _getSrcReg(memory: Memory) {
+  private getSrcReg(memory: Memory) {
     return utils.getBits(this.getByte(memory), 0, 2);
   }
 
-  _getDestReg(memory: Memory) {
+  private getDestReg(memory: Memory) {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const srcReg = this._getSrcReg(memory);
-    const destReg = this._getDestReg(memory);
+    const srcReg = this.getSrcReg(memory);
+    const destReg = this.getDestReg(memory);
 
     if (srcReg === 6) {
       cpu.regs[destReg] = memory.getByte(cpu.getHL());
@@ -472,8 +472,8 @@ export class OpLdR8ToR8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const srcReg = this._getSrcReg(memory);
-    const destReg = this._getDestReg(memory);
+    const srcReg = this.getSrcReg(memory);
+    const destReg = this.getDestReg(memory);
 
     let src = this.getStringForR8(srcReg);
     let dest = this.getStringForR8(destReg);
@@ -540,7 +540,7 @@ export class OpInc8 extends Instruction {
     return 1;
   }
 
-  _getReg(memory: Memory) {
+  private getReg(memory: Memory) {
     const opcode = this.getByte(memory);
     switch (opcode) {
       case 0x04:
@@ -571,7 +571,7 @@ export class OpInc8 extends Instruction {
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
       tStates = 12;
     } else {
-      const register = this._getReg(memory);
+      const register = this.getReg(memory);
       cpu.setHalfCarryFlagAdd(cpu.regs[register], 1);
       cpu.regs[register] += 1;
       cpu.setZeroFlag(cpu.regs[register] === 0 ? 1 : 0);
@@ -587,7 +587,7 @@ export class OpInc8 extends Instruction {
     if (this.getByte(memory) === 0x34) {
       reg = "(HL)";
     } else {
-      reg = this.getStringForR8(this._getReg(memory));
+      reg = this.getStringForR8(this.getReg(memory));
     }
 
     return `INC ${reg}`;
@@ -599,7 +599,7 @@ export class OpDec8 extends Instruction {
     return 1;
   }
 
-  _getReg(memory: Memory) {
+  private getReg(memory: Memory) {
     const opcode = this.getByte(memory);
     switch (opcode) {
       case 0x05:
@@ -630,7 +630,7 @@ export class OpDec8 extends Instruction {
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
       tStates = 12;
     } else {
-      const register = this._getReg(memory);
+      const register = this.getReg(memory);
       cpu.setHalfCarryFlagAdd(cpu.regs[register], -1);
       cpu.regs[register] -= 1;
       cpu.setZeroFlag(cpu.regs[register] === 0 ? 1 : 0);
@@ -646,7 +646,7 @@ export class OpDec8 extends Instruction {
     if (this.getByte(memory) === 0x35) {
       reg = "(HL)";
     } else {
-      reg = this.getStringForR8(this._getReg(memory));
+      reg = this.getStringForR8(this.getReg(memory));
     }
 
     return `DEC ${reg}`;
@@ -723,12 +723,12 @@ export class OpRL extends Instruction {
     return 2;
   }
 
-  _getReg(memory: Memory) {
+  private getReg(memory: Memory) {
     return this.getNext8Bits(memory) & 0xf;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = this._getReg(memory);
+    const register = this.getReg(memory);
     if (register === 6) {
       cpu.setHL(cpu.rotateLeft(cpu.getHL()));
       return 16;
@@ -739,7 +739,7 @@ export class OpRL extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const reg = this._getReg(memory);
+    const reg = this.getReg(memory);
     let regString = "(HL)";
     if (reg !== 6) {
       regString = this.getStringForR8(reg);
@@ -776,12 +776,12 @@ export class OpAddR16ToHL extends Instruction {
     return 1;
   }
 
-  _getReg(memory: Memory) {
+  private getReg(memory: Memory) {
     return (this.getByte(memory) >> 4) * 2;
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const register = this._getReg(memory);
+    const register = this.getReg(memory);
     const r16 = cpu.getCombinedRegister(register, register + 1);
     let hl = cpu.getHL();
     cpu.setHalfCarryFlagAdd(r16, hl);
@@ -792,7 +792,7 @@ export class OpAddR16ToHL extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getStringForR16(this._getReg(memory));
+    const reg = this.getStringForR16(this.getReg(memory));
     return `ADD HL, ${reg}`;
   }
 }
@@ -1019,7 +1019,7 @@ export class OpPush extends Instruction {
     return 1;
   }
 
-  _getR16(memory: Memory) {
+  private getR16(memory: Memory) {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
@@ -1030,7 +1030,7 @@ export class OpPush extends Instruction {
       high = cpu.regs[CPU.A];
       low = cpu.regs[CPU.F];
     } else {
-      const register = this._getR16(memory);
+      const register = this.getR16(memory);
       high = cpu.regs[register];
       low = cpu.regs[register + 1];
     }
@@ -1042,7 +1042,7 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this._getR16(memory));
+    const r16 = this.getStringForR16(this.getR16(memory));
     return `PUSH ${r16}`;
   }
 }
@@ -1052,7 +1052,7 @@ export class OpPop extends Instruction {
     return 1;
   }
 
-  _getR16(memory: Memory) {
+  private getR16(memory: Memory) {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
@@ -1061,7 +1061,7 @@ export class OpPop extends Instruction {
       cpu.regs[CPU.F] = memory.getByte(cpu.SP++);
       cpu.regs[CPU.A] = memory.getByte(cpu.SP++);
     } else {
-      const register = this._getR16(memory);
+      const register = this.getR16(memory);
       cpu.regs[register + 1] = memory.getByte(cpu.SP++);
       cpu.regs[register] = memory.getByte(cpu.SP++);
     }
@@ -1070,7 +1070,7 @@ export class OpPop extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this._getR16(memory));
+    const r16 = this.getStringForR16(this.getR16(memory));
     return `POP ${r16}`;
   }
 }
@@ -1219,18 +1219,18 @@ export class OpLdhA8toA extends Instruction {
     return 2;
   }
 
-  _getAddr(memory: Memory) {
+  private getAddr(memory: Memory) {
     return this.getNext8Bits(memory);
   }
 
   exec(cpu: CPU, memory: Memory) {
-    const addr = this._getAddr(memory);
+    const addr = this.getAddr(memory);
     cpu.regs[CPU.A] = memory.getByte(0xff00 | addr);
     return 12;
   }
 
   disassemble(memory: Memory) {
-    const addr = this._getAddr(memory);
+    const addr = this.getAddr(memory);
     return `LDH A, ($0xff00+$${utils.hexString(addr)})`;
   }
 }
@@ -1348,13 +1348,13 @@ export class OpAddCarryD8 extends Instruction {
     return 2;
   }
 
-  _getToAdd(memory: Memory) {
+  private getToAdd(memory: Memory) {
     return this.getNext8Bits(memory);
   }
 
   exec(cpu: CPU, memory: Memory) {
     const toAdd = utils.wrapping8BitAdd(
-      this._getToAdd(memory),
+      this.getToAdd(memory),
       cpu.getCarryFlag()
     );
     cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
@@ -1366,7 +1366,7 @@ export class OpAddCarryD8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const toAdd = this._getToAdd(memory);
+    const toAdd = this.getToAdd(memory);
     return `ADC A, $${utils.hexString(toAdd)}`;
   }
 }
