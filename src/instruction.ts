@@ -892,6 +892,22 @@ export class OpJRC extends Instruction {
   }
 }
 
+export class OpJA16 extends Instruction {
+  size() {
+    return 3;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    cpu.PC = this.getNext16Bits(memory);
+    return 16;
+  }
+
+  disassemble(memory: Memory) {
+    const addr = this.getNext16Bits(memory);
+    return `JP ${utils.hexString(addr, 16)}`;
+  }
+}
+
 export class OpCPL extends Instruction {
   size() {
     return 1;
