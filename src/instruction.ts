@@ -908,6 +908,21 @@ export class OpJA16 extends Instruction {
   }
 }
 
+export class OpJHL extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory) {
+    cpu.PC = cpu.getHL();
+    return 4;
+  }
+
+  disassemble(_memory: Memory) {
+    return "JP HL";
+  }
+}
+
 export class OpCPL extends Instruction {
   size() {
     return 1;
