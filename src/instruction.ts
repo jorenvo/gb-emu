@@ -321,7 +321,7 @@ export class OpLdR8ToA16 extends Instruction {
   }
 }
 
-export class OpLdA16ToA extends Instruction {
+export class OpLdA16InRegToA extends Instruction {
   size() {
     return 1;
   }

@@ -340,7 +340,7 @@ export class Disassembler {
       case 0x0a:
       case 0x1a:
       case 0x2a:
-        return new instruction.OpLdA16ToA(address);
+        return new instruction.OpLdA16InRegToA(address);
       case 0x0b:
       case 0x1b:
       case 0x2b:
