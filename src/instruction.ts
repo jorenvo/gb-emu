@@ -907,6 +907,60 @@ export class OpJRC extends Instruction {
   }
 }
 
+export class OpJC extends Instruction {
+  size() {
+    return 3;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    let condition = false;
+    switch (this.getByte(memory)) {
+      case 0xc2:
+        condition = cpu.getZeroFlag() === 0;
+        break;
+      case 0xd2:
+        condition = cpu.getCarryFlag() === 0;
+        break;
+      case 0xca:
+        condition = cpu.getZeroFlag() !== 0;
+        break;
+      case 0xda:
+        condition = cpu.getCarryFlag() !== 0;
+        break;
+    }
+
+    if (condition) {
+      cpu.PC = this.getNext16Bits(memory);
+      return 16;
+    } else {
+      return 12;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    const addr = this.getNext16Bits(memory);
+    let condition = "";
+    switch (this.getByte(memory)) {
+      case 0xc2:
+        condition = "NZ";
+        break;
+      case 0xd2:
+        condition = "NC";
+        break;
+      case 0xca:
+        condition = "Z";
+        break;
+      case 0xda:
+        condition = "C";
+        break;
+      default:
+        throw new Error("Unknown conditional jump");
+    }
+
+    return `JP ${condition}, ${utils.hexString(addr, 16)}`;
+  }
+}
+
 export class OpJA16 extends Instruction {
   size() {
     return 3;

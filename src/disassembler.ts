@@ -533,8 +533,7 @@ export class Disassembler {
       case 0xf1:
         return new instruction.OpPop(address);
       case 0xc2:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpJC(address);
       case 0xc3:
         return new instruction.OpJA16(address);
       case 0xc4:
@@ -555,8 +554,7 @@ export class Disassembler {
       case 0xd9:
         return new instruction.OpRet(address);
       case 0xca:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpJC(address);
       case 0xcb:
         return this.buildPrefixedInstruction(address, bytes);
       case 0xcc:
@@ -568,7 +566,10 @@ export class Disassembler {
       case 0xcf:
       case 0xd0:
       case 0xd1:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xd2:
+        return new instruction.OpJC(address);
       case 0xd3:
       case 0xd4:
       case 0xd5:
@@ -576,7 +577,10 @@ export class Disassembler {
       case 0xd7:
       case 0xd8:
       case 0xd9:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xda:
+        return new instruction.OpJC(address);
       case 0xdb:
       case 0xdc:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
