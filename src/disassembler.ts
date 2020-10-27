@@ -5,8 +5,8 @@ export class Disassembler {
   static logNotImplemented(address: number, byte: number, prefixed = false) {
     throw new Error(
       `${utils.hexString(address)}: unknown ${
-        prefixed ? "prefixed" : ""
-      } instruction ${utils.binString(byte)} ${utils.hexString(byte)}`
+        prefixed ? "prefixed " : ""
+      }instruction ${utils.binString(byte)} ${utils.hexString(byte)}`
     );
   }
 
