@@ -388,6 +388,21 @@ export class OpLdA16InRegToA extends Instruction {
   }
 }
 
+export class OpLdA16ToA extends Instruction {
+  size() {
+    return 3;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    cpu.regs[CPU.A] = memory.getByte(this.getNext16Bits(memory));
+    return 16;
+  }
+
+  disassemble(memory: Memory) {
+    return `LD A, (${utils.hexString(this.getNext16Bits(memory), 16)})`;
+  }
+}
+
 export class OpLdAtoAddrC extends Instruction {
   size() {
     return 1;
