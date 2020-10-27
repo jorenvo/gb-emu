@@ -1014,6 +1014,17 @@ export class OpRet extends Instruction {
   }
 }
 
+export class OpRetZero extends OpRet {
+  exec(cpu: CPU, memory: Memory) {
+    if (cpu.getZeroFlag()) {
+      super.exec(cpu, memory);
+      return 20;
+    } else {
+      return 8;
+    }
+  }
+}
+
 export class OpPush extends Instruction {
   size() {
     return 1;
