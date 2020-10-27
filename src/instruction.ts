@@ -1023,6 +1023,10 @@ export class OpRetZero extends OpRet {
       return 8;
     }
   }
+
+  disassemble(_memory: Memory) {
+    return "RET Z";
+  }
 }
 
 export class OpPush extends Instruction {
