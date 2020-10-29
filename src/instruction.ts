@@ -1527,10 +1527,13 @@ export class OpAndR8 extends Instruction {
     return opcode & 0xf;
   }
 
+  protected getToAnd(cpu: CPU, memory: Memory) {
+    return this.isHL(memory) ? cpu.getHL() : cpu.regs[this.getReg(memory)];
+  }
+
   exec(cpu: CPU, memory: Memory) {
     const isHL = this.isHL(memory);
-    const reg = this.getReg(memory);
-    const toAnd = isHL ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+    const toAnd = this.getToAnd(cpu, memory);
     cpu.regs[CPU.A] &= toAnd;
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
@@ -1550,5 +1553,24 @@ export class OpAndR8 extends Instruction {
       reg = this.getStringForR8(regNr);
     }
     return `AND ${reg}`;
+  }
+}
+
+export class OpAndD8 extends OpAndR8 {
+  size() {
+    return 2;
+  }
+
+  protected getToAnd(_cpu: CPU, memory: Memory) {
+    return this.getNext8Bits(memory);
+  }
+
+  exec(cpu: CPU, memory: Memory): 8 {
+    super.exec(cpu, memory);
+    return 8;
+  }
+
+  disassemble(memory: Memory) {
+    return `AND $${utils.hexString(this.getNext8Bits(memory))}`;
   }
 }
