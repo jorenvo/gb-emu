@@ -764,20 +764,44 @@ export class OpRL extends Instruction {
   }
 }
 
-export class OpRRA extends Instruction {
+export class OpRR extends Instruction {
   size() {
-    return 1;
+    return 2;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
-    const lsb = cpu.regs[CPU.A] & 1;
-    cpu.regs[CPU.A] >>= 1;
-    cpu.regs[CPU.A] |= cpu.getCarryFlag() << 7;
+  protected getReg(memory: Memory) {
+    return (this.getNext8Bits(memory) & 0xf) - 0x8;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    const reg = this.getReg(memory);
+    const lsb = cpu.regs[reg] & 1;
+    cpu.regs[reg] >>= 1;
+    cpu.regs[reg] |= cpu.getCarryFlag() << 7;
     cpu.setCarryFlagDirect(lsb);
 
     cpu.setHalfCarryFlagAdd(0, 0);
     cpu.setSubtractFlag(0);
     cpu.setZeroFlag(0);
+    return 8;
+  }
+
+  disassemble(memory: Memory) {
+    return `RR ${this.getStringForR8(this.getReg(memory))}`;
+  }
+}
+
+export class OpRRA extends OpRR {
+  size() {
+    return 1;
+  }
+
+  protected getReg(_memory: Memory) {
+    return 7;
+  }
+
+  exec(cpu: CPU, memory: Memory) {
+    super.exec(cpu, memory);
     return 4;
   }
 
