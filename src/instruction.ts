@@ -1412,6 +1412,25 @@ export class OpSubCarryR8 extends OpSubR8 {
   }
 }
 
+export class OpSubD8 extends OpSubR8 {
+  size() {
+    return 2;
+  }
+
+  protected getToSubtract(_cpu: CPU, memory: Memory) {
+    return this.getNext8Bits(memory);
+  }
+
+  exec(cpu: CPU, memory: Memory): 8 {
+    super.exec(cpu, memory);
+    return 8;
+  }
+
+  disassemble(memory: Memory) {
+    return `SUB $${utils.hexString(this.getNext8Bits(memory))}`;
+  }
+}
+
 export class OpAddR8 extends Instruction {
   size() {
     return 1;
