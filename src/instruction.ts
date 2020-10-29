@@ -1475,6 +1475,25 @@ export class OpAddR8 extends Instruction {
   }
 }
 
+export class OpAddD8 extends OpAddR8 {
+  size() {
+    return 2;
+  }
+
+  protected getToAdd(_cpu: CPU, memory: Memory) {
+    return this.getNext8Bits(memory);
+  }
+
+  exec(cpu: CPU, memory: Memory): 8 {
+    super.exec(cpu, memory);
+    return 8;
+  }
+
+  disassemble(memory: Memory) {
+    return `ADD $${utils.hexString(this.getNext8Bits(memory))}`;
+  }
+}
+
 export class OpAddCarryR8 extends OpAddR8 {
   protected getToAdd(cpu: CPU, memory: Memory) {
     return super.getToAdd(cpu, memory) + cpu.getCarryFlag();

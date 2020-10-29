@@ -546,6 +546,7 @@ export class Disassembler {
       case 0xf5:
         return new instruction.OpPush(address);
       case 0xc6:
+        return new instruction.OpAddD8(address);
       case 0xc7:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
