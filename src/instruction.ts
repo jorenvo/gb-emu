@@ -92,7 +92,7 @@ export class NotImplemented extends Instruction {
     return 0;
   }
 
-  exec(_cpu: CPU, memory: Memory) {
+  exec(_cpu: CPU, memory: Memory): number {
     utils.log(
       this.address,
       `Executing not implemented instruction with opcode ${memory.getByte(
@@ -113,7 +113,7 @@ export class OpNop extends Instruction {
     return 1;
   }
 
-  exec(_cpu: CPU, _memory: Memory) {
+  exec(_cpu: CPU, _memory: Memory): number {
     return 4;
   }
 
@@ -132,7 +132,7 @@ export class OpUnknown extends Instruction {
     return 1;
   }
 
-  exec(_cpu: CPU, _memory: Memory) {
+  exec(_cpu: CPU, _memory: Memory): number {
     return 0;
   }
 
@@ -146,7 +146,7 @@ export class OpLdD16ToR16 extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const d16 = this.getNext16Bits(memory);
 
     if (this.getByte(memory) === 0x31) {
@@ -206,7 +206,7 @@ export class OpLdD8ToR8 extends Instruction {
     return this.getByte(memory) === 0x36;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const register = this.getRegister(memory);
     const d8 = this.getNext8Bits(memory);
     if (this.isHL(memory)) {
@@ -244,7 +244,7 @@ export class OpLdR8ToA16 extends Instruction {
     return src;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let destRegister = 0;
     switch (this.getByte(memory)) {
       case 0x02:
@@ -346,7 +346,7 @@ export class OpLdA16InRegToA extends Instruction {
     return src;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const register = this.getSourceReg(memory);
     const aHigh = cpu.regs[register];
     const aLow = cpu.regs[register + 1];
@@ -393,7 +393,7 @@ export class OpLdA16ToA extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     cpu.regs[CPU.A] = memory.getByte(this.getNext16Bits(memory));
     return 16;
   }
@@ -408,7 +408,7 @@ export class OpLdAtoAddrC extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     memory.setByte(cpu.regs[CPU.C], cpu.regs[CPU.A]);
     return 8;
   }
@@ -423,7 +423,7 @@ export class OpLdSPToA16 extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const a16 = this.getNext16Bits(memory);
 
     // TODO: this order is correct, should we always store LSB before MSB?
@@ -447,7 +447,7 @@ export class OpLdhA8 extends Instruction {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const lowAddr = this.getAddr(memory);
     memory.setByte(0xff00 | lowAddr, cpu.regs[CPU.A]);
     return 12;
@@ -471,7 +471,7 @@ export class OpLdR8ToR8 extends Instruction {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const srcReg = this.getSrcReg(memory);
     const destReg = this.getDestReg(memory);
 
@@ -522,7 +522,7 @@ export abstract class OpDecInc16 extends Instruction {
 }
 
 export class OpInc16 extends OpDecInc16 {
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     if (this.getByte(memory) === 0x33) {
       ++cpu.SP;
       // TODO set flags
@@ -539,7 +539,7 @@ export class OpInc16 extends OpDecInc16 {
 }
 
 export class OpDec16 extends OpDecInc16 {
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     super.do(cpu, memory, false); // TODO no special case for SP like in Inc?
     return 8;
   }
@@ -577,7 +577,7 @@ export class OpInc8 extends Instruction {
     }
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let tStates;
     if (this.getByte(memory) === 0x34) {
       let addr = cpu.getHL();
@@ -636,7 +636,7 @@ export class OpDec8 extends Instruction {
     }
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let tStates;
     if (this.getByte(memory) === 0x35) {
       let addr = cpu.getHL();
@@ -673,7 +673,7 @@ export class OpRLCA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
+  exec(cpu: CPU, _memory: Memory): number {
     let regValue = cpu.regs[CPU.A];
     const eightBit = regValue >> 7;
 
@@ -700,7 +700,7 @@ export class OpRRCA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
+  exec(cpu: CPU, _memory: Memory): number {
     const lsb = cpu.regs[CPU.A] & 1;
     cpu.regs[CPU.A] >>= 1;
     cpu.regs[CPU.A] |= lsb << 7;
@@ -723,7 +723,7 @@ export class OpRLA extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
+  exec(cpu: CPU, _memory: Memory): number {
     cpu.regs[CPU.A] = cpu.rotateLeft(cpu.regs[CPU.A]);
     return 4;
   }
@@ -742,7 +742,7 @@ export class OpRL extends Instruction {
     return this.getNext8Bits(memory) & 0xf;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     if (register === 6) {
       cpu.setHL(cpu.rotateLeft(cpu.getHL()));
@@ -773,7 +773,7 @@ export class OpRR extends Instruction {
     return (this.getNext8Bits(memory) & 0xf) - 0x8;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const reg = this.getReg(memory);
     const lsb = cpu.regs[reg] & 1;
     cpu.regs[reg] >>= 1;
@@ -800,7 +800,7 @@ export class OpRRA extends OpRR {
     return 7;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     super.exec(cpu, memory);
     return 4;
   }
@@ -819,7 +819,7 @@ export class OpAddR16ToHL extends Instruction {
     return (this.getByte(memory) >> 4) * 2;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     const r16 = cpu.getCombinedRegister(register, register + 1);
     let hl = cpu.getHL();
@@ -841,7 +841,7 @@ export class OpStop extends Instruction {
     return 1;
   }
 
-  exec(_cpu: CPU, memory: Memory) {
+  exec(_cpu: CPU, memory: Memory): number {
     utils.log(this.getByte(memory), "TODO: stop");
     return 4;
   }
@@ -860,7 +860,7 @@ export class OpJR extends Instruction {
     return utils.twosComplementToNumber(this.getNext8Bits(memory));
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     cpu.PC += this.size() + this.getRelativeOffset(memory);
     return 12;
   }
@@ -879,7 +879,7 @@ export class OpJRC extends Instruction {
     return utils.twosComplementToNumber(this.getNext8Bits(memory));
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let condition = false;
     switch (this.getByte(memory)) {
       case 0x20:
@@ -936,7 +936,7 @@ export class OpJC extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let condition = false;
     switch (this.getByte(memory)) {
       case 0xc2:
@@ -990,7 +990,7 @@ export class OpJA16 extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     cpu.PC = this.getNext16Bits(memory);
     return 16;
   }
@@ -1006,7 +1006,7 @@ export class OpJHL extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
+  exec(cpu: CPU, _memory: Memory): number {
     cpu.PC = cpu.getHL();
     return 4;
   }
@@ -1021,7 +1021,7 @@ export class OpCPL extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory) {
+  exec(cpu: CPU, _memory: Memory): number {
     cpu.regs[CPU.A] ^= 0xff;
     cpu.setZeroFlag(1);
     cpu.setSubtractFlag(1);
@@ -1046,7 +1046,7 @@ export class OpXorR8 extends Instruction {
     return this.getByte(memory) & 0b111;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     if (this.isHL(memory)) {
       cpu.regs[CPU.A] ^= cpu.getHL();
     } else {
@@ -1075,7 +1075,7 @@ export class OpCall extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const nextPC = cpu.PC + this.size();
     memory.setByte(--cpu.SP, nextPC >> 8);
     memory.setByte(--cpu.SP, nextPC & 0xff);
@@ -1090,7 +1090,7 @@ export class OpCall extends Instruction {
 }
 
 export class OpCallIfZero extends OpCall {
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     if (cpu.getZeroFlag()) {
       super.exec(cpu, memory);
       return 24;
@@ -1110,7 +1110,7 @@ export class OpRet extends Instruction {
     return 1;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const low = memory.getByte(cpu.SP++);
     const high = memory.getByte(cpu.SP++);
     cpu.PC = (high << 8) | low;
@@ -1123,7 +1123,7 @@ export class OpRet extends Instruction {
 }
 
 export class OpRetZero extends OpRet {
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     if (cpu.getZeroFlag()) {
       super.exec(cpu, memory);
       return 20;
@@ -1146,7 +1146,7 @@ export class OpPush extends Instruction {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     let low = 0;
     let high = 0;
     if (this.getByte(memory) === 0xf5) {
@@ -1179,7 +1179,7 @@ export class OpPop extends Instruction {
     return utils.getBits(this.getByte(memory), 3, 5);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     if (this.getByte(memory) === 0xf1) {
       cpu.regs[CPU.F] = memory.getByte(cpu.SP++);
       cpu.regs[CPU.A] = memory.getByte(cpu.SP++);
@@ -1224,7 +1224,7 @@ export class OpBit extends Instruction {
     return utils.getBits(byte, 4, 5) * 2 + utils.getBit(byte, 3);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     const bit = this.getBit(memory);
     if (register === 0x6) {
@@ -1255,7 +1255,7 @@ export abstract class OpCP extends Instruction {
   protected abstract getToCompare(cpu: CPU, memory: Memory): number;
   protected abstract tStates(): number;
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const d8 = this.getToCompare(cpu, memory);
     cpu.setSubtractFlag(1);
     cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], d8);
@@ -1325,7 +1325,7 @@ export class OpLdAToA16 extends Instruction {
     return 3;
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const addr = this.getNext16Bits(memory);
     memory.setByte(addr, cpu.regs[CPU.A]);
     return 16;
@@ -1346,7 +1346,7 @@ export class OpLdhA8toA extends Instruction {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const addr = this.getAddr(memory);
     cpu.regs[CPU.A] = memory.getByte(0xff00 | addr);
     return 12;
@@ -1377,7 +1377,7 @@ export class OpSubR8 extends Instruction {
     return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const toSub = this.getToSubtract(cpu, memory);
     cpu.setHalfCarryFlagSubtract(cpu.regs[CPU.A], toSub);
     cpu.setCarryFlagSubtract(cpu.regs[CPU.A], toSub);
@@ -1421,7 +1421,7 @@ export class OpSubD8 extends OpSubR8 {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory): 8 {
+  exec(cpu: CPU, memory: Memory): number {
     super.exec(cpu, memory);
     return 8;
   }
@@ -1450,7 +1450,7 @@ export class OpAddR8 extends Instruction {
     return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const toAdd = this.getToAdd(cpu, memory);
     cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
     cpu.setCarryFlagAdd(cpu.regs[CPU.A], toAdd);
@@ -1484,7 +1484,7 @@ export class OpAddD8 extends OpAddR8 {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory): 8 {
+  exec(cpu: CPU, memory: Memory): number {
     super.exec(cpu, memory);
     return 8;
   }
@@ -1513,7 +1513,7 @@ export class OpAddCarryD8 extends Instruction {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const toAdd = utils.wrapping8BitAdd(
       this.getToAdd(memory),
       cpu.getCarryFlag()
@@ -1550,7 +1550,7 @@ export class OpAndR8 extends Instruction {
     return this.isHL(memory) ? cpu.getHL() : cpu.regs[this.getReg(memory)];
   }
 
-  exec(cpu: CPU, memory: Memory) {
+  exec(cpu: CPU, memory: Memory): number {
     const isHL = this.isHL(memory);
     const toAnd = this.getToAnd(cpu, memory);
     cpu.regs[CPU.A] &= toAnd;
@@ -1584,7 +1584,7 @@ export class OpAndD8 extends OpAndR8 {
     return this.getNext8Bits(memory);
   }
 
-  exec(cpu: CPU, memory: Memory): 8 {
+  exec(cpu: CPU, memory: Memory): number {
     super.exec(cpu, memory);
     return 8;
   }
