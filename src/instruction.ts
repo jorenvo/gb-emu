@@ -1593,3 +1593,55 @@ export class OpAndD8 extends OpAndR8 {
     return `AND $${utils.hexString(this.getNext8Bits(memory))}`;
   }
 }
+
+// There's no complete explanation for how this works,
+// this implementation has therefore been ported from MAME:
+// https://github.com/mamedev/mame/blob/99e6e4b67919bbb449ec259b4955d5c862216d97/src/devices/cpu/lr35902/opc_main.hxx#L354
+export class OpDAA extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    let tmp = cpu.regs[CPU.A];
+
+    if (! cpu.getSubtractFlag()) { // addition
+      if (cpu.getHalfCarryFlag() || (tmp > 0x9)) {
+        tmp += 6;
+      }
+
+      if (cpu.getCarryFlag() || tmp > 0x9f) {
+        tmp += 0x60;
+      }
+    } else { // subtraction
+      if (cpu.getHalfCarryFlag()) {
+        tmp -= 0x6;
+
+        if (! cpu.getCarryFlag()) {
+          tmp &= 0xff;
+        }
+      }
+
+      if (cpu.getCarryFlag()) {
+        tmp -= 0x60;
+      }
+    }
+
+    cpu.setHalfCarryFlagDirect(0);
+    cpu.setZeroFlag(0);
+
+    if (tmp & 0x100) {
+      cpu.setCarryFlagDirect(1);
+    }
+    cpu.regs[CPU.A] = tmp & 0xff;
+    if (cpu.regs[CPU.A] === 0) {
+      cpu.setZeroFlag(1);
+    }
+    
+    return 4;
+  }
+
+  disassemble(_memory: Memory) {
+    return "DAA";
+  }
+}

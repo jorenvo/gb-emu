@@ -377,9 +377,7 @@ export class Disassembler {
       case 0x38:
         return new instruction.OpJRC(address);
       case 0x27:
-        // TODO: DAA https://ehaskins.com/2018-01-30%20Z80%20DAA/
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpDAA(address);
       case 0x2f:
         return new instruction.OpCPL(address);
       case 0x37:
