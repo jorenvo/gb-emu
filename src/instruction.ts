@@ -1645,3 +1645,20 @@ export class OpDAA extends Instruction {
     return "DAA";
   }
 }
+
+export class OpSCF extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    cpu.setCarryFlagDirect(1);
+    cpu.setSubtractFlag(0);
+    cpu.setHalfCarryFlagDirect(0);
+    return 1;
+  }
+
+  disassemble(_memory: Memory) {
+    return "SCF";
+  }
+}

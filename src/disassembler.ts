@@ -381,9 +381,7 @@ export class Disassembler {
       case 0x2f:
         return new instruction.OpCPL(address);
       case 0x37:
-        // TODO: SCF
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpSCF(address);
       case 0x39:
       case 0x3a:
       case 0x3b:
