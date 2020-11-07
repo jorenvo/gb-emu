@@ -1699,3 +1699,19 @@ export class OpSwap extends Instruction {
     return `SWAP ${regString}`;
   }
 }
+
+export class OpDI extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    cpu.IME = false;;
+    return 4;
+  }
+
+  disassemble(_memory: Memory) {
+    return "DI";
+  }
+}
+  

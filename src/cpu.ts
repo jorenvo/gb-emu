@@ -13,6 +13,9 @@ export class CPU {
   static F = 6;
   static A = 7;
 
+  // Interrupt Master Enable
+  IME: boolean;
+
   SP: number;
   private PCInternal: number;
 
@@ -24,6 +27,7 @@ export class CPU {
 
   constructor(instructions: Map<number, Instruction>) {
     this.SP = 0xfffe;
+    this.IME = false;
     this.PCInternal = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
