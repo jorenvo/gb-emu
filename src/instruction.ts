@@ -851,6 +851,21 @@ export class OpStop extends Instruction {
   }
 }
 
+export class OpHalt extends Instruction {
+ size() {
+    return 1;
+  }
+
+  exec(_cpu: CPU, memory: Memory): number {
+    utils.log(this.getByte(memory), "Should wait for interrupt");
+    return 4;
+  }
+
+  disassemble(_memory: Memory) {
+    return "HALT";
+  }
+}
+
 export class OpJR extends Instruction {
   size() {
     return 2;
