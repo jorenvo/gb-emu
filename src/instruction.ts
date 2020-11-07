@@ -1730,3 +1730,26 @@ export class OpEI extends Instruction {
   }
 }
   
+export class OpRST extends Instruction {
+  size() {
+    return 1;
+  }
+
+  private getAddr(memory: Memory) {
+    const msb = this.getByte(memory) >> 4;
+    return (msb - 0xc) * 0x10 + 0x8;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    // TODO: this could also be cpu.PC + this.size()?
+    memory.setByte(--cpu.SP, cpu.PC >> 8);
+    memory.setByte(--cpu.SP, cpu.PC & 0xff);
+    cpu.PC = this.getAddr(memory);
+    return 16;
+  }
+
+  disassemble(memory: Memory) {
+    const addr = this.getAddr(memory);
+    return `RST ${utils.hexString(addr, 16)}`;
+  }
+}

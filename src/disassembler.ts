@@ -565,6 +565,7 @@ export class Disassembler {
       case 0xce:
         return new instruction.OpAddCarryD8(address);
       case 0xcf:
+        return new instruction.OpRST(address);
       case 0xd0:
       case 0xd1:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
@@ -592,9 +593,10 @@ export class Disassembler {
       case 0xdd:
         return new instruction.OpUnknown(address);
       case 0xde:
-      case 0xdf:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
+      case 0xdf:
+        return new instruction.OpRST(address);
       case 0xe0:
         return new instruction.OpLdhA8(address);
       case 0xe1:
@@ -621,9 +623,10 @@ export class Disassembler {
       case 0xec:
       case 0xed:
       case 0xee:
-      case 0xef:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
+      case 0xef:
+        return new instruction.OpRST(address);
       case 0xf0:
         return new instruction.OpLdhA8toA(address);
       case 0xf1:
@@ -651,6 +654,7 @@ export class Disassembler {
       case 0xfe:
         return new instruction.OpCPD8(address);
       case 0xff:
+        return new instruction.OpRST(address);
       default:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
