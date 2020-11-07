@@ -1662,3 +1662,40 @@ export class OpSCF extends Instruction {
     return "SCF";
   }
 }
+
+export class OpSwap extends Instruction {
+  size() {
+    return 2;
+  }
+
+  private swap(byte: number) {
+    return (byte >> 4) | ((byte & 0xf) << 4);
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    if (opcode === 0x36) {
+      cpu.setHL(this.swap(cpu.getHL()));
+      cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
+      return 16;
+    } else {
+      const reg = opcode & 0xf;
+      cpu.regs[reg] = this.swap(cpu.regs[reg]);
+      cpu.setZeroFlag(cpu.regs[reg] === 0 ? 1 : 0);
+      return 8;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    const opcode = this.getNext8Bits(memory);
+    let regString = "";
+    if (opcode === 0x36) {
+      const reg = opcode & 0xf;
+      regString = this.getStringForR8(reg);
+    } else {
+      regString = "(HL)";
+    }
+
+    return `SWAP ${regString}`;
+  }
+}
