@@ -643,6 +643,7 @@ export class Disassembler {
       case 0xfa:
         return new instruction.OpLdA16ToA(address);
       case 0xfb:
+        return new instruction.OpEI(address);
       case 0xfc:
       case 0xfd:
         Disassembler.logNotImplemented(address, byte, !"prefixed");

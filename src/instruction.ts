@@ -1715,3 +1715,18 @@ export class OpDI extends Instruction {
   }
 }
   
+export class OpEI extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    cpu.IME = false;
+    return 4;
+  }
+
+  disassemble(_memory: Memory) {
+    return "EI";
+  }
+}
+  
