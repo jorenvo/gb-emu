@@ -88,6 +88,10 @@ export class CPU {
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1011_1111) | (subFlag << 6);
   }
 
+  getSubtractFlag(): number {
+    return (this.regs[CPU.F] >> 6) & 1;
+  }
+
   setHalfCarryFlagDirect(halfCarryFlag: number) {
     this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
   }
