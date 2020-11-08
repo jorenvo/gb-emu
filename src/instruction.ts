@@ -1783,3 +1783,45 @@ export class OpRST extends Instruction {
     return `RST ${utils.hexString(addr, 16)}`;
   }
 }
+
+// According to the GB manual this shifts into the carry, so whatever
+// SLA stands for it's *not* "Shift Left Arithmetic".
+export class OpSLA extends Instruction {
+  size() {
+    return 2;
+  }
+
+  private shift(val: number): [number, number] {
+    let carry = val >> 7;
+    let shifted = (val & 0b0111_1111) << 1;
+    return [carry, shifted];
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    if (opcode === 0x26) {
+      const [carry, val] = this.shift(memory.getByte(cpu.getHL()));
+      cpu.setCarryFlagDirect(carry);
+      memory.setByte(cpu.getHL(), val);
+      return 16;
+    } else {
+      const reg = opcode & 0xf;
+      const [carry, val] = this.shift(cpu.regs[reg]);
+      cpu.setCarryFlagDirect(carry);
+      cpu.regs[reg] = val;
+      return 8;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    const opcode = this.getNext8Bits(memory);
+    let regStr = "";
+    if (opcode === 0x26) {
+      regStr = "(HL)";
+    } else {
+      regStr = this.getStringForR8(opcode & 0xf);
+    }
+
+    return `SLA ${regStr}`;
+  }
+}

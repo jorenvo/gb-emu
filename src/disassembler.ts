@@ -60,6 +60,7 @@ export class Disassembler {
       case 0x25:
       case 0x26:
       case 0x27:
+        return new instruction.OpSLA(address);
       case 0x28:
       case 0x29:
       case 0x2a:
