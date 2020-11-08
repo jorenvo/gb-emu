@@ -820,8 +820,13 @@ export class OpAddR16ToHL extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    const register = this.getReg(memory);
-    const r16 = cpu.getCombinedRegister(register, register + 1);
+    let r16 = cpu.SP;
+    const opcode = this.getByte(memory);
+    if (opcode !== 0x39) {
+      const register = this.getReg(memory);
+      r16 = cpu.getCombinedRegister(register, register + 1);
+    }
+
     let hl = cpu.getHL();
     cpu.setHalfCarryFlagAdd(r16, hl);
     cpu.setCarryFlagAdd(r16, hl);

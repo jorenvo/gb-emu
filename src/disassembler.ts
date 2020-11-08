@@ -341,6 +341,7 @@ export class Disassembler {
       case 0x09:
       case 0x19:
       case 0x29:
+      case 0x39:
         return new instruction.OpAddR16ToHL(address);
       case 0x0a:
       case 0x1a:
@@ -386,7 +387,6 @@ export class Disassembler {
         return new instruction.OpCPL(address);
       case 0x37:
         return new instruction.OpSCF(address);
-      case 0x39:
       case 0x3a:
       case 0x3b:
       case 0x3f:
