@@ -1842,3 +1842,36 @@ export class OpSLA extends Instruction {
     return `SLA ${regStr}`;
   }
 }
+
+export class OpORR8 extends Instruction {
+  size() {
+    return 1;
+  }
+
+  private getVal(cpu: CPU, memory: Memory): number {
+    const opcode = this.getByte(memory);
+    if (opcode === 0xb6) {
+      return memory.getByte(cpu.getHL());
+    } else {
+      return cpu.regs[opcode & 0xf];
+    }
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    cpu.regs[CPU.A] |= this.getVal(cpu, memory);
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    return 4;
+  }
+
+  disassemble(memory: Memory) {
+    const opcode = this.getByte(memory);
+    let regStr = "";
+    if (opcode === 0xb6) {
+      regStr = "(HL)";
+    } else {
+      regStr = this.getStringForR8(opcode & 0xf);
+    }
+
+    return `OR ${regStr}`;
+  }
+}
