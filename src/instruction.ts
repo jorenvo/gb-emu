@@ -1885,3 +1885,29 @@ export class OpORR8 extends Instruction {
     return `OR ${regStr}`;
   }
 }
+
+export class OpAddSPR8 extends Instruction {
+  size() {
+    return 2;
+  }
+
+  private getOffset(memory: Memory) {
+    return utils.twosComplementToNumber(this.getNext8Bits(memory));
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const offset = this.getOffset(memory);
+    cpu.setZeroFlag(0);
+    cpu.setSubtractFlag(0);
+    cpu.setCarryFlagAdd(cpu.SP, offset);
+    cpu.setHalfCarryFlagAdd(cpu.SP, offset);
+
+    cpu.SP += offset;
+
+    return 16;
+  }
+
+  disassemble(memory: Memory) {
+    return `ADD SP, $${utils.hexString(this.getOffset(memory))}`;
+  }
+}
