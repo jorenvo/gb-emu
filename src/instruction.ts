@@ -1817,12 +1817,14 @@ export class OpSLA extends Instruction {
     if (opcode === 0x26) {
       const [carry, val] = this.shift(memory.getByte(cpu.getHL()));
       cpu.setCarryFlagDirect(carry);
+      cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
       const reg = opcode & 0xf;
       const [carry, val] = this.shift(cpu.regs[reg]);
       cpu.setCarryFlagDirect(carry);
+      cpu.setZeroFlag(val === 0 ? 1 : 0);
       cpu.regs[reg] = val;
       return 8;
     }
