@@ -1152,6 +1152,21 @@ export class OpRetZero extends OpRet {
   }
 }
 
+export class OpRetNoCarry extends OpRet {
+  exec(cpu: CPU, memory: Memory): number {
+    if (! cpu.getCarryFlag()) {
+      super.exec(cpu, memory);
+      return 20;
+    } else {
+      return 8;
+    }
+  }
+
+  disassemble(_memory: Memory) {
+    return "RET NC";
+  }
+}
+
 export class OpPush extends Instruction {
   size() {
     return 1;

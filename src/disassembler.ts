@@ -571,6 +571,7 @@ export class Disassembler {
       case 0xff:
         return new instruction.OpRST(address);
       case 0xd0:
+        return new instruction.OpRetNoCarry(address);
       case 0xd1:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
