@@ -836,7 +836,12 @@ export class OpAddR16ToHL extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getStringForR16(this.getReg(memory));
+    const opcode = this.getByte(memory);
+    let reg = "SP";
+    if (opcode !== 0x39) {
+      reg = this.getStringForR16(this.getReg(memory));
+    }
+
     return `ADD HL, ${reg}`;
   }
 }
