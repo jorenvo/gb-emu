@@ -389,9 +389,10 @@ export class Disassembler {
         return new instruction.OpSCF(address);
       case 0x3a:
       case 0x3b:
-      case 0x3f:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
+      case 0x3f:
+        return new instruction.OpCCF(address);
       case 0x40:
       case 0x41:
       case 0x42:

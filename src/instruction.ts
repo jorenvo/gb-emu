@@ -1932,3 +1932,18 @@ export class OpAddSPR8 extends Instruction {
     return `ADD SP, $${utils.hexString(this.getOffset(memory))}`;
   }
 }
+
+export class OpCCF extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    cpu.setCarryFlagDirect(cpu.getCarryFlag() === 1 ? 0 : 1);
+    return 1;
+  }
+
+  disassemble(_memory: Memory) {
+    return "CCF";
+  }
+}
