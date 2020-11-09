@@ -573,7 +573,6 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xd2:
         return new instruction.OpJC(address);
-      case 0xd3:
       case 0xd4:
       case 0xd5:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
@@ -590,11 +589,20 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xda:
         return new instruction.OpJC(address);
-      case 0xdb:
       case 0xdc:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
+      case 0xd3:
+      case 0xdb:
       case 0xdd:
+      case 0xe3:
+      case 0xe4:
+      case 0xeb:
+      case 0xec:
+      case 0xed:
+      case 0xf4:
+      case 0xfc:
+      case 0xfd:
         return new instruction.OpUnknown(address);
       case 0xde:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
@@ -606,8 +614,6 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xe2:
         return new instruction.OpLdAtoAddrC(address);
-      case 0xe3:
-      case 0xe4:
       case 0xe5:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
@@ -622,11 +628,6 @@ export class Disassembler {
         return new instruction.OpJHL(address);
       case 0xea:
         return new instruction.OpLdAToA16(address);
-      case 0xeb:
-      case 0xec:
-      case 0xed:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xee:
         return new instruction.OpXorD8(address);
       case 0xf0:
@@ -637,7 +638,6 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xf3:
         return new instruction.OpDI(address);
-      case 0xf4:
       case 0xf5:
       case 0xf6:
       case 0xf7:
@@ -649,10 +649,6 @@ export class Disassembler {
         return new instruction.OpLdA16ToA(address);
       case 0xfb:
         return new instruction.OpEI(address);
-      case 0xfc:
-      case 0xfd:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xfe:
         return new instruction.OpCPD8(address);
       default:
