@@ -451,8 +451,6 @@ export class Disassembler {
       case 0x76:
         return new instruction.OpHalt(address);
       case 0x80:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0x81:
       case 0x82:
       case 0x83:
