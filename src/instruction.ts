@@ -1859,8 +1859,6 @@ export class OpRST extends Instruction {
   }
 }
 
-// According to the GB manual this shifts into the carry, so whatever
-// SLA stands for it's *not* "Shift Left Arithmetic".
 export class OpSLA extends Instruction {
   size() {
     return 2;
@@ -1868,7 +1866,9 @@ export class OpSLA extends Instruction {
 
   private shift(val: number): [number, number] {
     let carry = val >> 7;
-    let shifted = (val & 0b0111_1111) << 1;
+    let sign = val & 0b1000_0000;
+    let shifted = (val & 0b0011_1111) << 1;
+    shifted |= sign;
     return [carry, shifted];
   }
 
