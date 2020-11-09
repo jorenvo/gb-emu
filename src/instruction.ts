@@ -1058,7 +1058,20 @@ export class OpCPL extends Instruction {
   }
 }
 
-export class OpXorR8 extends Instruction {
+abstract class OpXor extends Instruction {
+  abstract getVal(cpu: CPU, memory: Memory): number;
+
+  exec(cpu: CPU, memory: Memory): number {
+    cpu.regs[CPU.A] ^= this.getVal(cpu, memory);
+    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setSubtractFlag(0);
+    cpu.setCarryFlagDirect(0);
+    cpu.setHalfCarryFlagAdd(0, 0);
+    return 4;
+  }
+}
+
+export class OpXorR8 extends OpXor {
   size() {
     return 1;
   }
@@ -1071,18 +1084,12 @@ export class OpXorR8 extends Instruction {
     return this.getByte(memory) & 0b111;
   }
 
-  exec(cpu: CPU, memory: Memory): number {
+  getVal(cpu: CPU, memory: Memory): number {
     if (this.isHL(memory)) {
-      cpu.regs[CPU.A] ^= cpu.getHL();
+      return cpu.getHL();
     } else {
-      const register = this.getReg(memory);
-      cpu.regs[CPU.A] ^= cpu.regs[register];
+      return cpu.regs[this.getReg(memory)];
     }
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
-    cpu.setSubtractFlag(0);
-    cpu.setCarryFlagDirect(0);
-    cpu.setHalfCarryFlagAdd(0, 0);
-    return 4;
   }
 
   disassemble(memory: Memory) {
@@ -1092,6 +1099,20 @@ export class OpXorR8 extends Instruction {
     }
 
     return `XOR ${reg}`;
+  }
+}
+
+export class OpXorD8 extends OpXor {
+  size() {
+    return 2;
+  }
+
+  getVal(_cpu: CPU, memory: Memory): number {
+    return this.getNext8Bits(memory);
+  }
+
+  disassemble(memory: Memory) {
+    return `XOR $${utils.hexString(this.getNext8Bits(memory))}`;
   }
 }
 
