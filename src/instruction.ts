@@ -1859,29 +1859,25 @@ export class OpRST extends Instruction {
   }
 }
 
-export class OpSLA extends Instruction {
+// arithmetic shifts (TODO: use this for logical shifts as well)
+abstract class OpSXA extends Instruction {
   size() {
     return 2;
   }
 
-  private shift(val: number): [number, number] {
-    let carry = val >> 7;
-    let sign = val & 0b1000_0000;
-    let shifted = (val & 0b0011_1111) << 1;
-    shifted |= sign;
-    return [carry, shifted];
-  }
+  abstract shift(val: number): [number, number];
+  abstract isHL(memory: Memory): boolean;
 
   exec(cpu: CPU, memory: Memory): number {
-    const opcode = this.getNext8Bits(memory);
-    if (opcode === 0x26) {
+    if (this.isHL(memory)) {
       const [carry, val] = this.shift(memory.getByte(cpu.getHL()));
       cpu.setCarryFlagDirect(carry);
       cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
-      const reg = opcode & 0xf;
+      const opcode = this.getNext8Bits(memory);
+      const reg = opcode & 0b111;
       const [carry, val] = this.shift(cpu.regs[reg]);
       cpu.setCarryFlagDirect(carry);
       cpu.setZeroFlag(val === 0 ? 1 : 0);
@@ -1889,17 +1885,59 @@ export class OpSLA extends Instruction {
       return 8;
     }
   }
+}
+
+export class OpSLA extends OpSXA {
+  isHL(memory: Memory): boolean {
+    const opcode = this.getNext8Bits(memory);
+    return opcode === 0x26;
+  }
+
+  shift(val: number): [number, number] {
+    let carry = val >> 7;
+    let sign = val & 0b1000_0000;
+    let shifted = (val & 0b0011_1111) << 1;
+    shifted |= sign;
+    return [carry, shifted];
+  }
 
   disassemble(memory: Memory) {
     const opcode = this.getNext8Bits(memory);
     let regStr = "";
-    if (opcode === 0x26) {
+    if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
       regStr = this.getStringForR8(opcode & 0xf);
     }
 
     return `SLA ${regStr}`;
+  }
+}
+
+export class OpSRA extends OpSXA {
+  isHL(memory: Memory): boolean {
+    const opcode = this.getNext8Bits(memory);
+    return opcode === 0x2e;
+  }
+
+  shift(val: number): [number, number] {
+    let carry = val & 1;
+    let sign = val & 0b1000_0000;
+    let shifted = val >> 1;
+    shifted |= sign;
+    return [carry, shifted];
+  }
+
+  disassemble(memory: Memory) {
+    const opcode = this.getNext8Bits(memory);
+    let regStr = "";
+    if (this.isHL(memory)) {
+      regStr = "(HL)";
+    } else {
+      regStr = this.getStringForR8(opcode & 0xf);
+    }
+
+    return `SRA ${regStr}`;
   }
 }
 
