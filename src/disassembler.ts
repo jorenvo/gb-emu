@@ -346,6 +346,7 @@ export class Disassembler {
       case 0x0a:
       case 0x1a:
       case 0x2a:
+      case 0x3a:
         return new instruction.OpLdA16InRegToA(address);
       case 0x0b:
       case 0x1b:
@@ -388,9 +389,6 @@ export class Disassembler {
         return new instruction.OpCPL(address);
       case 0x37:
         return new instruction.OpSCF(address);
-      case 0x3a:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0x3f:
         return new instruction.OpCCF(address);
       case 0x40:
