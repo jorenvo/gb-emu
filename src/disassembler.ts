@@ -350,6 +350,7 @@ export class Disassembler {
       case 0x0b:
       case 0x1b:
       case 0x2b:
+      case 0x3b:
         return new instruction.OpDec16(address);
       case 0x0c:
       case 0x1c:
@@ -388,7 +389,6 @@ export class Disassembler {
       case 0x37:
         return new instruction.OpSCF(address);
       case 0x3a:
-      case 0x3b:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0x3f:

@@ -508,45 +508,59 @@ export abstract class OpDecInc16 extends Instruction {
     return 1;
   }
 
-  do(cpu: CPU, memory: Memory, inc: boolean) {
-    // TODO: SP will be 0x3, check if that works
-    const register = (this.getByte(memory) >> 4) * 2;
-    const high = cpu.regs[register];
-    const low = cpu.regs[register + 1];
+  getRegName(memory: Memory) {
+    let reg = "SP";
+    if (!this.isSP(memory)) {
+      reg = this.getStringForR16(this.getByte(memory) >> 4);
+    }
+    return reg;
+  }
 
-    let r16 = (high << 8) | low;
-    r16 += inc ? 1 : -1;
-    cpu.regs[register] = r16 >> 8;
-    cpu.regs[register + 1] = r16 & 0xff;
+  isSP(memory: Memory): boolean {
+    const opcode = this.getByte(memory);
+    return opcode === 0x30 || opcode === 0x3b;
+  }
+
+  getVal(cpu: CPU, memory: Memory): number {
+    if (this.isSP(memory)) {
+      return cpu.SP;
+    } else {
+      const opcode = this.getByte(memory);
+      const reg = (opcode >> 4) * 2;
+      return cpu.getCombinedRegister(reg, reg + 1);
+    }
+  }
+
+  setVal(cpu: CPU, memory: Memory, newVal: number): void {
+    if (this.isSP(memory)) {
+      cpu.SP = newVal;
+    } else {
+      const opcode = this.getByte(memory);
+      const reg = (opcode >> 4) * 2;
+      cpu.setCombinedRegister(reg, reg + 1, newVal);
+    }
   }
 }
 
 export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    if (this.getByte(memory) === 0x33) {
-      ++cpu.SP;
-      // TODO set flags
-    } else {
-      super.do(cpu, memory, true);
-    }
+    this.setVal(cpu, memory, this.getVal(cpu, memory) + 1);
     return 8;
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getStringForR16(this.getByte(memory) >> 4);
-    return `INC ${reg}`;
+    return `INC ${this.getRegName(memory)}`;
   }
 }
 
 export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    super.do(cpu, memory, false); // TODO no special case for SP like in Inc?
+    this.setVal(cpu, memory, this.getVal(cpu, memory) - 1);
     return 8;
   }
 
   disassemble(memory: Memory) {
-    const reg = this.getStringForR16(this.getByte(memory) >> 4);
-    return `DEC ${reg}`;
+    return `INC ${this.getRegName(memory)}`;
   }
 }
 
