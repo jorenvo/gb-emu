@@ -603,7 +603,7 @@ export class Disassembler {
       case 0xf4:
       case 0xfc:
       case 0xfd:
-        return new instruction.OpUnknown(address);
+        return new instruction.OpNone(address);
       case 0xde:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
