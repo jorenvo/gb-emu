@@ -597,8 +597,7 @@ export class Disassembler {
       case 0xfd:
         return new instruction.OpNone(address);
       case 0xde:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpSubCarryD8(address);
       case 0xe0:
         return new instruction.OpLdhA8(address);
       case 0xe2:

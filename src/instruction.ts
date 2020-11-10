@@ -1533,6 +1533,20 @@ export class OpSubCarryR8 extends OpSubR8 {
   }
 }
 
+export class OpSubCarryD8 extends OpSubR8 {
+  size() {
+    return 2;
+  }
+
+  protected getToSubtract(cpu: CPU, memory: Memory) {
+    return this.getNext8Bits(memory) + cpu.getCarryFlag();
+  }
+
+  disassemble(memory: Memory) {
+    return `SBC A, $${utils.hexString(this.getNext8Bits(memory))}`;
+  }
+}
+
 export class OpSubD8 extends OpSubR8 {
   size() {
     return 2;
