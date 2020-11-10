@@ -217,6 +217,7 @@ export class Disassembler {
       case 0xbd:
       case 0xbe:
       case 0xbf:
+        return new instruction.OpRes(address);
       case 0xc0:
       case 0xc1:
       case 0xc2:
@@ -281,6 +282,7 @@ export class Disassembler {
       case 0xfd:
       case 0xfe:
       case 0xff:
+        return new instruction.OpSet(address);
       default:
         Disassembler.logNotImplemented(address, byte, !!"prefixed");
         return new instruction.NotImplemented(address);

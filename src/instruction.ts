@@ -2039,3 +2039,72 @@ export class OpCCF extends Instruction {
     return "CCF";
   }
 }
+
+abstract class OpBitManip extends Instruction {
+  size() {
+    return 2;
+  }
+
+  abstract manipulateBit(bit: number, value: number): number;
+
+  private isHL(memory: Memory): boolean {
+    const opcode = this.getNext8Bits(memory);
+    const nibble = opcode & 0xf;
+    return nibble === 0x6 || nibble === 0xe;
+  }
+
+  private getRegNr(memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    return opcode & 0b111;
+  }
+
+  private getBit(memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    return (opcode >> 3) & 0b111;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const bit = this.getBit(memory);
+    if (this.isHL(memory)) {
+      cpu.setHL(this.manipulateBit(bit, cpu.getHL()));
+      return 16;
+    } else {
+      const reg = this.getRegNr(memory);
+      cpu.regs[reg] = this.manipulateBit(bit, cpu.regs[reg]);
+      return 8;
+    }
+  }
+
+  abstract disassembleInst(): string;
+
+  disassemble(memory: Memory) {
+    let regStr = "(HL)";
+    if (!this.isHL(memory)) {
+      regStr = this.getStringForR8(this.getRegNr(memory));
+    }
+    return `${this.disassembleInst()} ${this.getBit(memory)}, ${regStr}`;
+  }
+}
+
+export class OpSet extends OpBitManip {
+  manipulateBit(bit: number, value: number): number {
+    const mask = 1 << bit;
+    return value | mask;
+  }
+
+  disassembleInst(): string {
+    return "SET";
+  }
+}
+
+export class OpRes extends OpBitManip {
+  manipulateBit(bit: number, value: number): number {
+    const mask = (1 << bit) ^ 0xff;
+    return value & mask;
+  }
+
+  disassembleInst(): string {
+    return "RES";
+  }
+}
+
