@@ -534,8 +534,7 @@ export class Disassembler {
       case 0xc3:
         return new instruction.OpJA16(address);
       case 0xc4:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpCallIfNotZero(address);
       case 0xc5:
       case 0xd5:
       case 0xe5:

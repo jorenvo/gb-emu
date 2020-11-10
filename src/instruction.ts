@@ -1165,6 +1165,22 @@ export class OpCallIfZero extends OpCall {
   }
 }
 
+export class OpCallIfNotZero extends OpCall {
+  exec(cpu: CPU, memory: Memory): number {
+    if (! cpu.getZeroFlag()) {
+      super.exec(cpu, memory);
+      return 24;
+    } else {
+      return 12;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    let addr = this.getNext16Bits(memory);
+    return `CALL NZ, $${utils.hexString(addr, 16)}`;
+  }
+}
+
 export class OpRet extends Instruction {
   size() {
     return 1;
