@@ -625,7 +625,10 @@ export class Disassembler {
         return new instruction.OpDI(address);
       case 0xf6:
       case 0xf7:
+        Disassembler.logNotImplemented(address, byte, !"prefixed");
+        return new instruction.NotImplemented(address);
       case 0xf8:
+        return new instruction.OpLdSPPlusToHL(address);
       case 0xf9:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);

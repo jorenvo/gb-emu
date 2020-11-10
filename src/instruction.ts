@@ -2125,3 +2125,28 @@ export class OpRes extends OpBitManip {
     return "RES";
   }
 }
+
+export class OpLdSPPlusToHL extends Instruction {
+  size() {
+    return 2;
+  }
+
+  private getOffset(memory: Memory): number {
+    return utils.twosComplementToNumber(this.getNext8Bits(memory));
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const offset = this.getOffset(memory);
+    cpu.setSubtractFlag(0);
+    cpu.setZeroFlag(0);
+    cpu.setCarryFlagAdd(cpu.SP, offset);
+    cpu.setHalfCarryFlagAdd(cpu.SP, offset);
+    cpu.setHL(cpu.SP + offset);
+    return 12;
+  }
+
+  disassemble(memory: Memory) {
+    const offset = this.getOffset(memory);
+    return `LD HL, SP + $${utils.hexString(offset)}`;
+  }
+}
