@@ -5,8 +5,8 @@ import * as assert from "assert";
 import { Memory } from "./memory";
 import { Video } from "./video";
 
-describe("Video subsystem", function () {
-  it("should correctly decode tiles", function () {
+describe("Video subsystem", function() {
+  it("should correctly decode tiles", function() {
     // +----------+----------+
     // |          |          |
     // |  TILE 1  |  TILE 2  |

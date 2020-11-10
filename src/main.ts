@@ -57,9 +57,9 @@ function runEmulator(bytes: Uint8Array) {
 }
 
 const loader = new Loader();
-loader.readFile.then((rom) => {
+loader.readFile.then(rom => {
   const totalLength = BOOTROM.length + rom.length;
-  console.log(`Total length is ${utils.hexString(totalLength, 16)} bytes`)
+  console.log(`Total length is ${utils.hexString(totalLength, 16)} bytes`);
   const fullRom = new Uint8Array(totalLength);
   fullRom.set(BOOTROM, 0);
   fullRom.set(rom, BOOTROM.length);

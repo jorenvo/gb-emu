@@ -104,7 +104,7 @@ export class Emulator {
   }
 
   private updatePrevPCs() {
-    let s = this.cpu.prevPCs.map((PC) => utils.hexString(PC, 16)).join(" ");
+    let s = this.cpu.prevPCs.map(PC => utils.hexString(PC, 16)).join(" ");
     document.getElementById("prevPCs")!.innerText = "Prev PCs: " + s;
   }
 

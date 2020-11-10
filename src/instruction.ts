@@ -876,7 +876,7 @@ export class OpStop extends Instruction {
 }
 
 export class OpHalt extends Instruction {
- size() {
+  size() {
     return 1;
   }
 
@@ -1167,7 +1167,7 @@ export class OpCallIfZero extends OpCall {
 
 export class OpCallIfNotZero extends OpCall {
   exec(cpu: CPU, memory: Memory): number {
-    if (! cpu.getZeroFlag()) {
+    if (!cpu.getZeroFlag()) {
       super.exec(cpu, memory);
       return 24;
     } else {
@@ -1215,7 +1215,7 @@ export class OpRetZero extends OpRet {
 
 export class OpRetNoCarry extends OpRet {
   exec(cpu: CPU, memory: Memory): number {
-    if (! cpu.getCarryFlag()) {
+    if (!cpu.getCarryFlag()) {
       super.exec(cpu, memory);
       return 20;
     } else {
@@ -1230,7 +1230,7 @@ export class OpRetNoCarry extends OpRet {
 
 export class OpRetNotZero extends OpRet {
   exec(cpu: CPU, memory: Memory): number {
-    if (! cpu.getZeroFlag()) {
+    if (!cpu.getZeroFlag()) {
       super.exec(cpu, memory);
       return 20;
     } else {
@@ -1726,19 +1726,21 @@ export class OpDAA extends Instruction {
   exec(cpu: CPU, _memory: Memory): number {
     let tmp = cpu.regs[CPU.A];
 
-    if (! cpu.getSubtractFlag()) { // addition
-      if (cpu.getHalfCarryFlag() || (tmp > 0x9)) {
+    if (!cpu.getSubtractFlag()) {
+      // addition
+      if (cpu.getHalfCarryFlag() || tmp > 0x9) {
         tmp += 6;
       }
 
       if (cpu.getCarryFlag() || tmp > 0x9f) {
         tmp += 0x60;
       }
-    } else { // subtraction
+    } else {
+      // subtraction
       if (cpu.getHalfCarryFlag()) {
         tmp -= 0x6;
 
-        if (! cpu.getCarryFlag()) {
+        if (!cpu.getCarryFlag()) {
           tmp &= 0xff;
         }
       }
@@ -1758,7 +1760,7 @@ export class OpDAA extends Instruction {
     if (cpu.regs[CPU.A] === 0) {
       cpu.setZeroFlag(1);
     }
-    
+
     return 4;
   }
 
@@ -1827,7 +1829,7 @@ export class OpDI extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    cpu.IME = false;;
+    cpu.IME = false;
     return 4;
   }
 
@@ -1835,7 +1837,7 @@ export class OpDI extends Instruction {
     return "DI";
   }
 }
-  
+
 export class OpEI extends Instruction {
   size() {
     return 1;
@@ -1850,7 +1852,7 @@ export class OpEI extends Instruction {
     return "EI";
   }
 }
-  
+
 export class OpRST extends Instruction {
   size() {
     return 1;
@@ -2123,4 +2125,3 @@ export class OpRes extends OpBitManip {
     return "RES";
   }
 }
-

@@ -2,8 +2,8 @@ import "mocha";
 import * as assert from "assert";
 import { CPU } from "./cpu";
 
-describe("flags", function () {
-  it("should correctly set the zero flag", function () {
+describe("flags", function() {
+  it("should correctly set the zero flag", function() {
     const cpu = new CPU(new Map());
     assert.equal(cpu.regs[0x6], 0);
 
@@ -13,7 +13,7 @@ describe("flags", function () {
     assert.equal(cpu.regs[0x6], 0);
   });
 
-  it("should correctly set the half carry bit", function () {
+  it("should correctly set the half carry bit", function() {
     const cpu = new CPU(new Map());
     assert.equal(cpu.getHalfCarryFlag(), 0);
 

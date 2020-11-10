@@ -2,7 +2,7 @@ export class Loader {
   readFile: Promise<Uint8Array>;
 
   constructor() {
-    this.readFile = new Promise((resolutionFunction) => {
+    this.readFile = new Promise(resolutionFunction => {
       const inputElement = document.getElementById("rom")!;
 
       inputElement.addEventListener(
@@ -20,9 +20,9 @@ export class Loader {
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const reader = new FileReader();
-      reader.onload = function (event) {
+      reader.onload = function(event) {
         const buffer = event.target!.result as ArrayBuffer;
         resolve(new Uint8Array(buffer));
       };
