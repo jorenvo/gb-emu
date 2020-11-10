@@ -1859,14 +1859,18 @@ export class OpRST extends Instruction {
   }
 }
 
-// arithmetic shifts (TODO: use this for logical shifts as well)
-abstract class OpSXA extends Instruction {
+abstract class OpShift extends Instruction {
   size() {
     return 2;
   }
 
   abstract shift(val: number): [number, number];
   abstract isHL(memory: Memory): boolean;
+
+  getRegNr(memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    return opcode & 0b111;
+  }
 
   exec(cpu: CPU, memory: Memory): number {
     if (this.isHL(memory)) {
@@ -1876,9 +1880,8 @@ abstract class OpSXA extends Instruction {
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
-      const opcode = this.getNext8Bits(memory);
-      const reg = opcode & 0b111;
-      const [carry, val] = this.shift(cpu.regs[reg]);
+      const reg = cpu.regs[this.getRegNr(memory)];
+      const [carry, val] = this.shift(reg);
       cpu.setCarryFlagDirect(carry);
       cpu.setZeroFlag(val === 0 ? 1 : 0);
       cpu.regs[reg] = val;
@@ -1887,7 +1890,7 @@ abstract class OpSXA extends Instruction {
   }
 }
 
-export class OpSLA extends OpSXA {
+export class OpSLA extends OpShift {
   isHL(memory: Memory): boolean {
     const opcode = this.getNext8Bits(memory);
     return opcode === 0x26;
@@ -1902,19 +1905,18 @@ export class OpSLA extends OpSXA {
   }
 
   disassemble(memory: Memory) {
-    const opcode = this.getNext8Bits(memory);
     let regStr = "";
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
-      regStr = this.getStringForR8(opcode & 0xf);
+      regStr = this.getStringForR8(this.getRegNr(memory));
     }
 
     return `SLA ${regStr}`;
   }
 }
 
-export class OpSRA extends OpSXA {
+export class OpSRA extends OpShift {
   isHL(memory: Memory): boolean {
     const opcode = this.getNext8Bits(memory);
     return opcode === 0x2e;
@@ -1929,15 +1931,38 @@ export class OpSRA extends OpSXA {
   }
 
   disassemble(memory: Memory) {
-    const opcode = this.getNext8Bits(memory);
     let regStr = "";
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
-      regStr = this.getStringForR8(opcode & 0xf);
+      regStr = this.getStringForR8(this.getRegNr(memory));
     }
 
     return `SRA ${regStr}`;
+  }
+}
+
+export class OpSRL extends OpShift {
+  isHL(memory: Memory): boolean {
+    const opcode = this.getNext8Bits(memory);
+    return opcode === 0x3e;
+  }
+
+  shift(val: number): [number, number] {
+    let carry = val & 1;
+    let shifted = val >> 1;
+    return [carry, shifted];
+  }
+
+  disassemble(memory: Memory) {
+    let regStr = "";
+    if (this.isHL(memory)) {
+      regStr = "(HL)";
+    } else {
+      regStr = this.getStringForR8(this.getRegNr(memory));
+    }
+
+    return `SRL ${regStr}`;
   }
 }
 
