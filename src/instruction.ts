@@ -2022,6 +2022,26 @@ export class OpOrR8 extends Instruction {
   }
 }
 
+export class OpOrD8 extends OpOrR8 {
+  size() {
+    return 2;
+  }
+
+  protected getVal(_cpu: CPU, memory: Memory): number {
+    return this.getNext8Bits(memory);
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    super.exec(cpu, memory);
+    return 8;
+  }
+
+  disassemble(memory: Memory) {
+    const d8 = this.getNext8Bits(memory);
+    return `OR $${utils.hexString(d8)}`;
+  }
+}
+
 export class OpAddSPR8 extends Instruction {
   size() {
     return 2;
