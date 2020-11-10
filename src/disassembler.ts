@@ -567,13 +567,9 @@ export class Disassembler {
         return new instruction.OpRST(address);
       case 0xd0:
         return new instruction.OpRetNoCarry(address);
-      case 0xd1:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xd2:
         return new instruction.OpJC(address);
       case 0xd4:
-      case 0xd5:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xd6:
@@ -583,9 +579,6 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xd8:
         return new instruction.OpRetCarry(address);
-      case 0xd9:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xda:
         return new instruction.OpJC(address);
       case 0xdc:
@@ -608,14 +601,8 @@ export class Disassembler {
         return new instruction.NotImplemented(address);
       case 0xe0:
         return new instruction.OpLdhA8(address);
-      case 0xe1:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xe2:
         return new instruction.OpLdAtoAddrC(address);
-      case 0xe5:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
       case 0xe6:
         return new instruction.OpAndD8(address);
       case 0xe7:
@@ -631,13 +618,11 @@ export class Disassembler {
         return new instruction.OpXorD8(address);
       case 0xf0:
         return new instruction.OpLdhA8toA(address);
-      case 0xf1:
       case 0xf2:
         Disassembler.logNotImplemented(address, byte, !"prefixed");
         return new instruction.NotImplemented(address);
       case 0xf3:
         return new instruction.OpDI(address);
-      case 0xf5:
       case 0xf6:
       case 0xf7:
       case 0xf8:
