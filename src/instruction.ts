@@ -1989,25 +1989,30 @@ export class OpOrR8 extends Instruction {
     return 1;
   }
 
-  private getVal(cpu: CPU, memory: Memory): number {
+  protected getVal(cpu: CPU, memory: Memory): number {
     const opcode = this.getByte(memory);
-    if (opcode === 0xb6) {
+    if (this.isHL(memory)) {
       return memory.getByte(cpu.getHL());
     } else {
       return cpu.regs[opcode & 0xf];
     }
   }
 
+  private isHL(memory: Memory): boolean {
+    const opcode = this.getByte(memory);
+    return opcode === 0xb6;
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     cpu.regs[CPU.A] |= this.getVal(cpu, memory);
     cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
-    return 4;
+    return this.isHL(memory) ? 8 : 4;
   }
 
   disassemble(memory: Memory) {
     const opcode = this.getByte(memory);
     let regStr = "";
-    if (opcode === 0xb6) {
+    if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
       regStr = this.getStringForR8(opcode & 0xf);
