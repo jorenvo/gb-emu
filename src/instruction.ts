@@ -1984,7 +1984,7 @@ export class OpSRL extends OpShift {
   }
 }
 
-export class OpORR8 extends Instruction {
+export class OpOrR8 extends Instruction {
   size() {
     return 1;
   }

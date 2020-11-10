@@ -512,7 +512,7 @@ export class Disassembler {
       case 0xb5:
       case 0xb6:
       case 0xb7:
-        return new instruction.OpORR8(address);
+        return new instruction.OpOrR8(address);
       case 0xb8:
       case 0xb9:
       case 0xba:
