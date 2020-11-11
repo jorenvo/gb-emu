@@ -1213,6 +1213,22 @@ export class OpCallIfNotZero extends OpCall {
   }
 }
 
+export class OpCallIfCarry extends OpCall {
+  exec(cpu: CPU, memory: Memory): number {
+    if (cpu.getCarryFlag()) {
+      super.exec(cpu, memory);
+      return 24;
+    } else {
+      return 12;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    let addr = this.getNext16Bits(memory);
+    return `CALL C, $${utils.hexString(addr, 16)}`;
+  }
+}
+
 export class OpRet extends Instruction {
   size() {
     return 1;

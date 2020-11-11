@@ -581,8 +581,7 @@ export class Disassembler {
       case 0xda:
         return new instruction.OpJC(address);
       case 0xdc:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpCallIfCarry(address);
       case 0xd3:
       case 0xdb:
       case 0xdd:
