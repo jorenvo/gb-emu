@@ -418,6 +418,21 @@ export class OpLdAtoAddrC extends Instruction {
   }
 }
 
+export class OpLdAddrCToA extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    cpu.regs[CPU.A] = memory.getByte(cpu.regs[CPU.C]);
+    return 8;
+  }
+
+  disassemble(_memory: Memory) {
+    return "LD A, ($0xff00+C)";
+  }
+}
+
 export class OpLdSPToA16 extends Instruction {
   size() {
     return 3;
