@@ -24,6 +24,7 @@ export class Disassembler {
       case 0x05:
       case 0x06:
       case 0x07:
+        return new instruction.OpRLC(address);
       case 0x08:
       case 0x09:
       case 0x0a:
