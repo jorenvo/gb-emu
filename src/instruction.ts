@@ -1873,8 +1873,13 @@ export class OpRST extends Instruction {
   }
 
   private getAddr(memory: Memory) {
-    const msb = this.getByte(memory) >> 4;
-    return (msb - 0xc) * 0x10 + 0x8;
+    const opcode = this.getByte(memory);
+    const msn = opcode >> 4;
+    let addr = (msn - 0xc) * 0x10;
+    if ((opcode & 0xf) === 0xf) {
+      addr += 0x8;
+    }
+    return addr;
   }
 
   exec(cpu: CPU, memory: Memory): number {
