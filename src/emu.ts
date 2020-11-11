@@ -114,9 +114,7 @@ export class Emulator {
 
     if (addr === undefined || byte === undefined) debugger;
 
-    newDiv.innerText = `${utils.hexString(addr, 16)}: ${utils.hexString(
-      byte
-    )} ${utils.binString(byte)}`;
+    newDiv.innerText = `${utils.hexString(addr, 16)}: ${utils.hexString(byte)}`;
 
     const instruction = this.instructionMap.get(addr);
     if (instruction) {
