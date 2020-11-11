@@ -2258,3 +2258,18 @@ export class OpLdSPPlusToHL extends Instruction {
     return `LD HL, SP + $${utils.hexString(offset)}`;
   }
 }
+
+export class OpLdHLToSP extends Instruction {
+  size() {
+    return 1;
+  }
+
+  exec(cpu: CPU, _memory: Memory): number {
+    cpu.SP = cpu.getHL();
+    return 8;
+  }
+
+  disassemble(_memory: Memory) {
+    return "LD SP, HL";
+  }
+}
