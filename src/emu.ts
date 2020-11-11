@@ -114,7 +114,7 @@ export class Emulator {
 
     if (addr === undefined || byte === undefined) debugger;
 
-    newDiv.innerText = `${utils.hexString(addr)}: ${utils.hexString(
+    newDiv.innerText = `${utils.hexString(addr, 16)}: ${utils.hexString(
       byte
     )} ${utils.binString(byte)}`;
 
@@ -131,7 +131,7 @@ export class Emulator {
     const memoryDiv = document.getElementById("memory")!;
     memoryDiv.innerHTML = "";
 
-    for (let addr = 0; addr <= 0xff; addr++) {
+    for (let addr = 0; addr <= 0x8100; addr++) {
       const addrDiv = this.createMemoryDiv(addr);
       memoryDiv.appendChild(addrDiv);
       addrToMemoryDiv.set(addr, addrDiv);
