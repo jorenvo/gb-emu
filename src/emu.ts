@@ -131,7 +131,7 @@ export class Emulator {
     const memoryDiv = document.getElementById("memory")!;
     memoryDiv.innerHTML = "";
 
-    for (let addr = 0; addr <= 0x8100; addr++) {
+    for (let addr = 0; addr <= this.memory.loadedBytes; addr++) {
       const addrDiv = this.createMemoryDiv(addr);
       memoryDiv.appendChild(addrDiv);
       addrToMemoryDiv.set(addr, addrDiv);

@@ -7,10 +7,12 @@ import * as utils from "./utils.js";
  */
 export class Memory {
   bytes: Uint8Array;
+  loadedBytes: number;
 
   constructor(rom: Uint8Array) {
     this.bytes = new Uint8Array(0xffff);
     this.bytes.set(rom, 0);
+    this.loadedBytes = rom.length;
 
     // fake nintendo logo in cart
     this.bytes[0x104] = 0xce;
