@@ -1,7 +1,6 @@
 import * as utils from "./utils.js";
 import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
-import { BOOTROM } from "./roms.js";
 
 declare global {
   interface Window {
@@ -58,13 +57,8 @@ function runEmulator(bytes: Uint8Array) {
 
 const loader = new Loader();
 loader.readFile.then(rom => {
-  const totalLength = BOOTROM.length + rom.length;
-  console.log(`Total length is ${utils.hexString(totalLength, 16)} bytes`);
-  const fullRom = new Uint8Array(totalLength);
-  fullRom.set(BOOTROM, 0);
-  fullRom.set(rom, BOOTROM.length);
-  runEmulator(fullRom);
+  runEmulator(new Uint8Array(rom));
 });
 
 const bootromButton = document.getElementById("loadBootrom")!;
-bootromButton.addEventListener("click", () => runEmulator(BOOTROM));
+bootromButton.addEventListener("click", () => runEmulator(new Uint8Array()));
