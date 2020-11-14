@@ -129,7 +129,7 @@ export class Emulator {
     const memoryDiv = document.getElementById("memory")!;
     memoryDiv.innerHTML = "";
 
-    for (let addr = 0; addr <= this.memory.bytes.length; addr++) {
+    for (let addr = 0; addr <= this.memory.getLastCode(); addr++) {
       const addrDiv = this.createMemoryDiv(addr);
       memoryDiv.appendChild(addrDiv);
       addrToMemoryDiv.set(addr, addrDiv);
@@ -180,7 +180,7 @@ export class Emulator {
 
     for (
       let addr = Math.max(0, sp - context);
-      addr <= Math.min(sp + context, this.memory.getSize() - 1);
+      addr <= Math.min(sp + context, this.memory.getLastCode());
       addr++
     ) {
       const memoryDiv = this.createMemoryDiv(addr);

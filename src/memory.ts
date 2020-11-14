@@ -13,11 +13,12 @@ export class Memory {
 
   constructor(rom: Uint8Array) {
     this.booting = true;
-    this.bootROM = new Uint8Array(BOOTROM);
+    this.bootROM = new Uint8Array(0xffff);
+    this.bootROM.set(BOOTROM, 0);
     this.cartridge = new Uint8Array(rom);
   }
 
-  get bytes(): Uint8Array {
+  private get bytes(): Uint8Array {
     if (this.booting) {
       return this.bootROM;
     } else {
@@ -29,8 +30,12 @@ export class Memory {
     this.booting = false;
   }
 
-  getSize() {
-    return this.bytes.length;
+  getLastCode() {
+    if (this.booting) {
+      return 0x100;
+    } else {
+      throw new Error("idk");
+    }
   }
 
   getByte(address: number): number {
@@ -38,6 +43,9 @@ export class Memory {
     //   if (this.bytes[address] === 0)
     //     console.log("Waiting for screen frame...");
     // }
+    if (address < 0 || address >= this.bytes.length) {
+      throw new Error(`${utils.hexString(address, 16)} is out of memory range (max ${utils.hexString(this.bytes.length, 16)})`);
+    }
 
     return this.bytes[address];
   }
@@ -58,34 +66,34 @@ export class Memory {
   }
 
   getSCY() {
-    return this.bytes[0xff42];
+    return this.getByte(0xff42);
   }
 
   getSCX() {
-    return this.bytes[0xff43];
+    return this.getByte(0xff43);
   }
 
   setLY(x: number) {
-    this.bytes[0xff44] = x;
+    this.setByte(0xff44, x);
   }
 
   getLY() {
-    return this.bytes[0xff44];
+    return this.getByte(0xff44);
   }
 
   getLYC() {
-    return this.bytes[0xff45];
+    return this.getByte(0xff45);
   }
 
   getWY() {
-    return this.bytes[0xff4a];
+    return this.getByte(0xff4a);
   }
 
   getWX() {
-    return this.bytes[0xff4b];
+    return this.getByte(0xff4b);
   }
 
   getLCDC() {
-    return this.bytes[0xff40];
+    return this.getByte(0xff40);
   }
 }
