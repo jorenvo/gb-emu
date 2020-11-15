@@ -16,6 +16,10 @@ export function binString(x: number): string {
   return `0b${bin}`;
 }
 
+export function decString(x: number, length: number): string {
+  return x.toString(10).padStart(length, "0");
+}
+
 export function formatArrayAsHex(array: Uint8Array): string {
   return array
     .reduce(

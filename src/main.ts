@@ -52,7 +52,7 @@ function runEmulator(bytes: Uint8Array) {
     document.execCommand("copy");
   });
 
-  emu.run();
+  // emu.run();
 }
 
 const loader = new Loader();

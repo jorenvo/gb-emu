@@ -10,10 +10,12 @@ export class Emulator {
   private cpu: CPU;
   private memory: Memory;
   private video: Video;
+  private nrBanks: number;
 
   // ui related
-  private addrToMemoryDiv: Map<number, HTMLDivElement>;
+  private bankToAddrToMemoryDiv: Map<number, Map<number, HTMLDivElement>>; // TODO: this could be an array
   private memoryPC: HTMLDivElement | undefined;
+  private bankNrToDiv: Map<number, HTMLDivElement>; // TODO: this can be an array
 
   // run loop related
   private runBudgetMs: number;
@@ -31,8 +33,13 @@ export class Emulator {
       this.memory,
       document.getElementById("video")! as HTMLCanvasElement
     );
+
+    this.nrBanks = 2 << this.memory.getByte(0x148);
+    console.log(`${this.nrBanks} banks`);
+    this.bankNrToDiv = new Map();
+
     this.paused = false;
-    this.addrToMemoryDiv = this.renderMemory();
+    this.bankToAddrToMemoryDiv = this.renderMemory();
 
     this.runBudgetMs = (1 / 60) * 1_000;
   }
@@ -108,7 +115,9 @@ export class Emulator {
     document.getElementById("prevPCs")!.innerText = "Prev PCs: " + s;
   }
 
-  private createMemoryDiv(addr: number) {
+  private createMemoryDiv(bank: number, addr: number) {
+    this.memory.setBank(bank);
+
     const byte = this.memory.getByte(addr);
     const newDiv = document.createElement("div");
 
@@ -124,21 +133,29 @@ export class Emulator {
     return newDiv;
   }
 
-  private renderMemory(): Map<number, HTMLDivElement> {
-    const addrToMemoryDiv = new Map();
-    const memoryDiv = document.getElementById("memory")!;
-    memoryDiv.innerHTML = "";
+  private renderMemory(): Map<number, Map<number, HTMLDivElement>> {
+    const bankToAddrToMemoryDiv = new Map();
+    const memoryBanks = document.getElementById("memoryBanks")!;
+    for (let bank = 0; bank < this.nrBanks; ++bank) {
+      const bankDiv = document.createElement("div");
+      bankDiv.id = `bank${utils.decString(bank, 4)}`;
+      memoryBanks.appendChild(bankDiv);
+      this.bankNrToDiv.set(bank, bankDiv);
+      bankToAddrToMemoryDiv.set(bank, new Map());
 
-    for (let addr = 0; addr <= this.memory.getLastCode(); addr++) {
-      const addrDiv = this.createMemoryDiv(addr);
-      memoryDiv.appendChild(addrDiv);
-      addrToMemoryDiv.set(addr, addrDiv);
+      for (let addr = 0; addr < this.memory.getBankSizeBytes(); ++addr) {
+        const addrDiv = this.createMemoryDiv(bank, addr);
+        bankDiv.appendChild(addrDiv);
+        console.log(bank);
+        bankToAddrToMemoryDiv.get(bank).set(addr, bankDiv);
+      }
     }
 
-    return addrToMemoryDiv;
+    return bankToAddrToMemoryDiv;
   }
 
   private updateMemory() {
+    // bankNr: number, div: HTMLDivElement) {
     let color = "#2e7bff";
     if (this.paused) {
       color = "#ffb22e";
@@ -148,7 +165,14 @@ export class Emulator {
       this.memoryPC.style.color = "black";
     }
 
-    const memoryDiv = this.addrToMemoryDiv.get(this.cpu.PC);
+    const addrToMemoryDiv = this.bankToAddrToMemoryDiv.get(
+      this.memory.getActiveBank()
+    );
+    if (!addrToMemoryDiv) {
+      throw new Error(`Unknown memory bank: ${this.memory.getActiveBank()}`);
+    }
+
+    const memoryDiv = addrToMemoryDiv.get(this.cpu.PC);
     if (memoryDiv === undefined) {
       throw new Error(
         `PC (${utils.hexString(this.cpu.PC, 16)}) not aligned with instruction.`
@@ -183,7 +207,7 @@ export class Emulator {
       addr <= Math.min(sp + context, this.memory.getLastCode());
       addr++
     ) {
-      const memoryDiv = this.createMemoryDiv(addr);
+      const memoryDiv = this.createMemoryDiv(0, addr);
       if (addr === sp) {
         memoryDiv.style.color = "#2e7bff";
       }

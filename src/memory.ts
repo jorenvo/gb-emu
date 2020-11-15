@@ -7,31 +7,45 @@ import { BOOTROM } from "./roms.js";
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
-  booting: boolean;
+  bootROMMapped: boolean;
+  bank: number;
   bootROM: Uint8Array;
   cartridge: Uint8Array;
 
   constructor(rom: Uint8Array) {
-    this.booting = true;
+    this.bootROMMapped = true;
+    this.bank = 0;
     this.bootROM = new Uint8Array(0xffff);
     this.bootROM.set(BOOTROM, 0);
     this.cartridge = new Uint8Array(rom);
   }
 
   private get bytes(): Uint8Array {
-    if (this.booting) {
+    if (this.bootROMMapped) {
       return this.bootROM;
     } else {
       return this.cartridge;
     }
   }
 
+  getBankSizeBytes() {
+    return 16_384; // 16 KiB
+  }
+
+  getActiveBank() {
+    return this.bank;
+  }
+
+  setBank(bank: number) {
+    this.bank = bank;
+  }
+
   switchToCart() {
-    this.booting = false;
+    this.bootROMMapped = false;
   }
 
   getLastCode() {
-    if (this.booting) {
+    if (this.bootROMMapped) {
       return 0x100;
     } else {
       throw new Error("idk");
@@ -44,10 +58,22 @@ export class Memory {
     //     console.log("Waiting for screen frame...");
     // }
     if (address < 0 || address >= this.bytes.length) {
-      throw new Error(`${utils.hexString(address, 16)} is out of memory range (max ${utils.hexString(this.bytes.length, 16)})`);
+      throw new Error(
+        `${utils.hexString(
+          address,
+          16
+        )} is out of memory range (max ${utils.hexString(
+          this.bytes.length,
+          16
+        )})`
+      );
     }
 
-    return this.bytes[address];
+    // Each bank is 16 KiB, 2 banks can be addressed without an
+    // MBC (half of the 16 bit address space is for the cartridge).
+    const offset = (this.bank >> 1) * Math.pow(2, 16);
+
+    return this.bytes[offset + address];
   }
 
   setByte(address: number, value: number) {

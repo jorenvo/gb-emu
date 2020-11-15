@@ -17,10 +17,14 @@
     margin-right: 10px;
 }
 
-#memory {
+#memoryBanks {
     width: 65%;
     max-height: 400px;
     overflow-y: scroll;
+}
+
+#memoryBanks > div {
+    width: 200px;
 }
 
 #video {
