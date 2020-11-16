@@ -1,7 +1,7 @@
 import { CPU } from "./cpu.js";
 import { View, RegisterView, SPView } from "./views.js";
 
-class Controller {
+export class Controller {
   private registerViews: Map<number, RegisterView>;
   // memoryViews: Map<number, MemoryView>;
 

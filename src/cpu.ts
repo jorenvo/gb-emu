@@ -1,6 +1,7 @@
 import * as utils from "./utils.js";
 import { Instruction } from "./instruction.js";
 import { Memory } from "./memory.js";
+import { Controller } from "./controller.js";
 
 export class CPU {
   // reg indexes in regs
@@ -20,15 +21,13 @@ export class CPU {
   private PCInternal: number;
 
   private _regs: Uint8Array;
-  instructions: Map<number, Instruction>;
 
   prevPCs: number[];
   tickCounter: number;
 
-  controller: Controller;
+  private _controller: Controller | undefined;
 
-  constructor(instructions: Map<number, Instruction>, controller: Controller) {
-    this.controller = controller;
+  constructor() {
     this._SP = 0xfffe;
     this.IME = false;
     this.PCInternal = 0;
@@ -38,10 +37,19 @@ export class CPU {
     // H (0x4)          L (0x5)
     // F (flags, 0x6)   A (accumulator, 0x7)
     this._regs = new Uint8Array(new Array(8));
-    this.instructions = instructions;
-
     this.prevPCs = [];
     this.tickCounter = 0;
+  }
+
+  setController(controller: Controller) {
+    this._controller = controller;
+  }
+
+  get controller() {
+    if (!this._controller) {
+      throw new Error("Controller not set");
+    }
+    return this._controller;
   }
 
   get SP() {
@@ -50,7 +58,7 @@ export class CPU {
 
   set SP(addr: number) {
     this._SP = addr;
-    this.controller.updatedSP();
+    // this.controller.updatedSP(); TODO
   }
 
   getReg(r: number) {
@@ -176,7 +184,7 @@ export class CPU {
   }
 
   tick(memory: Memory) {
-    const currentInstruction = this.instructions.get(this.PC);
+    const currentInstruction = memory.getInstruction(this.PC);
     if (currentInstruction === undefined) {
       const hexPC = utils.hexString(this.PC, 16);
       throw new Error(

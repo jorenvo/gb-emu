@@ -1,5 +1,7 @@
 import * as utils from "./utils.js";
 import { BOOTROM } from "./roms.js";
+import { Instruction } from "./instruction.js";
+import { Disassembler } from "./disassembler.js";
 
 /*
  * 0x8000-0x8fff: sprite pattern table
@@ -10,12 +12,51 @@ export class Memory {
   bank: number; // -1 means bootROM
   bootROM: Uint8Array;
   cartridge: Uint8Array;
+  bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
   constructor(rom: Uint8Array) {
     this.bank = -1;
-    this.bootROM = new Uint8Array(0xffff);
-    this.bootROM.set(BOOTROM, 0);
+    this.bootROM = new Uint8Array(BOOTROM);
     this.cartridge = new Uint8Array(rom);
+    this.bankToAddressToInstruction = this.disassemble();
+  }
+
+  private disassemble(): Map<number, Map<number, Instruction>> {
+    const bankToAddressToInstruction = new Map();
+
+    bankToAddressToInstruction.set(-1, new Map());
+    let i = 0;
+    while (i < this.bootROM.length) {
+      const newInstruction = Disassembler.buildInstruction(i, this.bootROM);
+      const size = newInstruction.size();
+      if (size === 0) {
+        const s = newInstruction.disassemble(new Memory(new Uint8Array()));
+        throw new Error(`Encountered unimplemented instruction: ${s}`);
+      }
+
+      i += size;
+      bankToAddressToInstruction.get(-1).set(i, newInstruction);
+    }
+
+    const BANKSIZE = 16_384;
+    for (let bank = 0; bank < this.cartridge.length / BANKSIZE; bank++) {
+      for (let i = 0; i < BANKSIZE; ++i) {
+        const newInstruction = Disassembler.buildInstruction(
+          bank * BANKSIZE + i,
+          this.cartridge
+        ); // TODO: has to be relative to bank
+        const size = newInstruction.size();
+        if (size === 0) {
+          const s = newInstruction.disassemble(new Memory(new Uint8Array()));
+          throw new Error(`Encountered unimplemented instruction: ${s}`);
+        }
+
+        i += size;
+        bankToAddressToInstruction.get(bank).set(i, newInstruction);
+      }
+    }
+
+    return bankToAddressToInstruction;
   }
 
   private get bytes(): Uint8Array {
@@ -25,6 +66,20 @@ export class Memory {
     } else {
       return this.cartridge;
     }
+  }
+
+  getInstruction(address: number): Instruction {
+    const addressToInstruction = this.bankToAddressToInstruction.get(this.bank);
+    if (!addressToInstruction) {
+      throw new Error(`Unknown bank: ${this.bank}`);
+    }
+
+    const instruction = addressToInstruction.get(address);
+    if (!instruction) {
+      throw new Error(`Unknown address: ${address}`);
+    }
+
+    return instruction;
   }
 
   getBankSizeBytes() {

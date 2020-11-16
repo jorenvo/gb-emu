@@ -838,7 +838,7 @@ export class OpRR extends Instruction {
     const reg = this.getReg(memory);
     const lsb = cpu.getReg(reg) & 1;
     cpu.setReg(reg, cpu.getReg(reg) >> 1);
-    cpu.setReg(reg, cpu.getReg(reg) | (cpu.getCarryFlag() << 7))
+    cpu.setReg(reg, cpu.getReg(reg) | (cpu.getCarryFlag() << 7));
     cpu.setCarryFlagDirect(lsb);
 
     cpu.setHalfCarryFlagAdd(0, 0);
@@ -1767,7 +1767,7 @@ export class OpAndR8 extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const isHL = this.isHL(memory);
     const toAnd = this.getToAnd(cpu, memory);
-    cpu.setReg(CPU.A, cpu.getReg(CPU.A) & toAnd)
+    cpu.setReg(CPU.A, cpu.getReg(CPU.A) & toAnd);
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
     cpu.setHalfCarryFlagDirect(1);

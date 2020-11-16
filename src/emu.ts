@@ -3,10 +3,9 @@ import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Video } from "./video.js";
 import { Instruction } from "./instruction.js";
-import { Disassembler } from "./disassembler.js";
+import { Controller } from "./controller.js";
 
 export class Emulator {
-  private instructionMap: Map<number, Instruction>;
   private cpu: CPU;
   private memory: Memory;
   private video: Video;
@@ -27,15 +26,15 @@ export class Emulator {
 
   constructor(bytes: Uint8Array) {
     this.memory = new Memory(bytes);
-    const instructions = this.disassemble(this.memory);
-    this.instructionMap = this.addressToInstruction(instructions);
-    this.cpu = new CPU(this.instructionMap);
+    this.cpu = new CPU();
+    this.controller = new Controller(this.cpu);
+
+    this.cpu.setController(this.controller);
+
     this.video = new Video(
       this.memory,
       document.getElementById("video")! as HTMLCanvasElement
     );
-
-    this.controller = new Controller();
 
     this.nrBanks = 2 << this.memory.getByte(0x148);
     console.log(`${this.nrBanks} banks`);
@@ -49,58 +48,6 @@ export class Emulator {
 
   setBreakpoint(addr: number) {
     this.breakpoint = addr;
-  }
-
-  private disassemble(memory: Memory): Instruction[] {
-    const instructions = [];
-
-    for (let bank = -1; bank < this.memory.nrBanks; ++bank) {
-      let i = 0;
-      while (i < bytes.length) {
-        const newInstruction = Disassembler.buildInstruction(i, bytes);
-        const size = newInstruction.size();
-        if (size === 0) {
-          throw new Error(
-            `Encountered unimplemented instruction: ${newInstruction.disassemble(
-              new Memory(new Uint8Array())
-            )}`
-          );
-        }
-
-        i += size;
-        instructions.push(newInstruction);
-      }
-    }
-
-    return instructions;
-  }
-
-  private addressToInstruction(
-    instructions: Instruction[]
-  ): Map<number, Instruction> {
-    let res = new Map();
-
-    for (let instruction of instructions) {
-      res.set(instruction.getAddress(), instruction);
-    }
-
-    return res;
-  }
-
-  private updateRegs() {
-    let s = `PC: ${utils.hexString(this.cpu.PC, 16)}  `;
-    s += `SP: ${utils.hexString(this.cpu.SP, 16)}  `;
-
-    s += `B: ${utils.hexString(this.cpu.regs[CPU.B])}  `;
-    s += `C: ${utils.hexString(this.cpu.regs[CPU.C])}  `;
-    s += `D: ${utils.hexString(this.cpu.regs[CPU.D])}  `;
-    s += `E: ${utils.hexString(this.cpu.regs[CPU.E])}  `;
-    s += `H: ${utils.hexString(this.cpu.regs[CPU.H])}  `;
-    s += `L: ${utils.hexString(this.cpu.regs[CPU.L])}  `;
-    s += `F: ${utils.hexString(this.cpu.regs[CPU.F])}  `;
-    s += `A: ${utils.hexString(this.cpu.regs[CPU.A])}  `;
-
-    document.getElementById("regs")!.innerText = s;
   }
 
   private updateMemRegs() {
@@ -130,10 +77,10 @@ export class Emulator {
 
     newDiv.innerText = `${utils.hexString(addr, 16)}: ${utils.hexString(byte)}`;
 
-    const instruction = this.instructionMap.get(addr);
-    if (instruction) {
-      newDiv.innerText += ` ${instruction.disassemble(this.memory)}`;
-    }
+    // const instruction = this.instructionMap.get(addr);
+    // if (instruction) {
+    //   newDiv.innerText += ` ${instruction.disassemble(this.memory)}`;
+    // }
 
     return newDiv;
   }
@@ -188,21 +135,21 @@ export class Emulator {
       );
     }
 
-    const instruction = this.instructionMap.get(this.cpu.PC);
-    if (instruction === undefined) {
-      throw new Error(`PC ${this.cpu.PC} is not in instruction map.`);
-    }
+    // const instruction = this.instructionMap.get(this.cpu.PC);
+    // if (instruction === undefined) {
+    //   throw new Error(`PC ${this.cpu.PC} is not in instruction map.`);
+    // }
 
     this.memoryPC = memoryDiv;
     this.memoryPC.style.color = color;
 
-    const execColor = Math.max(100, 255 - instruction.executions * 8);
-    this.memoryPC.style.backgroundColor = `rgb(${execColor}, 255, ${execColor})`;
+    // const execColor = Math.max(100, 255 - instruction.executions * 8);
+    // this.memoryPC.style.backgroundColor = `rgb(${execColor}, 255, ${execColor})`;
 
-    this.memoryPC.scrollIntoView();
+    // this.memoryPC.scrollIntoView();
 
-    const memoryContainer = document.getElementById("memory")!;
-    memoryContainer.scrollTop -= memoryContainer.clientHeight / 2;
+    // const memoryContainer = document.getElementById("memory")!;
+    // memoryContainer.scrollTop -= memoryContainer.clientHeight / 2;
   }
 
   private updateStack() {
@@ -226,7 +173,6 @@ export class Emulator {
   }
 
   private updateUI() {
-    this.updateRegs();
     this.updateMemRegs();
     this.updatePrevPCs();
     this.updateMemory();
