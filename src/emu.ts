@@ -100,7 +100,7 @@ export class Emulator {
       this.bankNrToDiv.set(bank, bankDiv);
       bankToAddrToMemoryDiv.set(bank, new Map());
 
-      for (let addr = 0; addr < this.memory.getBankSizeBytes(); ++addr) {
+      for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
         const addrDiv = this.createMemoryDiv(bank, addr);
         bankDiv.appendChild(addrDiv);
         bankToAddrToMemoryDiv.get(bank).set(addr, bankDiv);

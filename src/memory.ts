@@ -9,6 +9,8 @@ import { Disassembler } from "./disassembler.js";
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
+  static BANKSIZE: 16_384; // 16 KiB
+
   bank: number; // -1 means bootROM
   bootROM: Uint8Array;
   cartridge: Uint8Array;
@@ -38,11 +40,10 @@ export class Memory {
       bankToAddressToInstruction.get(-1).set(i, newInstruction);
     }
 
-    const BANKSIZE = 16_384;
-    for (let bank = 0; bank < this.cartridge.length / BANKSIZE; bank++) {
-      for (let i = 0; i < BANKSIZE; ++i) {
+    for (let bank = 0; bank < this.cartridge.length / Memory.BANKSIZE; bank++) {
+      for (let i = 0; i < Memory.BANKSIZE; ++i) {
         const newInstruction = Disassembler.buildInstruction(
-          bank * BANKSIZE + i,
+          bank * Memory.BANKSIZE + i,
           this.cartridge
         ); // TODO: has to be relative to bank
         const size = newInstruction.size();
@@ -80,10 +81,6 @@ export class Memory {
     }
 
     return instruction;
-  }
-
-  getBankSizeBytes() {
-    return 16_384; // 16 KiB
   }
 
   getActiveBank() {
