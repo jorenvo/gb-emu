@@ -11,7 +11,12 @@ export class Controller {
   constructor(cpu: CPU) {
     this.registerViews = this.createRegisterViews(cpu);
     // this.memoryViews = new Map();
+
     this.toUpdate = new Set();
+    for (const view of this.registerViews.values()) {
+      this.toUpdate.add(view);
+    }
+
     this.updateLoop();
   }
 
