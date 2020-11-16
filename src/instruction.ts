@@ -348,8 +348,8 @@ export class OpLdA16InRegToA extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getSourceReg(memory);
-    const aHigh = cpu.regs[register];
-    const aLow = cpu.regs[register + 1];
+    const aHigh = cpu.getReg(register);
+    const aLow = cpu.getReg(register + 1);
     let addr = (aHigh << 8) | aLow;
     cpu.setReg(CPU.A, memory.getByte(addr));
 
@@ -409,7 +409,7 @@ export class OpLdAtoAddrC extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    memory.setByte(cpu.regs[CPU.C], cpu.regs[CPU.A]);
+    memory.setByte(cpu.getReg(CPU.C), cpu.getReg(CPU.A));
     return 8;
   }
 
@@ -424,7 +424,7 @@ export class OpLdAddrCToA extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    cpu.setReg(CPU.A, memory.getByte(cpu.regs[CPU.C]));
+    cpu.setReg(CPU.A, memory.getByte(cpu.getReg(CPU.C)));
     return 8;
   }
 
@@ -464,7 +464,7 @@ export class OpLdhA8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     const lowAddr = this.getAddr(memory);
-    memory.setByte(0xff00 | lowAddr, cpu.regs[CPU.A]);
+    memory.setByte(0xff00 | lowAddr, cpu.getReg(CPU.A));
     return 12;
   }
 
@@ -493,9 +493,9 @@ export class OpLdR8ToR8 extends Instruction {
     if (srcReg === 6) {
       cpu.setReg(destReg, memory.getByte(cpu.getHL()));
     } else if (destReg === 6) {
-      memory.setByte(cpu.getHL(), cpu.regs[srcReg]);
+      memory.setByte(cpu.getHL(), cpu.getReg(srcReg));
     } else {
-      cpu.setReg(destReg, cpu.regs[srcReg]);
+      cpu.setReg(destReg, cpu.getReg(srcReg));
     }
 
     return 4;
@@ -616,9 +616,9 @@ export class OpInc8 extends Instruction {
       tStates = 12;
     } else {
       const register = this.getReg(memory);
-      cpu.setHalfCarryFlagAdd(cpu.regs[register], 1);
+      cpu.setHalfCarryFlagAdd(cpu.getReg(register), 1);
       cpu.setReg(register, cpu.getReg(register) + 1);
-      cpu.setZeroFlag(cpu.regs[register] === 0 ? 1 : 0);
+      cpu.setZeroFlag(cpu.getReg(register) === 0 ? 1 : 0);
       tStates = 4;
     }
     cpu.setSubtractFlag(0);
@@ -675,9 +675,9 @@ export class OpDec8 extends Instruction {
       tStates = 12;
     } else {
       const register = this.getReg(memory);
-      cpu.setHalfCarryFlagAdd(cpu.regs[register], -1);
+      cpu.setHalfCarryFlagAdd(cpu.getReg(register), -1);
       cpu.setReg(register, cpu.getReg(register) - 1);
-      cpu.setZeroFlag(cpu.regs[register] === 0 ? 1 : 0);
+      cpu.setZeroFlag(cpu.getReg(register) === 0 ? 1 : 0);
       tStates = 4;
     }
     cpu.setSubtractFlag(1);
@@ -703,7 +703,7 @@ export class OpRLCA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    let regValue = cpu.regs[CPU.A];
+    let regValue = cpu.getReg(CPU.A);
     const eightBit = regValue >> 7;
 
     regValue <<= 1;
@@ -730,7 +730,7 @@ export class OpRRCA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    const lsb = cpu.regs[CPU.A] & 1;
+    const lsb = cpu.getReg(CPU.A) & 1;
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) >> 1);
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) | (lsb << 7));
     cpu.setCarryFlagDirect(lsb);
@@ -753,7 +753,7 @@ export class OpRLA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    cpu.setReg(CPU.A, cpu.rotateLeft(cpu.regs[CPU.A]));
+    cpu.setReg(CPU.A, cpu.rotateLeft(cpu.getReg(CPU.A)));
     return 4;
   }
 
@@ -777,7 +777,7 @@ export class OpRL extends Instruction {
       cpu.setHL(cpu.rotateLeft(cpu.getHL()));
       return 16;
     } else {
-      cpu.setReg(register, cpu.rotateLeft(cpu.regs[register]));
+      cpu.setReg(register, cpu.rotateLeft(cpu.getReg(register)));
       return 8;
     }
   }
@@ -809,7 +809,7 @@ export class OpRLC extends Instruction {
       cpu.setHL(cpu.rotateLeft(cpu.getHL()));
       return 16;
     } else {
-      cpu.setReg(register, cpu.rotateLeft(cpu.regs[register]));
+      cpu.setReg(register, cpu.rotateLeft(cpu.getReg(register)));
       return 8;
     }
   }
@@ -836,7 +836,7 @@ export class OpRR extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     const reg = this.getReg(memory);
-    const lsb = cpu.regs[reg] & 1;
+    const lsb = cpu.getReg(reg) & 1;
     cpu.setReg(reg, cpu.getReg(reg) >> 1);
     cpu.setReg(reg, cpu.getReg(reg) | (cpu.getCarryFlag() << 7))
     cpu.setCarryFlagDirect(lsb);
@@ -1124,7 +1124,7 @@ abstract class OpXor extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) ^ this.getVal(cpu, memory));
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
     cpu.setCarryFlagDirect(0);
     cpu.setHalfCarryFlagAdd(0, 0);
@@ -1149,7 +1149,7 @@ export class OpXorR8 extends OpXor {
     if (this.isHL(memory)) {
       return cpu.getHL();
     } else {
-      return cpu.regs[this.getReg(memory)];
+      return cpu.getReg(this.getReg(memory));
     }
   }
 
@@ -1350,12 +1350,12 @@ export class OpPush extends Instruction {
     let low = 0;
     let high = 0;
     if (this.getByte(memory) === 0xf5) {
-      high = cpu.regs[CPU.A];
-      low = cpu.regs[CPU.F];
+      high = cpu.getReg(CPU.A);
+      low = cpu.getReg(CPU.F);
     } else {
       const register = this.getR16(memory);
-      high = cpu.regs[register];
-      low = cpu.regs[register + 1];
+      high = cpu.getReg(register);
+      low = cpu.getReg(register + 1);
     }
 
     memory.setByte(--cpu.SP, high);
@@ -1431,7 +1431,7 @@ export class OpBit extends Instruction {
       // (HL)
       throw new Error("Unimplemented BIT instruction");
     } else {
-      const res = utils.getBits(cpu.regs[register], bit, bit);
+      const res = utils.getBits(cpu.getReg(register), bit, bit);
       cpu.setSubtractFlag(0);
       cpu.setHalfCarryFlagDirect(1);
       cpu.setZeroFlag(res === 0 ? 1 : 0);
@@ -1458,9 +1458,9 @@ export abstract class OpCP extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const d8 = this.getToCompare(cpu, memory);
     cpu.setSubtractFlag(1);
-    cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], d8);
-    cpu.setCarryFlagAdd(cpu.regs[CPU.A], d8);
-    cpu.setZeroFlag(cpu.regs[CPU.A] - d8 === 0 ? 1 : 0);
+    cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), d8);
+    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), d8);
+    cpu.setZeroFlag(cpu.getReg(CPU.A) - d8 === 0 ? 1 : 0);
     return this.tStates();
   }
 }
@@ -1506,7 +1506,7 @@ export class OpCPR8 extends OpCP {
       return memory.getByte(cpu.getHL());
     } else {
       const reg = this.getReg(memory);
-      return cpu.regs[reg];
+      return cpu.getReg(reg);
     }
   }
 
@@ -1527,7 +1527,7 @@ export class OpLdAToA16 extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     const addr = this.getNext16Bits(memory);
-    memory.setByte(addr, cpu.regs[CPU.A]);
+    memory.setByte(addr, cpu.getReg(CPU.A));
     return 16;
   }
 
@@ -1574,15 +1574,15 @@ export class OpSubR8 extends Instruction {
 
   protected getToSubtract(cpu: CPU, memory: Memory) {
     const reg = this.getReg(memory);
-    return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+    return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.getReg(reg);
   }
 
   exec(cpu: CPU, memory: Memory): number {
     const toSub = this.getToSubtract(cpu, memory);
-    cpu.setHalfCarryFlagSubtract(cpu.regs[CPU.A], toSub);
-    cpu.setCarryFlagSubtract(cpu.regs[CPU.A], toSub);
-    cpu.setReg(CPU.A, utils.wrapping8BitSub(cpu.regs[CPU.A], toSub));
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), toSub);
+    cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), toSub);
+    cpu.setReg(CPU.A, utils.wrapping8BitSub(cpu.getReg(CPU.A), toSub));
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(1);
 
     if (this.isHL(memory)) {
@@ -1661,15 +1661,15 @@ export class OpAddR8 extends Instruction {
 
   protected getToAdd(cpu: CPU, memory: Memory) {
     const reg = this.getReg(memory);
-    return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.regs[reg];
+    return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.getReg(reg);
   }
 
   exec(cpu: CPU, memory: Memory): number {
     const toAdd = this.getToAdd(cpu, memory);
-    cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
-    cpu.setCarryFlagAdd(cpu.regs[CPU.A], toAdd);
-    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.regs[CPU.A], toAdd));
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), toAdd));
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
 
     if (this.isHL(memory)) {
@@ -1732,10 +1732,10 @@ export class OpAddCarryD8 extends Instruction {
       this.getToAdd(memory),
       cpu.getCarryFlag()
     );
-    cpu.setHalfCarryFlagAdd(cpu.regs[CPU.A], toAdd);
-    cpu.setCarryFlagAdd(cpu.regs[CPU.A], toAdd);
-    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.regs[CPU.A], toAdd));
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), toAdd));
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
     return 4;
   }
@@ -1761,14 +1761,14 @@ export class OpAndR8 extends Instruction {
   }
 
   protected getToAnd(cpu: CPU, memory: Memory) {
-    return this.isHL(memory) ? cpu.getHL() : cpu.regs[this.getReg(memory)];
+    return this.isHL(memory) ? cpu.getHL() : cpu.getReg(this.getReg(memory));
   }
 
   exec(cpu: CPU, memory: Memory): number {
     const isHL = this.isHL(memory);
     const toAnd = this.getToAnd(cpu, memory);
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) & toAnd)
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
     cpu.setHalfCarryFlagDirect(1);
     cpu.setCarryFlagDirect(0);
@@ -1817,7 +1817,7 @@ export class OpDAA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    let tmp = cpu.regs[CPU.A];
+    let tmp = cpu.getReg(CPU.A);
 
     if (!cpu.getSubtractFlag()) {
       // addition
@@ -1850,7 +1850,7 @@ export class OpDAA extends Instruction {
       cpu.setCarryFlagDirect(1);
     }
     cpu.setReg(CPU.A, tmp & 0xff);
-    if (cpu.regs[CPU.A] === 0) {
+    if (cpu.getReg(CPU.A) === 0) {
       cpu.setZeroFlag(1);
     }
 
@@ -1896,8 +1896,8 @@ export class OpSwap extends Instruction {
       return 16;
     } else {
       const reg = opcode & 0xf;
-      cpu.setReg(reg, this.swap(cpu.regs[reg]));
-      cpu.setZeroFlag(cpu.regs[reg] === 0 ? 1 : 0);
+      cpu.setReg(reg, this.swap(cpu.getReg(reg)));
+      cpu.setZeroFlag(cpu.getReg(reg) === 0 ? 1 : 0);
       return 8;
     }
   }
@@ -1996,7 +1996,7 @@ abstract class OpShift extends Instruction {
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
-      const reg = cpu.regs[this.getRegNr(memory)];
+      const reg = cpu.getReg(this.getRegNr(memory));
       const [carry, val] = this.shift(reg);
       cpu.setCarryFlagDirect(carry);
       cpu.setZeroFlag(val === 0 ? 1 : 0);
@@ -2092,7 +2092,7 @@ export class OpOrR8 extends Instruction {
     if (this.isHL(memory)) {
       return memory.getByte(cpu.getHL());
     } else {
-      return cpu.regs[opcode & 0xf];
+      return cpu.getReg(opcode & 0xf);
     }
   }
 
@@ -2103,7 +2103,7 @@ export class OpOrR8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) | this.getVal(cpu, memory));
-    cpu.setZeroFlag(cpu.regs[CPU.A] === 0 ? 1 : 0);
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     return this.isHL(memory) ? 8 : 4;
   }
 
@@ -2211,7 +2211,7 @@ abstract class OpBitManip extends Instruction {
       return 16;
     } else {
       const reg = this.getRegNr(memory);
-      cpu.setReg(reg, this.manipulateBit(bit, cpu.regs[reg]));
+      cpu.setReg(reg, this.manipulateBit(bit, cpu.getReg(reg)));
       return 8;
     }
   }
