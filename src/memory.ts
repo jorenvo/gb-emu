@@ -7,21 +7,20 @@ import { BOOTROM } from "./roms.js";
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
-  bootROMMapped: boolean;
-  bank: number;
+  bank: number; // -1 means bootROM
   bootROM: Uint8Array;
   cartridge: Uint8Array;
 
   constructor(rom: Uint8Array) {
-    this.bootROMMapped = true;
-    this.bank = 0;
+    this.bank = -1;
     this.bootROM = new Uint8Array(0xffff);
     this.bootROM.set(BOOTROM, 0);
     this.cartridge = new Uint8Array(rom);
   }
 
   private get bytes(): Uint8Array {
-    if (this.bootROMMapped) {
+    if (this.bank === -1) {
+      console.log("Getting bootrom");
       return this.bootROM;
     } else {
       return this.cartridge;
@@ -38,18 +37,6 @@ export class Memory {
 
   setBank(bank: number) {
     this.bank = bank;
-  }
-
-  switchToCart() {
-    this.bootROMMapped = false;
-  }
-
-  getLastCode() {
-    if (this.bootROMMapped) {
-      return 0x100;
-    } else {
-      throw new Error("idk");
-    }
   }
 
   getByte(address: number): number {
@@ -71,7 +58,10 @@ export class Memory {
 
     // Each bank is 16 KiB, 2 banks can be addressed without an
     // MBC (half of the 16 bit address space is for the cartridge).
-    const offset = (this.bank >> 1) * Math.pow(2, 16);
+    let offset = 0;
+    if (this.bank >= 0) {
+      offset = (this.bank >> 1) * Math.pow(2, 16);
+    }
 
     return this.bytes[offset + address];
   }

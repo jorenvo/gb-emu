@@ -13,6 +13,7 @@ export class Emulator {
   private nrBanks: number;
 
   // ui related
+  private controller: Controller;
   private bankToAddrToMemoryDiv: Map<number, Map<number, HTMLDivElement>>; // TODO: this could be an array
   private memoryPC: HTMLDivElement | undefined;
   private bankNrToDiv: Map<number, HTMLDivElement>; // TODO: this can be an array
@@ -25,14 +26,16 @@ export class Emulator {
   breakpoint: number | undefined;
 
   constructor(bytes: Uint8Array) {
-    const instructions = this.disassemble(bytes);
+    this.memory = new Memory(bytes);
+    const instructions = this.disassemble(this.memory);
     this.instructionMap = this.addressToInstruction(instructions);
     this.cpu = new CPU(this.instructionMap);
-    this.memory = new Memory(bytes);
     this.video = new Video(
       this.memory,
       document.getElementById("video")! as HTMLCanvasElement
     );
+
+    this.controller = new Controller();
 
     this.nrBanks = 2 << this.memory.getByte(0x148);
     console.log(`${this.nrBanks} banks`);
@@ -48,23 +51,25 @@ export class Emulator {
     this.breakpoint = addr;
   }
 
-  private disassemble(bytes: Uint8Array): Instruction[] {
+  private disassemble(memory: Memory): Instruction[] {
     const instructions = [];
-    let i = 0;
 
-    while (i < bytes.length) {
-      const newInstruction = Disassembler.buildInstruction(i, bytes);
-      const size = newInstruction.size();
-      if (size === 0) {
-        throw new Error(
-          `Encountered unimplemented instruction: ${newInstruction.disassemble(
-            new Memory(new Uint8Array())
-          )}`
-        );
+    for (let bank = -1; bank < this.memory.nrBanks; ++bank) {
+      let i = 0;
+      while (i < bytes.length) {
+        const newInstruction = Disassembler.buildInstruction(i, bytes);
+        const size = newInstruction.size();
+        if (size === 0) {
+          throw new Error(
+            `Encountered unimplemented instruction: ${newInstruction.disassemble(
+              new Memory(new Uint8Array())
+            )}`
+          );
+        }
+
+        i += size;
+        instructions.push(newInstruction);
       }
-
-      i += size;
-      instructions.push(newInstruction);
     }
 
     return instructions;
@@ -136,9 +141,14 @@ export class Emulator {
   private renderMemory(): Map<number, Map<number, HTMLDivElement>> {
     const bankToAddrToMemoryDiv = new Map();
     const memoryBanks = document.getElementById("memoryBanks")!;
-    for (let bank = 0; bank < this.nrBanks; ++bank) {
+    for (let bank = -1; bank < this.nrBanks; ++bank) {
+      // -1 for bootrom
       const bankDiv = document.createElement("div");
-      bankDiv.id = `bank${utils.decString(bank, 4)}`;
+      if (bank === -1) {
+        bankDiv.id = "bankBOOT";
+      } else {
+        bankDiv.id = `bank${utils.decString(bank, 4)}`;
+      }
       memoryBanks.appendChild(bankDiv);
       this.bankNrToDiv.set(bank, bankDiv);
       bankToAddrToMemoryDiv.set(bank, new Map());
@@ -146,7 +156,6 @@ export class Emulator {
       for (let addr = 0; addr < this.memory.getBankSizeBytes(); ++addr) {
         const addrDiv = this.createMemoryDiv(bank, addr);
         bankDiv.appendChild(addrDiv);
-        console.log(bank);
         bankToAddrToMemoryDiv.get(bank).set(addr, bankDiv);
       }
     }
@@ -204,7 +213,7 @@ export class Emulator {
 
     for (
       let addr = Math.max(0, sp - context);
-      addr <= Math.min(sp + context, this.memory.getLastCode());
+      addr <= Math.min(sp + context, 0xffff);
       addr++
     ) {
       const memoryDiv = this.createMemoryDiv(0, addr);

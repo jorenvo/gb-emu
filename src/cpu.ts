@@ -16,17 +16,20 @@ export class CPU {
   // Interrupt Master Enable
   IME: boolean;
 
-  SP: number;
+  private _SP: number;
   private PCInternal: number;
 
-  regs: Uint8Array;
+  private _regs: Uint8Array;
   instructions: Map<number, Instruction>;
 
   prevPCs: number[];
   tickCounter: number;
 
-  constructor(instructions: Map<number, Instruction>) {
-    this.SP = 0xfffe;
+  controller: Controller;
+
+  constructor(instructions: Map<number, Instruction>, controller: Controller) {
+    this.controller = controller;
+    this._SP = 0xfffe;
     this.IME = false;
     this.PCInternal = 0;
     // from 0x0 to 0x7
@@ -34,20 +37,38 @@ export class CPU {
     // D (0x2)          E (0x3)
     // H (0x4)          L (0x5)
     // F (flags, 0x6)   A (accumulator, 0x7)
-    this.regs = new Uint8Array(new Array(8));
+    this._regs = new Uint8Array(new Array(8));
     this.instructions = instructions;
 
     this.prevPCs = [];
     this.tickCounter = 0;
   }
 
+  get SP() {
+    return this._SP;
+  }
+
+  set SP(addr: number) {
+    this._SP = addr;
+    this.controller.updatedSP();
+  }
+
+  getReg(r: number) {
+    return this._regs[r];
+  }
+
+  setReg(r: number, val: number) {
+    this._regs[r] = val;
+    this.controller.updatedReg(r);
+  }
+
   getCombinedRegister(r1: number, r2: number): number {
-    return (this.regs[r1] << 8) | this.regs[r2];
+    return (this.getReg(r1) << 8) | this.getReg(r2);
   }
 
   setCombinedRegister(r1: number, r2: number, val: number) {
-    this.regs[r1] = val >> 8;
-    this.regs[r2] = val & 0xff;
+    this.setReg(r1, val >> 8);
+    this.setReg(r2, val & 0xff);
   }
 
   set PC(newPC: number) {
@@ -81,41 +102,50 @@ export class CPU {
   }
 
   setZeroFlag(zeroFlag: number) {
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b0111_1111) | (zeroFlag << 7);
+    this.setReg(CPU.F, (this.getReg(CPU.F) & 0b0111_1111) | (zeroFlag << 7));
   }
 
   getZeroFlag(): number {
-    return this.regs[CPU.F] >> 7;
+    return this.getReg(CPU.F) >> 7;
   }
 
   setSubtractFlag(subFlag: number) {
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1011_1111) | (subFlag << 6);
+    this.setReg(CPU.F, (this.getReg(CPU.F) & 0b1011_1111) | (subFlag << 6));
   }
 
   getSubtractFlag(): number {
-    return (this.regs[CPU.F] >> 6) & 1;
+    return (this.getReg(CPU.F) >> 6) & 1;
   }
 
   setHalfCarryFlagDirect(halfCarryFlag: number) {
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
+    this.setReg(
+      CPU.F,
+      (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5)
+    );
   }
 
   setHalfCarryFlagAdd(a: number, b: number) {
     const halfCarryFlag = (a & 0xf) + (b & 0xf) >= 0x10 ? 1 : 0;
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
+    this.setReg(
+      CPU.F,
+      (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5)
+    );
   }
 
   setHalfCarryFlagSubtract(a: number, b: number) {
     const halfCarryFlag = (b & 0xf) > (a & 0xf) ? 1 : 0;
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1101_1111) | (halfCarryFlag << 5);
+    this.setReg(
+      CPU.F,
+      (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5)
+    );
   }
 
   getHalfCarryFlag(): number {
-    return (this.regs[CPU.F] & 0b0010_0000) > 0 ? 1 : 0;
+    return (this.getReg(CPU.F) & 0b0010_0000) > 0 ? 1 : 0;
   }
 
   setCarryFlagDirect(carryFlag: number) {
-    this.regs[CPU.F] = (this.regs[CPU.F] & 0b1110_1111) | (carryFlag << 4);
+    this.setReg(CPU.F, (this.getReg(CPU.F) & 0b1110_1111) | (carryFlag << 4));
   }
 
   setCarryFlagAdd(a: number, b: number) {
@@ -129,7 +159,7 @@ export class CPU {
   }
 
   getCarryFlag(): number {
-    return (this.regs[CPU.F] & 0b0001_0000) > 0 ? 1 : 0;
+    return (this.getReg(CPU.F) & 0b0001_0000) > 0 ? 1 : 0;
   }
 
   rotateLeft(n: number): number {
