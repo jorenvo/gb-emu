@@ -24,7 +24,7 @@ export class Memory {
     this.cartridge = new Uint8Array(rom);
     this.romBanks = this.splitCartridge();
     this.bankToAddressToInstruction = this.disassemble();
-    this.nrBanks = this.cartridge.length / Memory.BANKSIZE;
+    this.nrBanks = this.romBanks.length;
   }
 
   private splitCartridge(): Uint8Array[] {
