@@ -52,8 +52,8 @@ export class Memory {
         throw new Error(`Encountered unimplemented instruction: ${s}`);
       }
 
-      i += size;
       bankToAddressToInstruction.get(-1)!.set(i, newInstruction);
+      i += size;
     }
 
     for (let bankNr = 0; bankNr < this.romBanks.length; ++bankNr) {
@@ -68,8 +68,8 @@ export class Memory {
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 
-        i += size;
         bankToAddressToInstruction.get(bankNr)!.set(i, newInstruction);
+        i += size;
       }
     }
 
