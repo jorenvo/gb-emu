@@ -118,7 +118,7 @@ export class MemoryView extends View {
   update() {
     const instruction = this.memory.getInstruction(this.address, this.bank);
     if (instruction) {
-      const dis = instruction.disassemble(this.memory)
+      const dis = instruction.disassemble(this.memory);
       this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
     }
 

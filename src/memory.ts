@@ -76,27 +76,17 @@ export class Memory {
     return bankToAddressToInstruction;
   }
 
-  private get bytes(): Uint8Array {
-    if (this.bank === -1) {
-      return this.bootROM;
-    } else {
-      return this.cartridge;
-    }
-  }
-
   // specify bank to force a bank instead of taking the current one
   getInstruction(address: number, bank?: number): Instruction | undefined {
-    const addressToInstruction = this.bankToAddressToInstruction.get(
-      bank || this.bank
-    );
+    if (bank === undefined) {
+      bank = this.bank;
+    }
+
+    const addressToInstruction = this.bankToAddressToInstruction.get(bank);
     if (!addressToInstruction) {
-      throw new Error(`Unknown bank: ${bank || this.bank}`);
+      throw new Error(`Unknown bank: ${bank}`);
     }
     return addressToInstruction.get(address);
-  }
-
-  getActiveBank() {
-    return this.bank;
   }
 
   setBank(bank: number) {
@@ -104,30 +94,11 @@ export class Memory {
   }
 
   getByte(address: number): number {
-    // if (address === 0xff44) {
-    //   if (this.bytes[address] === 0)
-    //     console.log("Waiting for screen frame...");
-    // }
-    if (address < 0 || address >= this.bytes.length) {
-      throw new Error(
-        `${utils.hexString(
-          address,
-          16
-        )} is out of memory range (max ${utils.hexString(
-          this.bytes.length,
-          16
-        )})`
-      );
+    if (this.bank === -1) {
+      return this.bootROM[address];
+    } else {
+      return this.romBanks[this.bank][address];
     }
-
-    // Each bank is 16 KiB, 2 banks can be addressed without an
-    // MBC (half of the 16 bit address space is for the cartridge).
-    let offset = 0;
-    if (this.bank >= 0) {
-      offset = (this.bank >> 1) * Math.pow(2, 16);
-    }
-
-    return this.bytes[offset + address];
   }
 
   setByte(address: number, value: number) {
@@ -142,7 +113,7 @@ export class Memory {
 
     if (value === undefined) debugger;
 
-    this.bytes[address] = value;
+    this.romBanks[this.bank][address] = value;
   }
 
   getSCY() {
