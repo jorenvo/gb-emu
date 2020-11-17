@@ -13,7 +13,6 @@
 }
 
 .debugColumns {
-    display: flex;
     width: 700px;
 }
 
@@ -22,9 +21,7 @@
 }
 
 #memoryBanks {
-    width: 65%;
-    max-height: 400px;
-    overflow-y: scroll;
+    display: flex;
 }
 
 #memoryBanks > span {
@@ -44,6 +41,13 @@
     height: 256px;
 }
 
+BankView {
+    max-height: 400px;
+    overflow-y: scroll;
+    padding-right: 1em;
+}
+
 MemoryView {
     display: block;
+    white-space: nowrap;
 }
