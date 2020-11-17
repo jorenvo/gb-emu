@@ -116,9 +116,11 @@ export class MemoryView extends View {
   }
 
   update() {
-    this.element.innerHTML = this.memory
-      .getInstruction(this.address, this.bank)
-      .disassemble(this.memory);
+    const instruction = this.memory.getInstruction(this.address, this.bank);
+    if (instruction) {
+      const dis = instruction.disassemble(this.memory)
+      this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
+    }
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
       this.element.classList.add("activeInstruction");

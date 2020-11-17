@@ -78,7 +78,6 @@ export class Memory {
 
   private get bytes(): Uint8Array {
     if (this.bank === -1) {
-      console.log("Getting bootrom");
       return this.bootROM;
     } else {
       return this.cartridge;
@@ -86,20 +85,14 @@ export class Memory {
   }
 
   // specify bank to force a bank instead of taking the current one
-  getInstruction(address: number, bank?: number): Instruction {
+  getInstruction(address: number, bank?: number): Instruction | undefined {
     const addressToInstruction = this.bankToAddressToInstruction.get(
       bank || this.bank
     );
     if (!addressToInstruction) {
       throw new Error(`Unknown bank: ${bank || this.bank}`);
     }
-
-    const instruction = addressToInstruction.get(address);
-    if (!instruction) {
-      throw new Error(`Unknown address: ${address}`);
-    }
-
-    return instruction;
+    return addressToInstruction.get(address);
   }
 
   getActiveBank() {
