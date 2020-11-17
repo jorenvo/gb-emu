@@ -4,11 +4,7 @@
   font-family: monospace;
 }
 
-#regs {
-  margin-top: 10px;
-}
-
-#regs > span {
+Register {
   margin-right: 5px;
 }
 
