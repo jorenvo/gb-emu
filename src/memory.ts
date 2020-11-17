@@ -9,7 +9,7 @@ import { Disassembler } from "./disassembler.js";
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
-  static BANKSIZE: 16_384; // 16 KiB
+  static BANKSIZE = 16_384; // 16 KiB
 
   bank: number; // -1 means bootROM
   nrBanks: number;
