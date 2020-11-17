@@ -8,6 +8,10 @@
   margin-top: 10px;
 }
 
+#regs > span {
+  margin-right: 5px;
+}
+
 .debugColumns {
     display: flex;
     width: 700px;
@@ -23,8 +27,16 @@
     overflow-y: scroll;
 }
 
-#memoryBanks > div {
+#memoryBanks > span {
     width: 200px;
+}
+
+#memoryBanks .activeBank {
+    background-color: green;
+}
+
+#memoryBanks .inactiveBank {
+    background-color: grey;
 }
 
 #video {

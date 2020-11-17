@@ -23,7 +23,7 @@ export class Emulator {
   constructor(bytes: Uint8Array) {
     this.memory = new Memory(bytes);
     this.cpu = new CPU();
-    this.controller = new Controller(this.cpu);
+    this.controller = new Controller(this.cpu, this.memory);
 
     this.cpu.setController(this.controller);
 

@@ -1,16 +1,19 @@
 import { CPU } from "./cpu.js";
-import { View, RegisterView, SPView } from "./views.js";
+import { Memory } from "./memory.js";
+import { View, RegisterView, SPView, BankView, MemoryView } from "./views.js";
 
 export class Controller {
   private registerViews: Map<number, RegisterView>;
-  // memoryViews: Map<number, MemoryView>;
+  private bankViews: Map<number, BankView>;
+  private memoryViews: Map<number, MemoryView>;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
 
-  constructor(cpu: CPU) {
+  constructor(cpu: CPU, memory: Memory) {
     this.registerViews = this.createRegisterViews(cpu);
-    // this.memoryViews = new Map();
+    this.bankViews = this.createBankViews(memory);
+    this.memoryViews = this.createMemoryViews(cpu, memory);
 
     this.toUpdate = new Set();
     for (const view of this.registerViews.values()) {
@@ -34,6 +37,30 @@ export class Controller {
     return views;
   }
 
+  private createBankViews(memory: Memory) {
+    const views = new Map();
+    for (let bank = 0; bank < memory.nrBanks + 1; ++bank) {
+      views.set(bank, new BankView(bank, memory));
+    }
+
+    return views;
+  }
+
+  private createMemoryViews(cpu: CPU, memory: Memory) {
+    const views = new Map();
+    for (let bank = 0; bank < memory.nrBanks + 1; ++bank) {
+      const bankView = this.bankViews.get(bank)!;
+      for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
+        views.set(
+          (bank << 16) | addr,
+          new MemoryView(bank, addr, memory, cpu, bankView)
+        );
+      }
+    }
+
+    return views;
+  }
+
   updatedReg(reg: number) {
     const view = this.registerViews.get(reg);
     if (!view) {
@@ -42,6 +69,8 @@ export class Controller {
 
     this.toUpdate.add(view);
   }
+
+  updatedMemory(bank: number, address: number) {}
 
   private updatePending() {
     this.toUpdate.forEach(view => {

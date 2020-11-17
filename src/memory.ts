@@ -12,15 +12,28 @@ export class Memory {
   static BANKSIZE: 16_384; // 16 KiB
 
   bank: number; // -1 means bootROM
+  nrBanks: number;
   bootROM: Uint8Array;
   cartridge: Uint8Array;
+  romBanks: Uint8Array[];
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
   constructor(rom: Uint8Array) {
     this.bank = -1;
     this.bootROM = new Uint8Array(BOOTROM);
     this.cartridge = new Uint8Array(rom);
+    this.romBanks = this.splitCartridge();
     this.bankToAddressToInstruction = this.disassemble();
+    this.nrBanks = this.cartridge.length / Memory.BANKSIZE;
+  }
+
+  private splitCartridge(): Uint8Array[] {
+    const banks = [];
+    for (let i = 0; i < this.cartridge.length; i += Memory.BANKSIZE) {
+      banks.push(this.cartridge.subarray(i, i + Memory.BANKSIZE));
+    }
+
+    return banks;
   }
 
   private disassemble(): Map<number, Map<number, Instruction>> {
@@ -40,12 +53,10 @@ export class Memory {
       bankToAddressToInstruction.get(-1).set(i, newInstruction);
     }
 
-    for (let bank = 0; bank < this.cartridge.length / Memory.BANKSIZE; bank++) {
-      for (let i = 0; i < Memory.BANKSIZE; ++i) {
-        const newInstruction = Disassembler.buildInstruction(
-          bank * Memory.BANKSIZE + i,
-          this.cartridge
-        ); // TODO: has to be relative to bank
+    for (let bank of this.romBanks) {
+      let i = 0;
+      while (i < bank.length) {
+        const newInstruction = Disassembler.buildInstruction(i, bank);
         const size = newInstruction.size();
         if (size === 0) {
           const s = newInstruction.disassemble(new Memory(new Uint8Array()));
