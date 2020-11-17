@@ -69,10 +69,12 @@ export class Controller {
         throw new Error(`Bank ${bank} doesn't exist.`);
       }
       for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
-        views.set(
-          this.createMemoryViewKey(bank, addr),
-          new MemoryView(bank, addr, memory, cpu, bankView.element)
-        );
+        if (memory.getInstruction(addr, bank)) {
+          views.set(
+            this.createMemoryViewKey(bank, addr),
+            new MemoryView(bank, addr, memory, cpu, bankView.element)
+          );
+        }
       }
     }
 
