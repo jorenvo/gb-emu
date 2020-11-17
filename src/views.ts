@@ -4,19 +4,26 @@ import * as utils from "./utils.js";
 
 export abstract class View {
   element: HTMLElement;
+  parent: HTMLElement | undefined;
   abstract update(): void;
 
-  constructor(elementID: string) {
-    this.setupElement(elementID);
-    const element = document.getElementById(elementID);
+  constructor(elementID: string, parent?: HTMLElement, elementName?: string) {
+    let element = document.getElementById(elementID);
     if (!element) {
-      throw new Error(`#${elementID} does not exist in DOM.`);
+      if (!parent) {
+        throw new Error(`Cannot create #${elementID} without parent.`);
+      }
+      if (!elementName) {
+        throw new Error(`Cannot create #${elementID} without element name.`);
+      }
+
+      element = document.createElement(elementName);
+      element.id = elementID;
+      parent.appendChild(element);
     }
+
     this.element = element;
   }
-
-  // Can be implemented if DOM elements need to be created dynamically.
-  protected setupElement(_elementID: string): void {}
 }
 
 export class RegisterView extends View {
@@ -55,17 +62,18 @@ export class BankView extends View {
   memory: Memory;
   bank: number;
 
-  constructor(bank: number, memory: Memory) {
-    super(`bank${utils.decString(bank, 3)}`);
+  constructor(bank: number, memory: Memory, parent: HTMLElement) {
+    let elementID = "bank";
+    if (bank === -1) {
+      elementID += "Boot";
+    } else {
+      elementID += utils.decString(bank, 3);
+    }
+    super(elementID, parent, "BankView");
     this.memory = memory;
     this.bank = bank;
-  }
 
-  protected setupElement(elementID: string) {
-    const span = document.createElement("span");
-    span.id = elementID;
-    span.classList.add("inactiveBank");
-    document.getElementById("memoryBanks")!.appendChild(span);
+    this.element.classList.add("inactiveBank");
   }
 
   update() {
@@ -80,7 +88,6 @@ export class BankView extends View {
 }
 
 export class MemoryView extends View {
-  parent: View;
   memory: Memory;
   cpu: CPU;
   address: number;
@@ -91,22 +98,21 @@ export class MemoryView extends View {
     address: number,
     memory: Memory,
     cpu: CPU,
-    parent: View
+    parent: HTMLElement
   ) {
-    super(
-      `memBank${utils.decString(bank, 3)}Addr${utils.hexString(address, 16)}`
-    );
+    let elementID = "memBank";
+    if (bank === -1) {
+      elementID += "Boot";
+    } else {
+      elementID += utils.decString(bank, 3);
+    }
+    elementID += `-${utils.hexString(address, 16)}`;
+
+    super(elementID, parent, "MemoryView");
     this.memory = memory;
     this.cpu = cpu;
     this.address = address;
     this.bank = bank;
-    this.parent = parent;
-  }
-
-  protected setupElement(elementID: string) {
-    const div = document.createElement("div");
-    div.id = elementID;
-    this.parent.element.appendChild(div);
   }
 
   update() {

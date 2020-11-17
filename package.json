@@ -7,6 +7,7 @@
     "prebuild": "rm -rvf dist/*",
     "build": "mkdir -p $PWD/dist && tsc && cp $PWD/src/*.{html,css} dist/",
     "watch": "npm-watch",
+    "watch-tsc": "tsc --watch",
     "test": "./prep_tests.sh && mocha -r ts-node/register test_src/*.spec.ts; rm -r $PWD/test_src",
     "env": "env"
   },

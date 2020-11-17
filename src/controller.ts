@@ -39,8 +39,11 @@ export class Controller {
 
   private createBankViews(memory: Memory) {
     const views = new Map();
-    for (let bank = 0; bank < memory.nrBanks + 1; ++bank) {
-      views.set(bank, new BankView(bank, memory));
+    for (let bank = -1; bank < memory.nrBanks; ++bank) {
+      views.set(
+        bank,
+        new BankView(bank, memory, document.getElementById("memoryBanks")!)
+      );
     }
 
     return views;
@@ -48,12 +51,15 @@ export class Controller {
 
   private createMemoryViews(cpu: CPU, memory: Memory) {
     const views = new Map();
-    for (let bank = 0; bank < memory.nrBanks + 1; ++bank) {
-      const bankView = this.bankViews.get(bank)!;
+    for (let bank = -1; bank < memory.nrBanks; ++bank) {
+      const bankView = this.bankViews.get(bank);
+      if (!bankView) {
+        throw new Error(`Bank ${bank} doesn't exist.`);
+      }
       for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
         views.set(
           (bank << 16) | addr,
-          new MemoryView(bank, addr, memory, cpu, bankView)
+          new MemoryView(bank, addr, memory, cpu, bankView.element)
         );
       }
     }

@@ -37,7 +37,10 @@ export class Memory {
   }
 
   private disassemble(): Map<number, Map<number, Instruction>> {
-    const bankToAddressToInstruction = new Map();
+    const bankToAddressToInstruction: Map<
+      number,
+      Map<number, Instruction>
+    > = new Map();
 
     bankToAddressToInstruction.set(-1, new Map());
     let i = 0;
@@ -50,10 +53,12 @@ export class Memory {
       }
 
       i += size;
-      bankToAddressToInstruction.get(-1).set(i, newInstruction);
+      bankToAddressToInstruction.get(-1)!.set(i, newInstruction);
     }
 
-    for (let bank of this.romBanks) {
+    for (let bankNr = 0; bankNr < this.romBanks.length; ++bankNr) {
+      const bank = this.romBanks[bankNr];
+      bankToAddressToInstruction.set(bankNr, new Map());
       let i = 0;
       while (i < bank.length) {
         const newInstruction = Disassembler.buildInstruction(i, bank);
@@ -64,7 +69,7 @@ export class Memory {
         }
 
         i += size;
-        bankToAddressToInstruction.get(bank).set(i, newInstruction);
+        bankToAddressToInstruction.get(bankNr)!.set(i, newInstruction);
       }
     }
 
