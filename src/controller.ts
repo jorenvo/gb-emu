@@ -14,13 +14,21 @@ export class Controller {
     this.registerViews = this.createRegisterViews(cpu);
     this.bankViews = this.createBankViews(memory);
     this.memoryViews = this.createMemoryViews(cpu, memory);
-
     this.toUpdate = new Set();
+    this.markAllUpdated();
+    this.updateLoop();
+  }
+
+  private markAllUpdated() {
     for (const view of this.registerViews.values()) {
       this.toUpdate.add(view);
     }
-
-    this.updateLoop();
+    for (const view of this.bankViews.values()) {
+      this.toUpdate.add(view);
+    }
+    for (const view of this.memoryViews.values()) {
+      this.toUpdate.add(view);
+    }
   }
 
   private createRegisterViews(cpu: CPU) {
@@ -49,6 +57,10 @@ export class Controller {
     return views;
   }
 
+  private createMemoryViewKey(bank: number, address: number): number {
+    return (bank << 16) | address;
+  }
+
   private createMemoryViews(cpu: CPU, memory: Memory) {
     const views = new Map();
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
@@ -58,7 +70,7 @@ export class Controller {
       }
       for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
         views.set(
-          (bank << 16) | addr,
+          this.createMemoryViewKey(bank, addr),
           new MemoryView(bank, addr, memory, cpu, bankView.element)
         );
       }
@@ -70,13 +82,22 @@ export class Controller {
   updatedReg(reg: number) {
     const view = this.registerViews.get(reg);
     if (!view) {
-      throw new Error("Unknown reg ${reg}");
+      throw new Error(`Unknown reg ${reg}`);
     }
 
     this.toUpdate.add(view);
   }
 
-  updatedMemory(bank: number, address: number) {}
+  updatedMemory(bank: number, address: number) {
+    const view = this.memoryViews.get(this.createMemoryViewKey(bank, address));
+    if (!view) {
+      throw new Error(
+        `Memory at bank ${bank} address ${address} doesn't exist`
+      );
+    }
+
+    this.toUpdate.add(view);
+  }
 
   private updatePending() {
     this.toUpdate.forEach(view => {

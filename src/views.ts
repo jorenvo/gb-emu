@@ -116,6 +116,10 @@ export class MemoryView extends View {
   }
 
   update() {
+    this.element.innerHTML = this.memory
+      .getInstruction(this.address, this.bank)
+      .disassemble(this.memory);
+
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
       this.element.classList.add("activeInstruction");
       this.element.scrollIntoView();

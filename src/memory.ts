@@ -85,10 +85,13 @@ export class Memory {
     }
   }
 
-  getInstruction(address: number): Instruction {
-    const addressToInstruction = this.bankToAddressToInstruction.get(this.bank);
+  // specify bank to force a bank instead of taking the current one
+  getInstruction(address: number, bank?: number): Instruction {
+    const addressToInstruction = this.bankToAddressToInstruction.get(
+      bank || this.bank
+    );
     if (!addressToInstruction) {
-      throw new Error(`Unknown bank: ${this.bank}`);
+      throw new Error(`Unknown bank: ${bank || this.bank}`);
     }
 
     const instruction = addressToInstruction.get(address);
