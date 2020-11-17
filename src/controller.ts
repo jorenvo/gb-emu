@@ -6,6 +6,7 @@ export class Controller {
   private registerViews: Map<number, RegisterView>;
   private bankViews: Map<number, BankView>;
   private memoryViews: Map<number, MemoryView>;
+  private SPView: SPView;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
@@ -14,6 +15,8 @@ export class Controller {
     this.registerViews = this.createRegisterViews(cpu);
     this.bankViews = this.createBankViews(memory);
     this.memoryViews = this.createMemoryViews(cpu, memory);
+    this.SPView = new SPView("SP", cpu);
+
     this.toUpdate = new Set();
     this.markAllUpdated();
     this.updateLoop();
@@ -23,9 +26,15 @@ export class Controller {
     for (const view of this.registerViews.values()) {
       this.toUpdate.add(view);
     }
+
+    this.toUpdate.add(this.SPView);
+
     for (const view of this.bankViews.values()) {
       this.toUpdate.add(view);
     }
+
+    // Updates happen in insertion order, keep this last in case of
+    // disassemble errors.
     for (const view of this.memoryViews.values()) {
       this.toUpdate.add(view);
     }
