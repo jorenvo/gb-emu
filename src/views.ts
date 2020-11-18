@@ -156,3 +156,10 @@ export class PauseButton extends Button {
     this.controller.togglePause();
   }
 }
+
+export class RunBootRomButton extends Button {
+  click(_e: MouseEvent): void {
+    console.log("clicked");
+    this.controller.runBootRom();
+  }
+}

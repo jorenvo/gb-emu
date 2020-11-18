@@ -1,51 +1,82 @@
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
+import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
-import { View, RegisterView, SPView, BankView, MemoryView, PauseButton } from "./views.js";
+import {
+  View,
+  RegisterView,
+  SPView,
+  BankView,
+  MemoryView,
+  PauseButton,
+  RunBootRomButton
+} from "./views.js";
+
+declare global {
+  interface Window {
+    emu: Emulator;
+  }
+}
 
 export class Controller {
+  // loader
+  private loader: Loader;
+
   // model
-  private emu: Emulator;
+  private emu: Emulator | undefined;
 
   // views
-  private registerViews: Map<number, RegisterView>;
-  private bankViews: Map<number, BankView>;
-  private memoryViews: Map<number, MemoryView>;
-  private SPView: SPView;
+  private registerViews: Map<number, RegisterView> | undefined;
+  private bankViews: Map<number, BankView> | undefined;
+  private memoryViews: Map<number, MemoryView> | undefined;
+  private SPView: SPView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
+  private bootRomButton: RunBootRomButton;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
 
-  constructor(cpu: CPU, memory: Memory, emu: Emulator) {
-    this.emu = emu;
-    this.registerViews = this.createRegisterViews(cpu);
-    this.bankViews = this.createBankViews(memory);
-    this.memoryViews = this.createMemoryViews(cpu, memory);
-    this.SPView = new SPView("SP", cpu);
+  constructor() {
+    this.loader = new Loader();
+    this.loader.readFile.then(rom => this.boot(new Uint8Array(rom)));
+    this.toUpdate = new Set();
+
     this.pauseButton = new PauseButton("pause", this);
+    this.bootRomButton = new RunBootRomButton("loadBootrom", this);
+  }
+
+  private boot(bytes: Uint8Array) {
+    console.log("Booting...");
+    this.emu = new Emulator(this, bytes);
+    window.emu = this.emu;
+
+    this.registerViews = this.createRegisterViews(this.emu.cpu);
+    this.bankViews = this.createBankViews(this.emu.memory);
+    this.memoryViews = this.createMemoryViews(this.emu.cpu, this.emu.memory);
+    this.SPView = new SPView("SP", this.emu.cpu);
 
     this.toUpdate = new Set();
     this.markAllUpdated();
     this.updateLoop();
+    // setBreakpoint(emu);
   }
 
   private markAllUpdated() {
-    for (const view of this.registerViews.values()) {
+    for (const view of this.registerViews!.values()) {
       this.toUpdate.add(view);
     }
 
-    this.toUpdate.add(this.SPView);
+    this.toUpdate.add(this.SPView!);
 
-    for (const view of this.bankViews.values()) {
+    for (const view of this.bankViews!.values()) {
       this.toUpdate.add(view);
     }
 
     // Updates happen in insertion order, keep this last in case of
     // disassemble errors.
-    for (const view of this.memoryViews.values()) {
+    for (const view of this.memoryViews!.values()) {
       this.toUpdate.add(view);
     }
   }
@@ -83,7 +114,7 @@ export class Controller {
   private createMemoryViews(cpu: CPU, memory: Memory) {
     const views = new Map();
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
-      const bankView = this.bankViews.get(bank);
+      const bankView = this.bankViews!.get(bank);
       if (!bankView) {
         throw new Error(`Bank ${bank} doesn't exist.`);
       }
@@ -100,12 +131,16 @@ export class Controller {
     return views;
   }
 
+  runBootRom() {
+    this.boot(new Uint8Array());
+  }
+
   togglePause() {
-    this.emu.togglePause();
+    this.emu!.togglePause();
   }
 
   updatedReg(reg: number) {
-    const view = this.registerViews.get(reg);
+    const view = this.registerViews!.get(reg);
     if (!view) {
       throw new Error(`Unknown reg ${reg}`);
     }
@@ -114,7 +149,7 @@ export class Controller {
   }
 
   updatedMemory(bank: number, address: number) {
-    const view = this.memoryViews.get(this.createMemoryViewKey(bank, address));
+    const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
     if (!view) {
       throw new Error(
         `Memory at bank ${bank} address ${address} doesn't exist`

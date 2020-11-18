@@ -6,12 +6,9 @@ import { Instruction } from "./instruction.js";
 import { Controller } from "./controller.js";
 
 export class Emulator {
-  private cpu: CPU;
-  private memory: Memory;
+  cpu: CPU;
+  memory: Memory;
   private video: Video;
-
-  // ui related
-  private controller: Controller;
 
   // run loop related
   private runBudgetMs: number;
@@ -20,11 +17,10 @@ export class Emulator {
   paused: boolean;
   breakpoint: number | undefined;
 
-  constructor(bytes: Uint8Array) {
+  constructor(controller: Controller, bytes: Uint8Array) {
     this.memory = new Memory(bytes);
     this.cpu = new CPU();
-    this.controller = new Controller(this.cpu, this.memory, this);
-    this.cpu.setController(this.controller);
+    this.cpu.setController(controller);
 
     this.video = new Video(
       this.memory,
@@ -177,7 +173,7 @@ export class Emulator {
   }
 
   togglePause() {
-    console.log('toggling');
+    console.log("toggling");
     this.paused = !this.paused;
     if (!this.paused) {
       this.run();
