@@ -40,10 +40,6 @@ function runEmulator(bytes: Uint8Array) {
 
   const pause = document.getElementById("pause")!;
   pause.addEventListener("click", () => {
-    emu.paused = !emu.paused;
-    if (!emu.paused) {
-      emu.run();
-    }
   });
 
   const copy = document.getElementById("copy")!;

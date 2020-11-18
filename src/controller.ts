@@ -1,21 +1,31 @@
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
-import { View, RegisterView, SPView, BankView, MemoryView } from "./views.js";
+import { Emulator } from "./emu.js";
+import { View, RegisterView, SPView, BankView, MemoryView, PauseButton } from "./views.js";
 
 export class Controller {
+  // model
+  private emu: Emulator;
+
+  // views
   private registerViews: Map<number, RegisterView>;
   private bankViews: Map<number, BankView>;
   private memoryViews: Map<number, MemoryView>;
   private SPView: SPView;
 
+  // buttons
+  private pauseButton: PauseButton;
+
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
 
-  constructor(cpu: CPU, memory: Memory) {
+  constructor(cpu: CPU, memory: Memory, emu: Emulator) {
+    this.emu = emu;
     this.registerViews = this.createRegisterViews(cpu);
     this.bankViews = this.createBankViews(memory);
     this.memoryViews = this.createMemoryViews(cpu, memory);
     this.SPView = new SPView("SP", cpu);
+    this.pauseButton = new PauseButton("pause", this);
 
     this.toUpdate = new Set();
     this.markAllUpdated();
@@ -88,6 +98,10 @@ export class Controller {
     }
 
     return views;
+  }
+
+  togglePause() {
+    this.emu.togglePause();
   }
 
   updatedReg(reg: number) {

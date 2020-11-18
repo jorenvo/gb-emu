@@ -1,5 +1,6 @@
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
+import { Controller } from "./controller.js";
 import * as utils from "./utils.js";
 
 export abstract class View {
@@ -130,5 +131,28 @@ export class MemoryView extends View {
     }
 
     // TODO show amount of time this was executed
+  }
+}
+
+export abstract class Button {
+  element: HTMLElement;
+  controller: Controller;
+  abstract click(e: MouseEvent): void;
+
+  constructor(elementID: string, controller: Controller) {
+    const el = document.getElementById(elementID);
+    if (!el) {
+      throw new Error(`Button #${elementID} does not exist.`);
+    }
+
+    el.addEventListener("click", this.click.bind(this));
+    this.element = el;
+    this.controller = controller;
+  }
+}
+
+export class PauseButton extends Button {
+  click(_e: MouseEvent): void {
+    this.controller.togglePause();
   }
 }

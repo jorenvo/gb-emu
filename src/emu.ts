@@ -23,8 +23,7 @@ export class Emulator {
   constructor(bytes: Uint8Array) {
     this.memory = new Memory(bytes);
     this.cpu = new CPU();
-    this.controller = new Controller(this.cpu, this.memory);
-
+    this.controller = new Controller(this.cpu, this.memory, this);
     this.cpu.setController(this.controller);
 
     this.video = new Video(
@@ -174,6 +173,14 @@ export class Emulator {
     // LCD enable
     if (utils.getBit(this.memory.getLCDC(), 7)) {
       this.video.render();
+    }
+  }
+
+  togglePause() {
+    console.log('toggling');
+    this.paused = !this.paused;
+    if (!this.paused) {
+      this.run();
     }
   }
 
