@@ -4,10 +4,6 @@
   font-family: monospace;
 }
 
-Register {
-  margin-right: 5px;
-}
-
 .debugColumns {
     width: 700px;
 }
@@ -37,13 +33,17 @@ Register {
     height: 256px;
 }
 
-BankView {
+register {
+  margin-right: 5px;
+}
+
+bankview {
     max-height: 400px;
     overflow-y: scroll;
     padding-right: 1em;
 }
 
-MemoryView {
+memoryview {
     display: block;
     white-space: nowrap;
 }

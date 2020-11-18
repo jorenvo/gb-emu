@@ -70,7 +70,7 @@ export class BankView extends View {
     } else {
       elementID += utils.decString(bank, 3);
     }
-    super(elementID, parent, "BankView");
+    super(elementID, parent, "bankview");
     this.memory = memory;
     this.bank = bank;
 
@@ -109,7 +109,7 @@ export class MemoryView extends View {
     }
     elementID += `-${utils.hexString(address, 16)}`;
 
-    super(elementID, parent, "MemoryView");
+    super(elementID, parent, "memoryview");
     this.memory = memory;
     this.cpu = cpu;
     this.address = address;
