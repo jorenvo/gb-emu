@@ -28,6 +28,9 @@ export class Memory {
     this.ram = new Uint8Array(0x7fff); // total size - 2 rom banks => 0xffff - (0x4000 * 2)
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
+
+    // hacks
+    // this.ram[0xff44] = 0x90; // indicate screen frame is done
   }
 
   private splitCartridge(): Uint8Array[] {

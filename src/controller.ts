@@ -11,7 +11,8 @@ import {
   BankView,
   MemoryView,
   PauseButton,
-  RunBootRomButton
+  RunBootRomButton,
+  StepNextButton
 } from "./views.js";
 
 declare global {
@@ -45,6 +46,7 @@ export class Controller {
   // buttons
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
+  private stepNextButton: StepNextButton;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
@@ -57,6 +59,7 @@ export class Controller {
     this.recentInstructionsCounter = new Map();
 
     this.pauseButton = new PauseButton("pause", this);
+    this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
   }
 
@@ -153,6 +156,10 @@ export class Controller {
     this.emu!.togglePause();
   }
 
+  stepNext() {
+    this.emu!.run();
+  }
+
   private updatePending() {
     this.toUpdate.forEach(view => {
       view.update();
@@ -226,8 +233,8 @@ export class Controller {
     }
     this.recentInstructions.push(instruction);
     this.incrementRecentInstructionCounter(instruction);
-
     instruction.recentlyExecuted = true;
+
     this.updatedMemory(oldAddr);
     this.updatedMemory(newAddr);
   }

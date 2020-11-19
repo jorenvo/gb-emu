@@ -158,12 +158,12 @@ export class Emulator {
   //   }
   // }
 
-  private updateUI() {
-    // this.updateMemRegs();
-    // this.updatePrevPCs();
-    // this.updateMemory();
-    // this.updateStack();
-  }
+  // private updateUI() {
+  //   this.updateMemRegs();
+  //   this.updatePrevPCs();
+  //   this.updateMemory();
+  //   this.updateStack();
+  // }
 
   private renderVideo() {
     // LCD enable
@@ -173,7 +173,6 @@ export class Emulator {
   }
 
   togglePause() {
-    console.log("toggling");
     this.paused = !this.paused;
     if (!this.paused) {
       this.run();
@@ -188,7 +187,6 @@ export class Emulator {
     const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
 
-    this.updateUI();
     const startMs = performance.now();
 
     let i = 0;
@@ -197,7 +195,6 @@ export class Emulator {
       this.video.handleLY(startMs + elapsedMs);
       if (this.cpu.PC === 0x100) {
         console.log("Should load cartridge rom now...");
-        this.updateUI();
         return;
       }
 

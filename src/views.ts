@@ -172,7 +172,12 @@ export class PauseButton extends Button {
 
 export class RunBootRomButton extends Button {
   click(_e: MouseEvent): void {
-    console.log("clicked");
     this.controller.runBootRom();
+  }
+}
+
+export class StepNextButton extends Button {
+  click(_e: MouseEvent): void {
+    this.controller.stepNext();
   }
 }
