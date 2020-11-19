@@ -13,7 +13,7 @@ export abstract class Instruction {
     this.recentlyExecuted = false;
   }
 
-  getStringForR8(n: number) {
+  protected getStringForR8(n: number) {
     switch (n) {
       case 0:
         return "B";
@@ -36,7 +36,7 @@ export abstract class Instruction {
     }
   }
 
-  getStringForR16(n: number) {
+  protected getStringForR16(n: number) {
     switch (n) {
       case 0:
         return "BC";
@@ -65,19 +65,19 @@ export abstract class Instruction {
     return spentTStates;
   }
 
-  getAddress() {
+  protected getAddress() {
     return this.address;
   }
 
-  getByte(memory: Memory) {
+  protected getByte(memory: Memory) {
     return memory.getByte(this.address);
   }
 
-  getNext8Bits(memory: Memory) {
+  protected getNext8Bits(memory: Memory) {
     return memory.getByte(this.address + 1);
   }
 
-  getNext16Bits(memory: Memory) {
+  protected getNext16Bits(memory: Memory) {
     // Loads the next 16 bits (little-endian)
     const low = memory.getByte(this.address + 1);
     const high = memory.getByte(this.address + 2);
@@ -85,8 +85,8 @@ export abstract class Instruction {
   }
 
   abstract size(): number;
-  abstract exec(cpu: CPU, memory: Memory): number;
   abstract disassemble(memory: Memory): string;
+  protected abstract exec(cpu: CPU, memory: Memory): number;
 }
 
 export class NotImplemented extends Instruction {
