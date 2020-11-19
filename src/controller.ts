@@ -149,7 +149,7 @@ export class Controller {
 
   private updateLoop() {
     this.updatePending();
-    this.nextUpdate = window.setTimeout(this.updateLoop.bind(this), 1_000);
+    this.nextUpdate = window.setTimeout(this.updateLoop.bind(this), 1_000 / 60);
   }
 
   // Updated functions
