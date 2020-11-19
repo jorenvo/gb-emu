@@ -47,3 +47,7 @@ memoryview {
     display: block;
     white-space: nowrap;
 }
+
+memoryview.activeInstruction {
+    background-color: red;
+}
