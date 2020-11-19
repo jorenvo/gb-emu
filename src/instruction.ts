@@ -409,7 +409,7 @@ export class OpLdAtoAddrC extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    memory.setByte(cpu.getReg(CPU.C), cpu.getReg(CPU.A));
+    memory.setByte(0xff00 | cpu.getReg(CPU.C), cpu.getReg(CPU.A));
     return 8;
   }
 
