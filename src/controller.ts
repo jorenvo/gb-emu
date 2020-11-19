@@ -139,6 +139,19 @@ export class Controller {
     this.emu!.togglePause();
   }
 
+  private updatePending() {
+    this.toUpdate.forEach(view => {
+      view.update();
+    });
+    this.toUpdate.clear();
+  }
+
+  private updateLoop() {
+    this.updatePending();
+    this.nextUpdate = window.setTimeout(this.updateLoop.bind(this), 1_000);
+  }
+
+  // Updated functions
   updatedReg(reg: number) {
     const view = this.registerViews!.get(reg);
     if (!view) {
@@ -146,6 +159,10 @@ export class Controller {
     }
 
     this.toUpdate.add(view);
+  }
+
+  updatedSP() {
+    this.toUpdate.add(this.SPView!);
   }
 
   updatedMemory(bank: number, address: number) {
@@ -157,17 +174,5 @@ export class Controller {
     }
 
     this.toUpdate.add(view);
-  }
-
-  private updatePending() {
-    this.toUpdate.forEach(view => {
-      view.update();
-    });
-    this.toUpdate.clear();
-  }
-
-  private updateLoop() {
-    this.updatePending();
-    this.nextUpdate = window.setTimeout(this.updateLoop.bind(this), 1_000);
   }
 }

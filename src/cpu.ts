@@ -58,7 +58,7 @@ export class CPU {
 
   set SP(addr: number) {
     this._SP = addr;
-    // this.controller.updatedSP(); TODO
+    this.controller.updatedSP();
   }
 
   getReg(r: number) {
