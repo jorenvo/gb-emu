@@ -1,3 +1,4 @@
+import * as utils from "./utils.js";
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Loader } from "./loader.js";
@@ -166,11 +167,16 @@ export class Controller {
     this.toUpdate.add(this.SPView!);
   }
 
-  updatedMemory(bank: number, address: number) {
+  updatedMemory(address: number) {
+    if (address >= Memory.RAMSTART) {
+      return; // RAM is not visualized atm
+    }
+
+    const bank = this.emu!.memory.bank;
     const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
     if (!view) {
       throw new Error(
-        `Memory at bank ${bank} address ${address} doesn't exist`
+        `Memory view at bank ${bank} address ${utils.hexString(address, 16)} doesn't exist`
       );
     }
 
