@@ -125,7 +125,7 @@ export class MemoryView extends View {
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
       this.element.classList.add("activeInstruction");
-      this.element.scrollIntoView();
+      this.element.scrollIntoView(); // TODO center
     } else {
       this.element.classList.remove("activeInstruction");
     }
