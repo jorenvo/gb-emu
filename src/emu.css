@@ -21,11 +21,11 @@
 }
 
 #memoryBanks .activeBank {
-    background-color: green;
+    /* background-color: lightgreen; */
 }
 
 #memoryBanks .inactiveBank {
-    background-color: grey;
+    /* background-color: grey; */
 }
 
 #video {
@@ -50,4 +50,8 @@ memoryview {
 
 memoryview.activeInstruction {
     background-color: red;
+}
+
+memoryview.recentlyExecuted {
+    background-color: blue;
 }

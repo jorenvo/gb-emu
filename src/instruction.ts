@@ -5,10 +5,12 @@ import * as utils from "./utils.js";
 export abstract class Instruction {
   protected address: number;
   executions: number;
+  recentlyExecuted: boolean;
 
   constructor(address: number) {
     this.address = address;
     this.executions = 0;
+    this.recentlyExecuted = false;
   }
 
   getStringForR8(n: number) {

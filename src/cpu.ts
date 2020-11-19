@@ -22,7 +22,6 @@ export class CPU {
 
   private _regs: Uint8Array;
 
-  prevPCs: number[];
   tickCounter: number;
 
   private _controller: Controller | undefined;
@@ -37,7 +36,6 @@ export class CPU {
     // H (0x4)          L (0x5)
     // F (flags, 0x6)   A (accumulator, 0x7)
     this._regs = new Uint8Array(new Array(8));
-    this.prevPCs = [];
     this.tickCounter = 0;
   }
 
@@ -82,13 +80,7 @@ export class CPU {
   }
 
   set PC(newPC: number) {
-    while (this.prevPCs.length > 8) {
-      this.prevPCs.shift();
-    }
-    this.prevPCs.push(this._PC);
-
-    this.controller.updatedMemory(this._PC);
-    this.controller.updatedMemory(newPC);
+    this.controller.movedPC(this._PC, newPC);
     this._PC = newPC;
   }
 

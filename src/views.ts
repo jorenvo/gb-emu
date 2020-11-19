@@ -128,6 +128,12 @@ export class MemoryView extends View {
     if (instruction) {
       const dis = instruction.disassemble(this.memory);
       this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
+
+      if (instruction.recentlyExecuted) {
+        this.element.classList.add("recentlyExecuted");
+      } else {
+        this.element.classList.remove("recentlyExecuted");
+      }
     }
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {

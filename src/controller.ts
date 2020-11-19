@@ -3,6 +3,7 @@ import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
+import { Instruction } from "./instruction.js";
 import {
   View,
   RegisterView,
@@ -20,11 +21,20 @@ declare global {
 }
 
 export class Controller {
+  static MAX_RECENT_INSTRUCTIONS = 128;
+
   // loader
   private loader: Loader;
 
   // model
   private emu: Emulator | undefined;
+  private recentInstructions: Instruction[];
+
+  // This remembers how many of each Instruction are in
+  // recentInstruction. When pushing/shifting this list is updated and
+  // we mark an instruction as not recently executed when it no longer
+  // appears in the list.
+  private recentInstructionsCounter: Map<Instruction, number>;
 
   // views
   private registerViews: Map<number, RegisterView> | undefined;
@@ -43,6 +53,8 @@ export class Controller {
     this.loader = new Loader();
     this.loader.readFile.then(rom => this.boot(new Uint8Array(rom)));
     this.toUpdate = new Set();
+    this.recentInstructions = [];
+    this.recentInstructionsCounter = new Map();
 
     this.pauseButton = new PauseButton("pause", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
@@ -176,10 +188,47 @@ export class Controller {
     const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
     if (!view) {
       throw new Error(
-        `Memory view at bank ${bank} address ${utils.hexString(address, 16)} doesn't exist`
+        `Memory view at bank ${bank} address ${utils.hexString(
+          address,
+          16
+        )} doesn't exist`
       );
     }
 
     this.toUpdate.add(view);
+  }
+
+  private incrementRecentInstructionCounter(instruction: Instruction) {
+    if (!this.recentInstructionsCounter.has(instruction)) {
+      this.recentInstructionsCounter.set(instruction, 0);
+    }
+
+    const prev = this.recentInstructionsCounter.get(instruction)!;
+    this.recentInstructionsCounter.set(instruction, prev + 1);
+  }
+
+  movedPC(oldAddr: number, newAddr: number) {
+    const instruction = this.emu!.memory.getInstruction(newAddr)!;
+
+    while (
+      this.recentInstructions.length > Controller.MAX_RECENT_INSTRUCTIONS
+    ) {
+      const oldInstruction = this.recentInstructions.shift()!;
+
+      const timesInList = this.recentInstructionsCounter.get(oldInstruction)! - 1;
+      if (timesInList < 0) {
+        throw new Error("Counter < 0");
+      } else if (timesInList === 0) {
+        oldInstruction.recentlyExecuted = false;
+      } else {
+        this.recentInstructionsCounter.set(oldInstruction, timesInList);
+      }
+    }
+    this.recentInstructions.push(instruction);
+    this.incrementRecentInstructionCounter(instruction);
+
+    instruction.recentlyExecuted = true;
+    this.updatedMemory(oldAddr);
+    this.updatedMemory(newAddr);
   }
 }
