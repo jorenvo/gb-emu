@@ -84,6 +84,10 @@ export abstract class Instruction {
     return (high << 8) | low;
   }
 
+  getRelatedAddress(_memory: Memory) {
+    return -1; // -1 means no related address
+  }
+
   abstract size(): number;
   abstract disassemble(memory: Memory): string;
   protected abstract exec(cpu: CPU, memory: Memory): number;
@@ -944,6 +948,10 @@ export class OpJR extends Instruction {
     return 2;
   }
 
+  getRelatedAddress(memory: Memory) {
+    return this.getRelativeOffset(memory);
+  }
+
   private getRelativeOffset(memory: Memory) {
     return utils.twosComplementToNumber(this.getNext8Bits(memory));
   }
@@ -961,6 +969,10 @@ export class OpJR extends Instruction {
 export class OpJRC extends Instruction {
   size() {
     return 2;
+  }
+
+  getRelatedAddress(memory: Memory) {
+    return this.getRelativeOffset(memory);
   }
 
   private getRelativeOffset(memory: Memory) {

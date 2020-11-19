@@ -55,3 +55,7 @@ memoryview.activeInstruction {
 memoryview.recentlyExecuted {
     background-color: blue;
 }
+
+memoryview.jumpToAddr {
+    cursor: pointer;
+}

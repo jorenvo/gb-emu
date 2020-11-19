@@ -134,6 +134,10 @@ export class MemoryView extends View {
       } else {
         this.element.classList.remove("recentlyExecuted");
       }
+
+      if (instruction.getRelatedAddress(this.memory) !== -1) {
+        this.element.classList.add("jumpToAddr");
+      }
     }
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
