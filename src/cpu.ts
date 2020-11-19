@@ -18,7 +18,7 @@ export class CPU {
   IME: boolean;
 
   private _SP: number;
-  private PCInternal: number;
+  private _PC: number;
 
   private _regs: Uint8Array;
 
@@ -30,7 +30,7 @@ export class CPU {
   constructor() {
     this._SP = 0xfffe;
     this.IME = false;
-    this.PCInternal = 0;
+    this._PC = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
     // D (0x2)          E (0x3)
@@ -86,12 +86,12 @@ export class CPU {
       this.prevPCs.shift();
     }
 
-    this.prevPCs.push(this.PCInternal);
-    this.PCInternal = newPC;
+    this.prevPCs.push(this._PC);
+    this._PC = newPC;
   }
 
   get PC() {
-    return this.PCInternal;
+    return this._PC;
   }
 
   // Fake 16 bit registers
