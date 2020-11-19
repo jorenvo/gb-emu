@@ -61,6 +61,7 @@ export class Controller {
     this.markAllUpdated();
     this.updateLoop();
     // setBreakpoint(emu);
+    this.emu.run();
   }
 
   private markAllUpdated() {

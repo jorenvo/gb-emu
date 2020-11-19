@@ -10,12 +10,14 @@ import { Disassembler } from "./disassembler.js";
  */
 export class Memory {
   static BANKSIZE = 16_384; // 16 KiB
+  static RAMSTART = 0x8000; // TODO this should really be 0xa000
 
   bank: number; // -1 means bootROM
   nrBanks: number;
   bootROM: Uint8Array;
   cartridge: Uint8Array;
   romBanks: Uint8Array[];
+  ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
   constructor(rom: Uint8Array) {
@@ -23,6 +25,7 @@ export class Memory {
     this.bootROM = new Uint8Array(BOOTROM);
     this.cartridge = new Uint8Array(rom);
     this.romBanks = this.splitCartridge();
+    this.ram = new Uint8Array(0x7fff); // total size - 2 rom banks => 0xffff - (0x4000 * 2)
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
   }
@@ -94,6 +97,10 @@ export class Memory {
   }
 
   getByte(address: number): number {
+    if (address >= Memory.RAMSTART) {
+      return this.ram[address];
+    }
+
     if (this.bank === -1) {
       return this.bootROM[address];
     } else {
@@ -112,8 +119,11 @@ export class Memory {
     }
 
     if (value === undefined) debugger;
+    if (address < Memory.RAMSTART) {
+      throw new Error(`Can't write to rom @${utils.hexString(address, 16)}`);
+    }
 
-    this.romBanks[this.bank][address] = value;
+    this.ram[address] = value;
   }
 
   getSCY() {
