@@ -85,8 +85,10 @@ export class CPU {
     while (this.prevPCs.length > 8) {
       this.prevPCs.shift();
     }
-
     this.prevPCs.push(this._PC);
+
+    this.controller.updatedMemory(this._PC);
+    this.controller.updatedMemory(newPC);
     this._PC = newPC;
   }
 
