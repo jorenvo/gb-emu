@@ -93,6 +93,7 @@ export class MemoryView extends View {
   cpu: CPU;
   address: number;
   bank: number;
+  parent: HTMLElement;
 
   constructor(
     bank: number,
@@ -114,6 +115,12 @@ export class MemoryView extends View {
     this.cpu = cpu;
     this.address = address;
     this.bank = bank;
+    this.parent = parent;
+  }
+
+  centerInBankView() {
+    this.element.scrollIntoView();
+    this.parent.scrollTop -= this.parent.clientHeight / 2;
   }
 
   update() {
@@ -125,7 +132,7 @@ export class MemoryView extends View {
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
       this.element.classList.add("activeInstruction");
-      this.element.scrollIntoView(); // TODO center
+      this.centerInBankView();
     } else {
       this.element.classList.remove("activeInstruction");
     }
