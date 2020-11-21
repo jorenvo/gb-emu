@@ -139,7 +139,7 @@ export class Controller {
         if (memory.getInstruction(addr, bank)) {
           views.set(
             this.createMemoryViewKey(bank, addr),
-            new MemoryView(bank, addr, memory, cpu, bankView.element)
+            new MemoryView(bank, addr, memory, cpu, bankView.element, this)
           );
         }
       }
@@ -186,12 +186,7 @@ export class Controller {
     this.toUpdate.add(this.SPView!);
   }
 
-  updatedMemory(address: number) {
-    if (address >= Memory.RAMSTART) {
-      return; // RAM is not visualized atm
-    }
-
-    const bank = this.emu!.memory.bank;
+  private getMemoryView(address: number, bank: number): MemoryView {
     const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
     if (!view) {
       throw new Error(
@@ -202,7 +197,21 @@ export class Controller {
       );
     }
 
+    return view;
+  }
+
+  updatedMemory(address: number) {
+    if (address >= Memory.RAMSTART) {
+      return; // RAM is not visualized atm
+    }
+
+    const bank = this.emu!.memory.bank;
+    const view = this.getMemoryView(address, bank);
     this.toUpdate.add(view);
+  }
+
+  viewAddress(address: number, bank: number) {
+    this.getMemoryView(address, bank).centerInBankView();
   }
 
   private incrementRecentInstructionCounter(instruction: Instruction) {
@@ -222,7 +231,8 @@ export class Controller {
     ) {
       const oldInstruction = this.recentInstructions.shift()!;
 
-      const timesInList = this.recentInstructionsCounter.get(oldInstruction)! - 1;
+      const timesInList =
+        this.recentInstructionsCounter.get(oldInstruction)! - 1;
       if (timesInList < 0) {
         throw new Error("Counter < 0");
       } else if (timesInList === 0) {

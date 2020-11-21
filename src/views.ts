@@ -1,6 +1,7 @@
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Controller } from "./controller.js";
+import { Instruction } from "./instruction.js";
 import * as utils from "./utils.js";
 
 export abstract class View {
@@ -90,17 +91,20 @@ export class BankView extends View {
 
 export class MemoryView extends View {
   memory: Memory;
+  controller: Controller;
   cpu: CPU;
   address: number;
   bank: number;
   parent: HTMLElement;
+  instruction: Instruction;
 
   constructor(
     bank: number,
     address: number,
     memory: Memory,
     cpu: CPU,
-    parent: HTMLElement
+    parent: HTMLElement,
+    controller: Controller
   ) {
     let elementID = "memBank";
     if (bank === -1) {
@@ -116,6 +120,15 @@ export class MemoryView extends View {
     this.address = address;
     this.bank = bank;
     this.parent = parent;
+    this.controller = controller;
+
+    this.instruction = this.memory.getInstruction(this.address, this.bank)!;
+    if (this.instruction.getRelatedAddress(this.memory) !== -1) {
+      this.element.addEventListener(
+        "click",
+        this.clickJumpToRelated.bind(this)
+      );
+    }
   }
 
   centerInBankView() {
@@ -124,18 +137,17 @@ export class MemoryView extends View {
   }
 
   update() {
-    const instruction = this.memory.getInstruction(this.address, this.bank);
-    if (instruction) {
-      const dis = instruction.disassemble(this.memory);
+    if (this.instruction) {
+      const dis = this.instruction.disassemble(this.memory);
       this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
 
-      if (instruction.recentlyExecuted) {
+      if (this.instruction.recentlyExecuted) {
         this.element.classList.add("recentlyExecuted");
       } else {
         this.element.classList.remove("recentlyExecuted");
       }
 
-      if (instruction.getRelatedAddress(this.memory) !== -1) {
+      if (this.instruction.getRelatedAddress(this.memory) !== -1) {
         this.element.classList.add("jumpToAddr");
       }
     }
@@ -148,6 +160,13 @@ export class MemoryView extends View {
     }
 
     // TODO show amount of time this was executed
+  }
+
+  private clickJumpToRelated(_e: MouseEvent) {
+    this.controller.viewAddress(
+      this.instruction.getRelatedAddress(this.memory),
+      this.bank
+    );
   }
 }
 
