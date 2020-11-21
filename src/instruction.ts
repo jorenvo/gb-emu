@@ -949,7 +949,7 @@ export class OpJR extends Instruction {
   }
 
   getRelatedAddress(memory: Memory) {
-    return this.getRelativeOffset(memory);
+    return this.address + this.size() + this.getRelativeOffset(memory);
   }
 
   private getRelativeOffset(memory: Memory) {
@@ -972,7 +972,7 @@ export class OpJRC extends Instruction {
   }
 
   getRelatedAddress(memory: Memory) {
-    return this.getRelativeOffset(memory);
+    return this.address + this.size() + this.getRelativeOffset(memory);
   }
 
   private getRelativeOffset(memory: Memory) {
