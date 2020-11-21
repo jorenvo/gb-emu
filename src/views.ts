@@ -63,6 +63,7 @@ export class SPView extends View {
 export class BankView extends View {
   memory: Memory;
   bank: number;
+  centeredMemory: MemoryView | undefined;
 
   constructor(bank: number, memory: Memory, parent: HTMLElement) {
     let elementID = "bank";
@@ -87,6 +88,17 @@ export class BankView extends View {
       this.element.classList.add("inactiveBank");
     }
   }
+
+  center(memory: MemoryView) {
+    if (this.centeredMemory) {
+      this.centeredMemory.element.classList.remove("highlightedInstruction");
+    }
+    this.centeredMemory = memory;
+
+    memory.element.scrollIntoView();
+    this.element.scrollTop -= this.element.clientHeight / 2;
+    memory.element.classList.add("highlightedInstruction");
+  }
 }
 
 export class MemoryView extends View {
@@ -95,7 +107,7 @@ export class MemoryView extends View {
   cpu: CPU;
   address: number;
   bank: number;
-  parent: HTMLElement;
+  bankView: BankView;
   instruction: Instruction;
 
   constructor(
@@ -103,7 +115,7 @@ export class MemoryView extends View {
     address: number,
     memory: Memory,
     cpu: CPU,
-    parent: HTMLElement,
+    bankView: BankView,
     controller: Controller
   ) {
     let elementID = "memBank";
@@ -114,12 +126,12 @@ export class MemoryView extends View {
     }
     elementID += `-${utils.hexString(address, 16)}`;
 
-    super(elementID, parent, "memoryview");
+    super(elementID, bankView.element, "memoryview");
     this.memory = memory;
     this.cpu = cpu;
     this.address = address;
     this.bank = bank;
-    this.parent = parent;
+    this.bankView = bankView;
     this.controller = controller;
 
     this.instruction = this.memory.getInstruction(this.address, this.bank)!;
@@ -132,8 +144,7 @@ export class MemoryView extends View {
   }
 
   centerInBankView() {
-    this.element.scrollIntoView();
-    this.parent.scrollTop -= this.parent.clientHeight / 2;
+    this.bankView.center(this);
   }
 
   update() {
@@ -153,10 +164,9 @@ export class MemoryView extends View {
     }
 
     if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
-      this.element.classList.add("activeInstruction");
       this.centerInBankView();
     } else {
-      this.element.classList.remove("activeInstruction");
+      this.element.classList.remove("highlightedInstruction");
     }
 
     // TODO show amount of time this was executed

@@ -48,7 +48,7 @@ memoryview {
     white-space: nowrap;
 }
 
-memoryview.activeInstruction {
+memoryview.highlightedInstruction {
     background-color: red !important;
 }
 
