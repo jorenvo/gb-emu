@@ -139,7 +139,7 @@ export class Controller {
         if (memory.getInstruction(addr, bank)) {
           views.set(
             this.createMemoryViewKey(bank, addr),
-            new MemoryView(bank, addr, memory, cpu, bankView, this)
+            new MemoryView(bankView, addr, memory, cpu, this)
           );
         }
       }

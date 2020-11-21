@@ -102,39 +102,36 @@ export class BankView extends View {
 }
 
 export class MemoryView extends View {
+  bankView: BankView;
   memory: Memory;
   controller: Controller;
   cpu: CPU;
   address: number;
-  bank: number;
-  bankView: BankView;
   instruction: Instruction;
 
   constructor(
-    bank: number,
+    bankView: BankView,
     address: number,
     memory: Memory,
     cpu: CPU,
-    bankView: BankView,
     controller: Controller
   ) {
     let elementID = "memBank";
-    if (bank === -1) {
+    if (bankView.bank === -1) {
       elementID += "Boot";
     } else {
-      elementID += utils.decString(bank, 3);
+      elementID += utils.decString(bankView.bank, 3);
     }
     elementID += `-${utils.hexString(address, 16)}`;
 
     super(elementID, bankView.element, "memoryview");
+    this.bankView = bankView;
     this.memory = memory;
     this.cpu = cpu;
     this.address = address;
-    this.bank = bank;
-    this.bankView = bankView;
     this.controller = controller;
 
-    this.instruction = this.memory.getInstruction(this.address, this.bank)!;
+    this.instruction = this.memory.getInstruction(this.address, bankView.bank)!;
     if (this.instruction.getRelatedAddress(this.memory) !== -1) {
       this.element.addEventListener(
         "click",
@@ -163,7 +160,7 @@ export class MemoryView extends View {
       }
     }
 
-    if (this.memory.bank === this.bank && this.cpu.PC === this.address) {
+    if (this.memory.bank === this.bankView.bank && this.cpu.PC === this.address) {
       this.centerInBankView();
     } else {
       this.element.classList.remove("highlightedInstruction");
@@ -175,7 +172,7 @@ export class MemoryView extends View {
   private clickJumpToRelated(_e: MouseEvent) {
     this.controller.viewAddress(
       this.instruction.getRelatedAddress(this.memory),
-      this.bank
+      this.bankView.bank
     );
   }
 }
