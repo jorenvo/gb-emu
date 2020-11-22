@@ -2,6 +2,7 @@ import * as utils from "./utils.js";
 import { BOOTROM } from "./roms.js";
 import { Instruction } from "./instruction.js";
 import { Disassembler } from "./disassembler.js";
+import { Controller } from "./controller.js";
 
 /*
  * 0x8000-0x8fff: sprite pattern table
@@ -12,6 +13,7 @@ export class Memory {
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
 
+  controller: Controller;
   bank: number; // -1 means bootROM
   nrBanks: number;
   bootROM: Uint8Array;
@@ -20,17 +22,20 @@ export class Memory {
   ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
-  constructor(rom: Uint8Array) {
+  constructor(rom: Uint8Array, controller: Controller) {
+    this.controller = controller;
     this.bank = -1;
     this.bootROM = new Uint8Array(BOOTROM);
     this.cartridge = new Uint8Array(rom);
     this.romBanks = this.splitCartridge();
-    this.ram = new Uint8Array(0x7fff); // total size - 2 rom banks => 0xffff - (0x4000 * 2)
+
+    // RAM starts at 0x7fff: total size - 2 rom banks => 0xffff - (0x4000 * 2)
+    // This could be size 0x7fff but then we need to translate addresses (- 0x7fff):
+    // 0x7fff => 0x0000
+    this.ram = new Uint8Array(0xffff + 1);
+
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
-
-    // hacks
-    // this.ram[0xff44] = 0x90; // indicate screen frame is done
   }
 
   private splitCartridge(): Uint8Array[] {
@@ -54,7 +59,7 @@ export class Memory {
       const newInstruction = Disassembler.buildInstruction(i, this.bootROM);
       const size = newInstruction.size();
       if (size === 0) {
-        const s = newInstruction.disassemble(new Memory(new Uint8Array()));
+        const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
         throw new Error(`Encountered unimplemented instruction: ${s}`);
       }
 
@@ -70,7 +75,7 @@ export class Memory {
         const newInstruction = Disassembler.buildInstruction(i, bank);
         const size = newInstruction.size();
         if (size === 0) {
-          const s = newInstruction.disassemble(new Memory(new Uint8Array()));
+          const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 
@@ -127,6 +132,7 @@ export class Memory {
     }
 
     this.ram[address] = value;
+    this.controller.updatedStack();
   }
 
   getSCY() {

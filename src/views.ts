@@ -185,6 +185,43 @@ export class MemoryView extends View {
   }
 }
 
+// TODO: support for RAM banking
+export class StackView extends View {
+  cpu: CPU;
+  memory: Memory;
+
+  constructor(elementID: string, cpu: CPU, memory: Memory) {
+    super(elementID);
+    this.cpu = cpu;
+    this.memory = memory;
+  }
+
+  private createStackByteView(addr: number) {
+    const el = document.createElement("stackbyte");
+    const addrString = utils.hexString(addr, 16);
+    const byteString = utils.hexString(this.memory.getByte(addr));
+    el.innerHTML = `${addrString}  ${byteString}`;
+    return el;
+  }
+
+  update() {
+    const context = 3;
+    this.element.innerHTML = "";
+
+    for (
+      let addr = Math.max(0, this.cpu.SP - context);
+      addr <= Math.min(this.cpu.SP + context, 0xffff);
+      addr++
+    ) {
+      const view = this.createStackByteView(addr);
+      if (addr === this.cpu.SP) {
+        view.classList.add("stackBottom");
+      }
+      this.element.appendChild(view);
+    }
+  }
+}
+
 export class BreakpointSetter extends View {
   controller: Controller;
 

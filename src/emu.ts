@@ -17,7 +17,7 @@ export class Emulator {
   breakpoint: number | undefined;
 
   constructor(controller: Controller, bytes: Uint8Array) {
-    this.memory = new Memory(bytes);
+    this.memory = new Memory(bytes, controller);
     this.cpu = new CPU();
     this.cpu.setController(controller);
 

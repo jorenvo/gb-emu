@@ -10,6 +10,7 @@ import {
   SPView,
   BankView,
   MemoryView,
+  StackView,
   PauseButton,
   RunBootRomButton,
   StepNextButton,
@@ -44,6 +45,7 @@ export class Controller {
   private bankViews: Map<number, BankView> | undefined;
   private memoryViews: Map<number, MemoryView> | undefined;
   private SPView: SPView | undefined;
+  private stackView: StackView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
@@ -82,6 +84,7 @@ export class Controller {
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankViews = this.createBankViews(this.emu.memory);
     this.memoryViews = this.createMemoryViews(this.emu.cpu, this.emu.memory);
+    this.stackView = new StackView("stack", this.emu.cpu, this.emu.memory);
     this.SPView = new SPView("SP", this.emu.cpu);
 
     this.toUpdate = new Set();
@@ -106,6 +109,8 @@ export class Controller {
     for (const view of this.bankViews!.values()) {
       this.toUpdate.add(view);
     }
+
+    this.toUpdate.add(this.stackView!);
 
     // Updates happen in insertion order, keep this last in case of
     // disassemble errors.
@@ -233,6 +238,10 @@ export class Controller {
     const bank = this.emu!.memory.bank;
     const view = this.getMemoryView(address, bank);
     this.toUpdate.add(view);
+  }
+
+  updatedStack() {
+    this.toUpdate.add(this.stackView!);
   }
 
   viewAddress(address: number, bank: number) {

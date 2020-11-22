@@ -63,3 +63,15 @@ memoryview.recentlyExecuted {
 memoryview.jumpToAddr {
     cursor: pointer;
 }
+
+.stackAndVideo {
+    margin-top: 20px;
+}
+
+stackbyte {
+    display: block;
+}
+
+stackbyte.stackBottom {
+    background-color: rgb(228, 58, 59);
+}
