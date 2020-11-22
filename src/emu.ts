@@ -57,20 +57,11 @@ export class Emulator {
   togglePause() {
     this.paused = !this.paused;
     if (!this.paused) {
-      this.run(!!"ignore breakpoint");
+      this.run();
     }
   }
 
-  run(ignoreBreakpoint?: boolean) {
-    if (
-      !ignoreBreakpoint &&
-      this.breakpoint !== undefined &&
-      this.breakpoint === this.cpu.PC
-    ) {
-      this.paused = true;
-      return;
-    }
-
+  run() {
     const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
 
@@ -80,6 +71,12 @@ export class Emulator {
     while (startMs + elapsedMs < endMs) {
       elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
       this.video.handleLY(startMs + elapsedMs);
+
+      if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
+        this.paused = true;
+        return;
+      }
+
       if (this.cpu.PC === 0x100) {
         console.log("Should load cartridge rom now...");
         return;
