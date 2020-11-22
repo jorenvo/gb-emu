@@ -240,3 +240,23 @@ export class StepNextButton extends Button {
     this.controller.stepNext();
   }
 }
+
+export class CopyButton extends Button {
+  private selectElementText(el: HTMLElement) {
+    const win = window;
+    var doc = win.document,
+      sel,
+      range;
+
+    sel = win.getSelection()!;
+    range = doc.createRange();
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  click(_e: MouseEvent): void {
+    this.selectElementText(this.controller.getActiveBankView()!.element);
+    document.execCommand("copy");
+  }
+}

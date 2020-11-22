@@ -11,19 +11,6 @@ function setBreakpoint(emu: Emulator) {
   emu.setBreakpoint(parseInt(val, 16));
 }
 
-function selectElementText(el: HTMLElement) {
-  const win = window;
-  var doc = win.document,
-    sel,
-    range;
-
-  sel = win.getSelection()!;
-  range = doc.createRange();
-  range.selectNodeContents(el);
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
 function _runEmulator(bytes: Uint8Array) {
   // const emu = new Emulator(bytes);
   // window.emu = emu;

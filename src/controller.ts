@@ -13,6 +13,7 @@ import {
   PauseButton,
   RunBootRomButton,
   StepNextButton,
+  CopyButton,
   BreakpointSetter
 } from "./views.js";
 
@@ -48,6 +49,7 @@ export class Controller {
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
+  private copyButton: CopyButton;
 
   // input
   private breakpointSetter: BreakpointSetter;
@@ -65,6 +67,7 @@ export class Controller {
     this.pauseButton = new PauseButton("pause", this);
     this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
+    this.copyButton = new CopyButton("copy", this);
     this.breakpointSetter = new BreakpointSetter("breakpoint", this);
   }
 
@@ -81,7 +84,6 @@ export class Controller {
     this.toUpdate = new Set();
     this.markAllUpdated();
     this.updateLoop();
-    // setBreakpoint(emu);
     this.emu.run();
   }
 
@@ -222,6 +224,10 @@ export class Controller {
 
   viewAddress(address: number, bank: number) {
     this.getMemoryView(address, bank).centerInBankView(true);
+  }
+
+  getActiveBankView() {
+    return this.bankViews!.get(this.emu!.memory.bank);
   }
 
   private incrementRecentInstructionCounter(instruction: Instruction) {
