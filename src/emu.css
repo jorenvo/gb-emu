@@ -65,6 +65,7 @@ memoryview.jumpToAddr {
 }
 
 .stackAndVideo {
+    display: flex;
     margin-top: 20px;
 }
 
