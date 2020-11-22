@@ -2,7 +2,6 @@ import * as utils from "./utils.js";
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Video } from "./video.js";
-import { Instruction } from "./instruction.js";
 import { Controller } from "./controller.js";
 
 export class Emulator {
@@ -46,123 +45,6 @@ export class Emulator {
   //   s += `WX: ${utils.hexString(this.memory.getWX())}  `;
 
   //   document.getElementById("memRegs")!.innerText = s;
-  // }
-
-  // private updatePrevPCs() {
-  //   let s = this.cpu.prevPCs.map(PC => utils.hexString(PC, 16)).join(" ");
-  //   document.getElementById("prevPCs")!.innerText = "Prev PCs: " + s;
-  // }
-
-  private createMemoryDiv(bank: number, addr: number) {
-    this.memory.setBank(bank);
-
-    const byte = this.memory.getByte(addr);
-    const newDiv = document.createElement("div");
-
-    if (addr === undefined || byte === undefined) debugger;
-
-    newDiv.innerText = `${utils.hexString(addr, 16)}: ${utils.hexString(byte)}`;
-
-    // const instruction = this.instructionMap.get(addr);
-    // if (instruction) {
-    //   newDiv.innerText += ` ${instruction.disassemble(this.memory)}`;
-    // }
-
-    return newDiv;
-  }
-
-  // private renderMemory(): Map<number, Map<number, HTMLDivElement>> {
-  //   const bankToAddrToMemoryDiv = new Map();
-  //   const memoryBanks = document.getElementById("memoryBanks")!;
-  //   for (let bank = -1; bank < this.nrBanks; ++bank) {
-  //     // -1 for bootrom
-  //     const bankDiv = document.createElement("div");
-  //     if (bank === -1) {
-  //       bankDiv.id = "bankBOOT";
-  //     } else {
-  //       bankDiv.id = `bank${utils.decString(bank, 4)}`;
-  //     }
-  //     memoryBanks.appendChild(bankDiv);
-  //     this.bankNrToDiv.set(bank, bankDiv);
-  //     bankToAddrToMemoryDiv.set(bank, new Map());
-
-  //     for (let addr = 0; addr < Memory.BANKSIZE; ++addr) {
-  //       const addrDiv = this.createMemoryDiv(bank, addr);
-  //       bankDiv.appendChild(addrDiv);
-  //       bankToAddrToMemoryDiv.get(bank).set(addr, bankDiv);
-  //     }
-  //   }
-
-  //   return bankToAddrToMemoryDiv;
-  // }
-
-  // private updateMemory() {
-  //   // bankNr: number, div: HTMLDivElement) {
-  //   let color = "#2e7bff";
-  //   if (this.paused) {
-  //     color = "#ffb22e";
-  //   }
-
-  //   if (this.memoryPC) {
-  //     this.memoryPC.style.color = "black";
-  //   }
-
-  //   const addrToMemoryDiv = this.bankToAddrToMemoryDiv.get(
-  //     this.memory.getActiveBank()
-  //   );
-  //   if (!addrToMemoryDiv) {
-  //     throw new Error(`Unknown memory bank: ${this.memory.getActiveBank()}`);
-  //   }
-
-  //   const memoryDiv = addrToMemoryDiv.get(this.cpu.PC);
-  //   if (memoryDiv === undefined) {
-  //     throw new Error(
-  //       `PC (${utils.hexString(this.cpu.PC, 16)}) not aligned with instruction.`
-  //     );
-  //   }
-
-  //   // const instruction = this.instructionMap.get(this.cpu.PC);
-  //   // if (instruction === undefined) {
-  //   //   throw new Error(`PC ${this.cpu.PC} is not in instruction map.`);
-  //   // }
-
-  //   this.memoryPC = memoryDiv;
-  //   this.memoryPC.style.color = color;
-
-  //   // const execColor = Math.max(100, 255 - instruction.executions * 8);
-  //   // this.memoryPC.style.backgroundColor = `rgb(${execColor}, 255, ${execColor})`;
-
-  //   // this.memoryPC.scrollIntoView();
-
-  //   // const memoryContainer = document.getElementById("memory")!;
-  //   // memoryContainer.scrollTop -= memoryContainer.clientHeight / 2;
-  // }
-
-  // private updateStack() {
-  //   const stackDiv = document.getElementById("stack")!;
-  //   const sp = this.cpu.SP;
-  //   const context = 3;
-  //   stackDiv.innerHTML = "";
-
-  //   for (
-  //     let addr = Math.max(0, sp - context);
-  //     addr <= Math.min(sp + context, 0xffff);
-  //     addr++
-  //   ) {
-  //     const memoryDiv = this.createMemoryDiv(0, addr);
-  //     if (addr === sp) {
-  //       memoryDiv.style.color = "#2e7bff";
-  //     }
-
-  //     stackDiv.appendChild(memoryDiv);
-  //   }
-  // }
-
-  // private updateUI() {
-  //   this.updateMemRegs();
-  //   this.updatePrevPCs();
-  //   this.updateMemory();
-  //   this.updateStack();
   // }
 
   private renderVideo() {
