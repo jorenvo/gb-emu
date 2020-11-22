@@ -1196,6 +1196,10 @@ export class OpCall extends Instruction {
     return 3;
   }
 
+  getRelatedAddress(memory: Memory) {
+    return this.getNext16Bits(memory);
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     const nextPC = cpu.PC + this.size();
     memory.setByte(--cpu.SP, nextPC >> 8);
