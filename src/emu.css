@@ -48,12 +48,16 @@ memoryview {
     white-space: nowrap;
 }
 
+/* remaining palette colors (https://colorhunt.co/palette/220258)
+ * rgb(138, 203, 174)
+ * rgb(234, 161, 77)
+ */
 memoryview.highlightedInstruction {
-    background-color: red !important;
+    background-color: rgb(228, 58, 59) !important;
 }
 
 memoryview.recentlyExecuted {
-    background-color: blue;
+    background-color: rgb(240, 230, 181);
 }
 
 memoryview.jumpToAddr {
