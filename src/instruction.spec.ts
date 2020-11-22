@@ -133,11 +133,10 @@ describe("rotations", function() {
   });
 });
 
-/*
 describe("bit extractions", function() {
   it("should correctly disassemble bit ops", function() {
     function getMemory(opcode: number) {
-      return new Memory(new Uint8Array([0xcb, opcode]));
+      return createMemory(new Uint8Array([0xcb, opcode]));
     }
     const opBit = new instruction.OpBit(0x00);
 
@@ -161,21 +160,19 @@ describe("bit extractions", function() {
 
     // BIT 7, H
     memory = getMemory(0x7c);
-    const cpu = new CPU(new Map());
+    const cpu = createCPU();
     cpu.setHL(0x8000);
-    assert.equal(cpu.regs[CPU.H], 0x80);
-    assert.equal(cpu.regs[CPU.L], 0x00);
+    assert.equal(cpu.getReg(CPU.H), 0x80);
+    assert.equal(cpu.getReg(CPU.L), 0x00);
 
     assert.equal(cpu.getZeroFlag(), 0);
     opBit.execAndIncrementPC(cpu, memory);
     assert.equal(cpu.getZeroFlag(), 0);
 
     cpu.setHL(0x8000 - 1);
-    assert.equal(cpu.regs[CPU.H], 0x7f);
-    assert.equal(cpu.regs[CPU.L], 0xff);
+    assert.equal(cpu.getReg(CPU.H), 0x7f);
+    assert.equal(cpu.getReg(CPU.L), 0xff);
     opBit.execAndIncrementPC(cpu, memory);
     assert.equal(cpu.getZeroFlag(), 1);
   });
 });
-
-*/
