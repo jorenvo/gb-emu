@@ -131,7 +131,6 @@ export class OpNop extends Instruction {
 export class OpNone extends Instruction {
   constructor(address: number) {
     super(address);
-    console.log(`None instruction at ${utils.hexString(address, 16)}`);
   }
 
   size() {
