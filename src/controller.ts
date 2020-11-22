@@ -211,7 +211,7 @@ export class Controller {
   }
 
   viewAddress(address: number, bank: number) {
-    this.getMemoryView(address, bank).centerInBankView();
+    this.getMemoryView(address, bank).centerInBankView(true);
   }
 
   private incrementRecentInstructionCounter(instruction: Instruction) {

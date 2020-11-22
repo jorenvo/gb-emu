@@ -89,14 +89,24 @@ export class BankView extends View {
     }
   }
 
-  center(memory: MemoryView) {
+  center(memory: MemoryView, smooth: boolean) {
     if (this.centeredMemory) {
       this.centeredMemory.element.classList.remove("highlightedInstruction");
     }
     this.centeredMemory = memory;
 
-    memory.element.scrollIntoView();
-    this.element.scrollTop -= this.element.clientHeight / 2;
+    const halfClientHeight = this.element.clientHeight / 2;
+    if (smooth) {
+      // TODO: maybe center this in the view?
+      this.element.scrollTo({
+        top:
+          memory.element.offsetTop - this.element.offsetTop - halfClientHeight,
+        behavior: "smooth"
+      });
+    } else {
+      memory.element.scrollIntoView();
+      this.element.scrollTop -= halfClientHeight;
+    }
     memory.element.classList.add("highlightedInstruction");
   }
 }
@@ -140,8 +150,8 @@ export class MemoryView extends View {
     }
   }
 
-  centerInBankView() {
-    this.bankView.center(this);
+  centerInBankView(center: boolean) {
+    this.bankView.center(this, center);
   }
 
   update() {
@@ -160,8 +170,11 @@ export class MemoryView extends View {
       }
     }
 
-    if (this.memory.bank === this.bankView.bank && this.cpu.PC === this.address) {
-      this.centerInBankView();
+    if (
+      this.memory.bank === this.bankView.bank &&
+      this.cpu.PC === this.address
+    ) {
+      this.centerInBankView(false);
     } else {
       this.element.classList.remove("highlightedInstruction");
     }
