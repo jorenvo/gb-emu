@@ -54,6 +54,9 @@ export class Controller {
   // input
   private breakpointSetter: BreakpointSetter;
 
+  // necessary in case emu is not yet running
+  breakpoint: number | undefined;
+
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
 
@@ -84,6 +87,12 @@ export class Controller {
     this.toUpdate = new Set();
     this.markAllUpdated();
     this.updateLoop();
+
+    if (this.breakpoint) {
+      this.emu.setBreakpoint(this.breakpoint);
+      this.breakpoint = undefined;
+    }
+
     this.emu.run();
   }
 
@@ -169,7 +178,11 @@ export class Controller {
 
   setBreakpoint(address: number) {
     // TODO bank?
-    this.emu!.setBreakpoint(address);
+    if (this.emu) {
+      this.emu.setBreakpoint(address);
+    } else {
+      this.breakpoint = address;
+    }
   }
 
   private updatePending() {
