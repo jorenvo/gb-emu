@@ -175,8 +175,6 @@ export class MemoryView extends View {
     } else {
       this.element.classList.remove("highlightedInstruction");
     }
-
-    // TODO show amount of time this was executed
   }
 
   private clickJumpToRelated(_e: MouseEvent) {
