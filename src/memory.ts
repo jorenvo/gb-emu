@@ -59,7 +59,9 @@ export class Memory {
       const newInstruction = Disassembler.buildInstruction(i, this.bootROM);
       const size = newInstruction.size();
       if (size === 0) {
-        const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
+        const s = newInstruction.disassemble(
+          new Memory(new Uint8Array(), this.controller)
+        );
         throw new Error(`Encountered unimplemented instruction: ${s}`);
       }
 
@@ -75,7 +77,9 @@ export class Memory {
         const newInstruction = Disassembler.buildInstruction(i, bank);
         const size = newInstruction.size();
         if (size === 0) {
-          const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
+          const s = newInstruction.disassemble(
+            new Memory(new Uint8Array(), this.controller)
+          );
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 

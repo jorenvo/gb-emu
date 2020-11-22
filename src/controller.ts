@@ -24,7 +24,37 @@ declare global {
   }
 }
 
-export class Controller {
+export abstract class Controller {
+  public abstract runBootRom(): void;
+  public abstract togglePause(): void;
+  public abstract stepNext(): void;
+  public abstract setBreakpoint(address: number): void;
+  public abstract updatedReg(reg: number): void;
+  public abstract updatedSP(): void;
+  public abstract updatedMemory(address: number): void;
+  public abstract updatedStack(): void;
+  public abstract viewAddress(address: number, bank: number): void;
+  public abstract getActiveBankView(): BankView | undefined;
+  public abstract movedPC(oldAddr: number, newAddr: number): void;
+}
+
+export class ControllerMock {
+  public runBootRom(): void {}
+  public togglePause(): void {}
+  public stepNext(): void {}
+  public setBreakpoint(_address: number): void {}
+  public updatedReg(_reg: number): void {}
+  public updatedSP(): void {}
+  public updatedMemory(_address: number): void {}
+  public updatedStack(): void {}
+  public viewAddress(_address: number, _bank: number): void {}
+  public getActiveBankView(): BankView | undefined {
+    return undefined;
+  }
+  public movedPC(_oldAddr: number, _newAddr: number): void {}
+}
+
+export class ControllerReal implements Controller {
   static MAX_RECENT_INSTRUCTIONS = 128;
 
   // loader
@@ -57,7 +87,7 @@ export class Controller {
   private breakpointSetter: BreakpointSetter;
 
   // necessary in case emu is not yet running
-  breakpoint: number | undefined;
+  private breakpoint: number | undefined;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
@@ -169,19 +199,19 @@ export class Controller {
     return views;
   }
 
-  runBootRom() {
+  public runBootRom() {
     this.boot(new Uint8Array());
   }
 
-  togglePause() {
+  public togglePause() {
     this.emu!.togglePause();
   }
 
-  stepNext() {
+  public stepNext() {
     this.emu!.run();
   }
 
-  setBreakpoint(address: number) {
+  public setBreakpoint(address: number) {
     // TODO bank?
     if (this.emu) {
       this.emu.setBreakpoint(address);
@@ -203,7 +233,7 @@ export class Controller {
   }
 
   // Updated functions
-  updatedReg(reg: number) {
+  public updatedReg(reg: number) {
     const view = this.registerViews!.get(reg);
     if (!view) {
       throw new Error(`Unknown reg ${reg}`);
@@ -212,7 +242,7 @@ export class Controller {
     this.toUpdate.add(view);
   }
 
-  updatedSP() {
+  public updatedSP() {
     this.toUpdate.add(this.SPView!);
   }
 
@@ -230,7 +260,7 @@ export class Controller {
     return view;
   }
 
-  updatedMemory(address: number) {
+  public updatedMemory(address: number) {
     if (address >= Memory.RAMSTART) {
       return; // RAM is not visualized atm
     }
@@ -240,15 +270,15 @@ export class Controller {
     this.toUpdate.add(view);
   }
 
-  updatedStack() {
+  public updatedStack() {
     this.toUpdate.add(this.stackView!);
   }
 
-  viewAddress(address: number, bank: number) {
+  public viewAddress(address: number, bank: number) {
     this.getMemoryView(address, bank).centerInBankView(true);
   }
 
-  getActiveBankView() {
+  public getActiveBankView() {
     return this.bankViews!.get(this.emu!.memory.bank);
   }
 
@@ -261,11 +291,11 @@ export class Controller {
     this.recentInstructionsCounter.set(instruction, prev + 1);
   }
 
-  movedPC(oldAddr: number, newAddr: number) {
+  public movedPC(oldAddr: number, newAddr: number) {
     const instruction = this.emu!.memory.getInstruction(newAddr)!;
 
     while (
-      this.recentInstructions.length > Controller.MAX_RECENT_INSTRUCTIONS
+      this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS
     ) {
       const oldInstruction = this.recentInstructions.shift()!;
 

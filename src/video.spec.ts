@@ -4,9 +4,11 @@ import * as assert from "assert";
 
 import { Memory } from "./memory";
 import { Video } from "./video";
+import { ControllerMock } from "./controller";
 
 describe("Video subsystem", function() {
   it("should correctly decode tiles", function() {
+    const controller = new ControllerMock();
     // +----------+----------+
     // |          |          |
     // |  TILE 1  |  TILE 2  |
@@ -34,7 +36,7 @@ describe("Video subsystem", function() {
       0xff, 0xff, 0xff, 0xff, // tile 4 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 4 row 5 & 6
       0xff, 0xff, 0x5f, 0x3f, // tile 4 row 7 & 8
-    ]));
+    ]), controller);
 
     const { document } = new JSDOM("<canvas>").window;
     const canvas = document.getElementsByTagName("canvas")[0];

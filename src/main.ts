@@ -1,3 +1,3 @@
-import { Controller } from "./controller.js";
+import { ControllerReal } from "./controller.js";
 
-new Controller();
+new ControllerReal();
