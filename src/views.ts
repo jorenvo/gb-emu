@@ -97,12 +97,9 @@ export class BankView extends View {
 
     const halfClientHeight = this.element.clientHeight / 2;
     if (smooth) {
-      // TODO: maybe center this in the view?
-      this.element.scrollTo({
-        top:
-          memory.element.offsetTop - this.element.offsetTop - halfClientHeight,
-        behavior: "smooth"
-      });
+      const top =
+        memory.element.offsetTop - this.element.offsetTop - halfClientHeight;
+      this.element.scrollTo({ top: top, behavior: "smooth" });
     } else {
       memory.element.scrollIntoView();
       this.element.scrollTop -= halfClientHeight;
