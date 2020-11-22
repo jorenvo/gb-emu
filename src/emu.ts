@@ -72,6 +72,11 @@ export class Emulator {
       elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
       this.video.handleLY(startMs + elapsedMs);
 
+      // if paused it means we're stepping over single instructions
+      if (this.paused) {
+        return;
+      }
+
       if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
         this.paused = true;
         return;
