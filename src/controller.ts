@@ -12,7 +12,8 @@ import {
   MemoryView,
   PauseButton,
   RunBootRomButton,
-  StepNextButton
+  StepNextButton,
+  BreakpointSetter
 } from "./views.js";
 
 declare global {
@@ -48,6 +49,9 @@ export class Controller {
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
 
+  // input
+  private breakpointSetter: BreakpointSetter;
+
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
 
@@ -61,6 +65,7 @@ export class Controller {
     this.pauseButton = new PauseButton("pause", this);
     this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
+    this.breakpointSetter = new BreakpointSetter("breakpoint", this);
   }
 
   private boot(bytes: Uint8Array) {
@@ -158,6 +163,11 @@ export class Controller {
 
   stepNext() {
     this.emu!.run();
+  }
+
+  setBreakpoint(address: number) {
+    // TODO bank?
+    this.emu!.setBreakpoint(address);
   }
 
   private updatePending() {

@@ -187,6 +187,25 @@ export class MemoryView extends View {
   }
 }
 
+export class BreakpointSetter extends View {
+  controller: Controller;
+
+  constructor(elementID: string, controller: Controller) {
+    super(elementID);
+    this.controller = controller;
+    this.element.addEventListener("change", this.setBreakpoint.bind(this));
+  }
+
+  update() {
+    // TODO: necessary? Don't think controller would ever updated this.
+  }
+
+  private setBreakpoint(_e: Event) {
+    const val = (this.element as HTMLInputElement).value;
+    this.controller.setBreakpoint(parseInt(val, 16));
+  }
+}
+
 export abstract class Button {
   element: HTMLElement;
   controller: Controller;

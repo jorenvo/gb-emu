@@ -175,13 +175,18 @@ export class Emulator {
   togglePause() {
     this.paused = !this.paused;
     if (!this.paused) {
-      this.run();
+      this.run(!!"ignore breakpoint");
     }
   }
 
-  run() {
-    if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
+  run(ignoreBreakpoint?: boolean) {
+    if (
+      !ignoreBreakpoint &&
+      this.breakpoint !== undefined &&
+      this.breakpoint === this.cpu.PC
+    ) {
       this.paused = true;
+      return;
     }
 
     const endMs = performance.now() + this.runBudgetMs;
