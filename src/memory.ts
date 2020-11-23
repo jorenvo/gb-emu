@@ -113,11 +113,23 @@ export class Memory {
       return this.ram[address];
     }
 
+    let byte;
     if (this.bank === -1) {
-      return this.bootROM[address];
+      byte = this.bootROM[address];
     } else {
-      return this.romBanks[this.bank][address];
+      byte = this.romBanks[this.bank][address];
     }
+
+    if (byte === undefined) {
+      throw new Error(
+        `Trying to read byte @${utils.hexString(
+          address,
+          16
+        )} which is out of range`
+      );
+    }
+
+    return byte;
   }
 
   setByte(address: number, value: number) {
