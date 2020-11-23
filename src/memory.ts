@@ -34,8 +34,68 @@ export class Memory {
     // 0x7fff => 0x0000
     this.ram = new Uint8Array(0xffff + 1);
 
+    if (rom.length === 0) {
+      this.mockNintendoCartLogo();
+    }
+
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
+  }
+
+  private mockNintendoCartLogo() {
+    // the logo ends at 0x133 but the bootrom will read 0x134
+    const extendedBootROM = new Uint8Array(0x135);
+    extendedBootROM.set(this.bootROM);
+    this.bootROM = extendedBootROM;
+
+    this.bootROM[0x104] = 0xce;
+    this.bootROM[0x105] = 0xed;
+    this.bootROM[0x106] = 0x66;
+    this.bootROM[0x107] = 0x66;
+    this.bootROM[0x108] = 0xcc;
+    this.bootROM[0x109] = 0xd;
+    this.bootROM[0x10a] = 0x0;
+    this.bootROM[0x10b] = 0xb;
+    this.bootROM[0x10c] = 0x3;
+    this.bootROM[0x10d] = 0x73;
+    this.bootROM[0x10e] = 0x0;
+    this.bootROM[0x10f] = 0x83;
+    this.bootROM[0x110] = 0x0;
+    this.bootROM[0x111] = 0xc;
+    this.bootROM[0x112] = 0x0;
+    this.bootROM[0x113] = 0xd;
+    this.bootROM[0x114] = 0x0;
+    this.bootROM[0x115] = 0x8;
+    this.bootROM[0x116] = 0x11;
+    this.bootROM[0x117] = 0x1f;
+    this.bootROM[0x118] = 0x88;
+    this.bootROM[0x119] = 0x89;
+    this.bootROM[0x11a] = 0x0;
+    this.bootROM[0x11b] = 0xe;
+    this.bootROM[0x11c] = 0xdc;
+    this.bootROM[0x11d] = 0xcc;
+    this.bootROM[0x11e] = 0x6e;
+    this.bootROM[0x11f] = 0xe6;
+    this.bootROM[0x120] = 0xdd;
+    this.bootROM[0x121] = 0xdd;
+    this.bootROM[0x122] = 0xd9;
+    this.bootROM[0x123] = 0x99;
+    this.bootROM[0x124] = 0xbb;
+    this.bootROM[0x125] = 0xbb;
+    this.bootROM[0x126] = 0x67;
+    this.bootROM[0x127] = 0x63;
+    this.bootROM[0x128] = 0x6e;
+    this.bootROM[0x129] = 0xe;
+    this.bootROM[0x12a] = 0xec;
+    this.bootROM[0x12b] = 0xcc;
+    this.bootROM[0x12c] = 0xdd;
+    this.bootROM[0x12d] = 0xdc;
+    this.bootROM[0x12e] = 0x99;
+    this.bootROM[0x12f] = 0x9f;
+    this.bootROM[0x130] = 0xbb;
+    this.bootROM[0x131] = 0xb9;
+    this.bootROM[0x132] = 0x33;
+    this.bootROM[0x133] = 0x3e;
   }
 
   private splitCartridge(): Uint8Array[] {
