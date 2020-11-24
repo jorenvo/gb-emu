@@ -116,6 +116,8 @@ export class MemoryView extends View {
   address: number;
   instruction: Instruction;
 
+  private originalBank: number | undefined;
+
   constructor(
     bankView: BankView,
     address: number,
@@ -139,12 +141,29 @@ export class MemoryView extends View {
     this.controller = controller;
 
     this.instruction = this.memory.getInstruction(this.address, bankView.bank)!;
+
+    this.switchToInstructionBank();
     if (this.instruction.getRelatedAddress(this.memory) !== -1) {
       this.element.addEventListener(
         "click",
         this.clickJumpToRelated.bind(this)
       );
     }
+    this.restoreBank();
+  }
+
+  private switchToInstructionBank() {
+    this.originalBank = this.memory.bank;
+    this.memory.setBank(this.bankView.bank);
+  }
+
+  private restoreBank() {
+    if (this.originalBank === undefined) {
+      throw new Error("restoreBank called without corresponding switchToBank");
+    }
+
+    this.memory.setBank(this.originalBank);
+    this.originalBank = undefined;
   }
 
   centerInBankView(center: boolean) {
@@ -153,6 +172,7 @@ export class MemoryView extends View {
 
   update() {
     if (this.instruction) {
+      this.switchToInstructionBank();
       const dis = this.instruction.disassemble(this.memory);
       this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
 
@@ -165,6 +185,7 @@ export class MemoryView extends View {
       if (this.instruction.getRelatedAddress(this.memory) !== -1) {
         this.element.classList.add("jumpToAddr");
       }
+      this.restoreBank();
     }
 
     if (
@@ -178,10 +199,12 @@ export class MemoryView extends View {
   }
 
   private clickJumpToRelated(_e: MouseEvent) {
+    this.switchToInstructionBank();
     this.controller.viewAddress(
       this.instruction.getRelatedAddress(this.memory),
       this.bankView.bank
     );
+    this.restoreBank();
   }
 }
 
