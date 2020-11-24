@@ -205,7 +205,7 @@ export class StackView extends View {
   }
 
   update() {
-    const context = 3;
+    const context = 4;
     this.element.innerHTML = "";
 
     for (
