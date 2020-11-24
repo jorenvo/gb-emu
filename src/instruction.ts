@@ -1035,6 +1035,10 @@ export class OpJC extends Instruction {
     return 3;
   }
 
+  getRelatedAddress(memory: Memory) {
+    return this.getNext16Bits(memory);
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     let condition = false;
     switch (this.getByte(memory)) {
@@ -1087,6 +1091,10 @@ export class OpJC extends Instruction {
 export class OpJA16 extends Instruction {
   size() {
     return 3;
+  }
+
+  getRelatedAddress(memory: Memory) {
+    return this.getNext16Bits(memory);
   }
 
   exec(cpu: CPU, memory: Memory): number {
