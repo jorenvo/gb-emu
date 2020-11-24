@@ -43,8 +43,9 @@ export class Memory {
   }
 
   private mockNintendoCartLogo() {
-    // the logo ends at 0x133 but the bootrom will read 0x134
-    const extendedBootROM = new Uint8Array(0x135);
+    // the logo ends at 0x133
+    // the bootrom also checks if 0x19 + data in 0x134-0x14d adds up to 0
+    const extendedBootROM = new Uint8Array(0x14d + 1);
     extendedBootROM.set(this.bootROM);
     this.bootROM = extendedBootROM;
 
