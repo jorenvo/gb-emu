@@ -1408,7 +1408,7 @@ export class OpPop extends Instruction {
   }
 
   private getR16(memory: Memory) {
-    return utils.getBits(this.getByte(memory), 3, 5);
+    return (this.getByte(memory) >> 4) - 0xc;
   }
 
   exec(cpu: CPU, memory: Memory): number {
