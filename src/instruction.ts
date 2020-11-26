@@ -46,8 +46,6 @@ export abstract class Instruction {
         return "HL";
       case 3:
         return "SP";
-      case 3:
-        return "AF";
       default:
         throw new Error(`Register ${n} doesn't exist.`);
     }
