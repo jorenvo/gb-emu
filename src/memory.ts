@@ -176,7 +176,11 @@ export class Memory {
 
     let byte;
     if (this.bank === -1) {
-      byte = this.bootROM[address];
+      if (address < 0x100) {
+        byte = this.bootROM[address];
+      } else {
+        byte = this.romBanks[0][address];
+      }
     } else {
       byte = this.romBanks[this.bank][address];
     }
