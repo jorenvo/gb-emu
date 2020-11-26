@@ -893,11 +893,13 @@ export class OpAddR16ToHL extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    let r16 = cpu.SP;
+    let r16;
     const opcode = this.getByte(memory);
     if (opcode !== 0x39) {
       const register = this.getReg(memory);
       r16 = cpu.getCombinedRegister(register, register + 1);
+    } else {
+      r16 = cpu.SP;
     }
 
     let hl = cpu.getHL();
