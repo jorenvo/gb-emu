@@ -182,7 +182,7 @@ export class ControllerReal implements Controller {
   private createMemoryViews(cpu: CPU, memory: Memory) {
     const views = new Map();
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
-      const bankSize = bank === - 1 ? memory.bootROM.length : Memory.BANKSIZE;
+      const bankSize = bank === -1 ? memory.bootROM.length : Memory.BANKSIZE;
       const bankView = this.bankViews!.get(bank);
       if (!bankView) {
         throw new Error(`Bank ${bank} doesn't exist.`);
