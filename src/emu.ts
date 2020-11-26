@@ -82,11 +82,6 @@ export class Emulator {
         return;
       }
 
-      if (this.cpu.PC === 0x100) {
-        console.log("Should load cartridge rom now...");
-        return;
-      }
-
       ++i;
     }
 

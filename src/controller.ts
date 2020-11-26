@@ -293,6 +293,12 @@ export class ControllerReal implements Controller {
   }
 
   public movedPC(oldAddr: number, newAddr: number) {
+    // TODO: Emulator should do this
+    if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
+      this.emu!.memory.setBank(0);
+      console.log("Switched out boot ROM and switched to bank 0");
+    }
+
     const instruction = this.emu!.memory.getInstruction(newAddr)!;
 
     while (
