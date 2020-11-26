@@ -88,6 +88,15 @@ export abstract class Instruction {
     return -1; // -1 means no related address
   }
 
+  getBytesHex(memory: Memory) {
+    const bytes = [];
+    for (let i = 0; i < this.size(); i++) {
+      const byte = memory.getByte(this.getAddress() + i);
+      bytes.push(utils.hexString(byte));
+    }
+    return bytes;
+  }
+
   abstract size(): number;
   abstract disassemble(memory: Memory): string;
   protected abstract exec(cpu: CPU, memory: Memory): number;

@@ -173,7 +173,17 @@ export class MemoryView extends View {
   update() {
     if (this.instruction) {
       this.switchToInstructionBank();
-      const dis = this.instruction.disassemble(this.memory);
+
+      let dis = "";
+      try {
+        dis = this.instruction.disassemble(this.memory);
+      } catch (error) {
+        console.error(
+          `Failed disassembling ${this.instruction.getBytesHex(this.memory)}`
+        );
+        throw error;
+      }
+
       this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
 
       if (this.instruction.recentlyExecuted) {
