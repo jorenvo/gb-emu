@@ -181,6 +181,7 @@ export class MemoryView extends View {
         console.error(
           `Failed disassembling ${this.instruction.getBytesHex(this.memory)}`
         );
+        console.error(error); // to show the original backtrace
         throw error;
       }
 
