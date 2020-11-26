@@ -914,7 +914,7 @@ export class OpAddR16ToHL extends Instruction {
     const opcode = this.getByte(memory);
     let reg = "SP";
     if (opcode !== 0x39) {
-      reg = this.getStringForR16(this.getReg(memory));
+      reg = this.getStringForR16(this.getReg(memory) / 2);
     }
 
     return `ADD HL, ${reg}`;
