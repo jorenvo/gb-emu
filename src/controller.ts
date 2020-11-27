@@ -20,7 +20,7 @@ import {
 
 declare global {
   interface Window {
-    emu: Emulator;
+    controller: Controller;
   }
 }
 
@@ -109,7 +109,7 @@ export class ControllerReal implements Controller {
   private boot(bytes: Uint8Array) {
     console.log("Booting...");
     this.emu = new Emulator(this, bytes);
-    window.emu = this.emu;
+    window.controller = this;
 
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankViews = this.createBankViews(this.emu.memory);
