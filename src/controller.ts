@@ -306,16 +306,26 @@ export class ControllerReal implements Controller {
     ) {
       const oldInstruction = this.recentInstructions.shift()!;
 
-      const timesInList =
-        this.recentInstructionsCounter.get(oldInstruction)! - 1;
+      const currentCounter = this.recentInstructionsCounter.get(oldInstruction);
+      if (currentCounter === undefined) {
+        throw new Error("Old instruction not in list!");
+      }
+
+      const timesInList = currentCounter - 1;
       if (timesInList < 0) {
         throw new Error("Counter < 0");
       } else if (timesInList === 0) {
         oldInstruction.recentlyExecuted = false;
-      } else {
-        this.recentInstructionsCounter.set(oldInstruction, timesInList);
+        const view = this.instructionToMemoryView!.get(oldInstruction);
+        if (!view) {
+          throw new Error("No view");
+        }
+        this.toUpdate.add(view);
       }
+
+      this.recentInstructionsCounter.set(oldInstruction, timesInList);
     }
+
     this.recentInstructions.push(instruction);
     this.incrementRecentInstructionCounter(instruction);
     instruction.recentlyExecuted = true;
