@@ -171,34 +171,31 @@ export class MemoryView extends View {
   }
 
   update() {
-    if (this.instruction) {
-      // TODO always true
-      this.switchToInstructionBank();
+    this.switchToInstructionBank();
 
-      let dis = "";
-      try {
-        dis = this.instruction.disassemble(this.memory);
-      } catch (error) {
-        console.error(
-          `Failed disassembling ${this.instruction.getBytesHex(this.memory)}`
-        );
-        console.error(error); // to show the original backtrace
-        throw error;
-      }
-
-      this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
-
-      if (this.instruction.recentlyExecuted) {
-        this.element.classList.add("recentlyExecuted");
-      } else {
-        this.element.classList.remove("recentlyExecuted");
-      }
-
-      if (this.instruction.getRelatedAddress(this.memory) !== -1) {
-        this.element.classList.add("jumpToAddr");
-      }
-      this.restoreBank();
+    let dis = "";
+    try {
+      dis = this.instruction.disassemble(this.memory);
+    } catch (error) {
+      console.error(
+        `Failed disassembling ${this.instruction.getBytesHex(this.memory)}`
+      );
+      console.error(error); // to show the original backtrace
+      throw error; // to stop execution
     }
+
+    this.element.innerHTML = `${utils.hexString(this.address, 16)}  ${dis}`;
+
+    if (this.instruction.recentlyExecuted) {
+      this.element.classList.add("recentlyExecuted");
+    } else {
+      this.element.classList.remove("recentlyExecuted");
+    }
+
+    if (this.instruction.getRelatedAddress(this.memory) !== -1) {
+      this.element.classList.add("jumpToAddr");
+    }
+    this.restoreBank();
 
     if (
       this.memory.bank === this.bankView.bank &&
