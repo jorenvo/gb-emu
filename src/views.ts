@@ -172,6 +172,7 @@ export class MemoryView extends View {
 
   update() {
     if (this.instruction) {
+      // TODO always true
       this.switchToInstructionBank();
 
       let dis = "";
