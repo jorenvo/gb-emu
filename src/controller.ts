@@ -74,6 +74,7 @@ export class ControllerReal implements Controller {
   private registerViews: Map<number, RegisterView> | undefined;
   private bankViews: Map<number, BankView> | undefined;
   private memoryViews: Map<number, MemoryView> | undefined;
+  private instructionToMemoryView: Map<Instruction, MemoryView> | undefined;
   private SPView: SPView | undefined;
   private stackView: StackView | undefined;
 
@@ -113,7 +114,11 @@ export class ControllerReal implements Controller {
 
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankViews = this.createBankViews(this.emu.memory);
-    this.memoryViews = this.createMemoryViews(this.emu.cpu, this.emu.memory);
+
+    this.memoryViews = new Map();
+    this.instructionToMemoryView = new Map();
+    this.createMemoryViews(this.emu.cpu, this.emu.memory);
+
     this.stackView = new StackView("stack", this.emu.cpu, this.emu.memory);
     this.SPView = new SPView("SP", this.emu.cpu);
 
@@ -180,7 +185,6 @@ export class ControllerReal implements Controller {
   }
 
   private createMemoryViews(cpu: CPU, memory: Memory) {
-    const views = new Map();
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
       const bankSize = bank === -1 ? memory.bootROM.length : Memory.BANKSIZE;
       const bankView = this.bankViews!.get(bank);
@@ -189,15 +193,14 @@ export class ControllerReal implements Controller {
       }
 
       for (let addr = 0; addr < bankSize; ++addr) {
-        if (memory.getInstruction(addr, bank)) {
-          views.set(
-            this.createMemoryViewKey(bank, addr),
-            new MemoryView(bankView, addr, memory, cpu, this)
-          );
+        const instruction = memory.getInstruction(addr, bank);
+        if (instruction) {
+          const view = new MemoryView(bankView, addr, memory, cpu, this);
+          this.memoryViews!.set(this.createMemoryViewKey(bank, addr), view);
+          this.instructionToMemoryView!.set(instruction, view);
         }
       }
     }
-    return views;
   }
 
   public runBootRom() {
