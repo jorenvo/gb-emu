@@ -166,10 +166,24 @@ export class Memory {
     return bankToAddressToInstruction;
   }
 
+  private getBankBasedOnAddress(address: number): number {
+    if (this.bank === -1) {
+      if (address < 0x100) {
+        return -1;
+      } else {
+        return 0;
+      }
+    } else if (address < Memory.BANKSIZE) {
+      return 0;
+    } else {
+      return this.bank;
+    }
+  }
+
   // specify bank to force a bank instead of taking the current one
   getInstruction(address: number, bank?: number): Instruction | undefined {
     if (bank === undefined) {
-      bank = this.bank;
+      bank = this.getBankBasedOnAddress(address);
     }
 
     const addressToInstruction = this.bankToAddressToInstruction.get(bank);
@@ -188,20 +202,16 @@ export class Memory {
       return this.ram[address];
     }
 
+    const bank = this.getBankBasedOnAddress(address);
+    if (bank >= 1) {
+      address -= Memory.BANKSIZE;
+    }
+
     let byte;
-    if (this.bank === -1) {
-      if (address < 0x100) {
-        byte = this.bootROM[address];
-      } else {
-        // for reading the logo on the cart
-        byte = this.romBanks[0][address];
-      }
+    if (bank === -1) {
+      byte = this.bootROM[address];
     } else {
-      if (address < 0x4000) {
-        byte = this.romBanks[0][address];
-      } else if (address <= 0x7fff) {
-        byte = this.romBanks[this.bank][address - 0x4000];
-      } // anything above is RAM
+      byte = this.romBanks[bank][address];
     }
 
     if (byte === undefined) {
