@@ -32,11 +32,10 @@ export abstract class Controller {
   public abstract setBreakpoint(address: number): void;
   public abstract updatedReg(reg: number): void;
   public abstract updatedSP(): void;
-  public abstract updatedMemory(address: number): void;
   public abstract updatedStack(): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
-  public abstract movedPC(oldAddr: number, newAddr: number): void;
+  public abstract movedPC(newAddr: number): void;
   public abstract getRecentInstructions(): Instruction[];
 }
 
@@ -47,13 +46,12 @@ export class ControllerMock {
   public setBreakpoint(_address: number): void {}
   public updatedReg(_reg: number): void {}
   public updatedSP(): void {}
-  public updatedMemory(_address: number): void {}
   public updatedStack(): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
   }
-  public movedPC(_oldAddr: number, _newAddr: number): void {}
+  public movedPC(_newAddr: number): void {}
 }
 
 export class ControllerReal implements Controller {
@@ -80,6 +78,7 @@ export class ControllerReal implements Controller {
   private SPView: SPView | undefined;
   private stackView: StackView | undefined;
   private executionThreadView: ExecutionThreadView | undefined;
+  private prevPCMemoryView: MemoryView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
@@ -267,7 +266,11 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.SPView!);
   }
 
-  private getMemoryView(address: number, bank: number): MemoryView {
+  private getMemoryView(address: number, bank?: number): MemoryView {
+    if (bank === undefined) {
+      bank = this.emu!.memory.getBankBasedOnAddress(address);
+    }
+
     const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
     if (!view) {
       throw new Error(
@@ -279,16 +282,6 @@ export class ControllerReal implements Controller {
     }
 
     return view;
-  }
-
-  public updatedMemory(address: number) {
-    if (address >= Memory.RAMSTART) {
-      return; // RAM is not visualized atm
-    }
-
-    const bank = this.emu!.memory.bank;
-    const view = this.getMemoryView(address, bank);
-    this.toUpdate.add(view);
   }
 
   public updatedStack() {
@@ -312,7 +305,7 @@ export class ControllerReal implements Controller {
     this.recentInstructionsCounter.set(instruction, prev + 1);
   }
 
-  public movedPC(oldAddr: number, newAddr: number) {
+  public movedPC(newAddr: number) {
     // TODO: Emulator should do this
     if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
       this.emu!.memory.setBank(0);
@@ -353,8 +346,13 @@ export class ControllerReal implements Controller {
     this.incrementRecentInstructionCounter(instruction);
     instruction.recentlyExecuted = true;
 
-    this.updatedMemory(oldAddr);
-    this.updatedMemory(newAddr);
+    if (this.prevPCMemoryView) {
+      this.toUpdate.add(this.prevPCMemoryView);
+    }
+
+    const newView = this.getMemoryView(newAddr);
+    this.toUpdate.add(newView);
+    this.prevPCMemoryView = newView;
 
     this.toUpdate.add(this.executionThreadView!);
   }

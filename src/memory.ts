@@ -166,7 +166,7 @@ export class Memory {
     return bankToAddressToInstruction;
   }
 
-  private getBankBasedOnAddress(address: number): number {
+  getBankBasedOnAddress(address: number): number {
     if (this.bank === -1) {
       if (address < 0x100) {
         return -1;

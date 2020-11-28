@@ -55,8 +55,6 @@ export class CPU {
   }
 
   set SP(addr: number) {
-    this.controller.updatedMemory(this._SP);
-    this.controller.updatedMemory(addr);
     this.controller.updatedSP();
     this._SP = addr;
   }
@@ -80,7 +78,7 @@ export class CPU {
   }
 
   set PC(newPC: number) {
-    this.controller.movedPC(this._PC, newPC);
+    this.controller.movedPC(newPC);
     this._PC = newPC;
   }
 
