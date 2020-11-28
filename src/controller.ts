@@ -306,7 +306,10 @@ export class ControllerReal implements Controller {
       console.log("Switched out boot ROM and switched to bank 0");
     }
 
-    const instruction = this.emu!.memory.getInstruction(newAddr)!;
+    const instruction = this.emu!.memory.getInstruction(newAddr);
+    if (!instruction) {
+      throw new Error(`No instruction at ${utils.hexString(newAddr, 16)}`);
+    }
 
     while (
       this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS
