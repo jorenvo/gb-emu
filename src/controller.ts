@@ -11,6 +11,7 @@ import {
   BankView,
   MemoryView,
   StackView,
+  ExecutionThreadView,
   PauseButton,
   RunBootRomButton,
   StepNextButton,
@@ -36,6 +37,7 @@ export abstract class Controller {
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(oldAddr: number, newAddr: number): void;
+  public abstract getRecentInstructions(): Instruction[];
 }
 
 export class ControllerMock {
@@ -77,6 +79,7 @@ export class ControllerReal implements Controller {
   private instructionToMemoryView: Map<Instruction, MemoryView> | undefined;
   private SPView: SPView | undefined;
   private stackView: StackView | undefined;
+  private executionThreadView: ExecutionThreadView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
@@ -121,6 +124,7 @@ export class ControllerReal implements Controller {
 
     this.stackView = new StackView("stack", this.emu.cpu, this.emu.memory);
     this.SPView = new SPView("SP", this.emu.cpu);
+    this.executionThreadView = new ExecutionThreadView("thread", this);
 
     this.toUpdate = new Set();
     this.markAllUpdated();
@@ -335,5 +339,11 @@ export class ControllerReal implements Controller {
 
     this.updatedMemory(oldAddr);
     this.updatedMemory(newAddr);
+
+    this.toUpdate.add(this.executionThreadView!);
+  }
+
+  public getRecentInstructions() {
+    return this.recentInstructions;
   }
 }

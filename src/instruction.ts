@@ -63,7 +63,7 @@ export abstract class Instruction {
     return spentTStates;
   }
 
-  protected getAddress() {
+  public getAddress() {
     return this.address;
   }
 

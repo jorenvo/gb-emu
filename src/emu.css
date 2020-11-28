@@ -37,6 +37,10 @@ register {
   margin-right: 5px;
 }
 
+thread {
+    display: block;
+}
+
 bankview {
     max-height: 400px;
     overflow-y: scroll;

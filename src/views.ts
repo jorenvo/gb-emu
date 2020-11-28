@@ -254,6 +254,26 @@ export class StackView extends View {
   }
 }
 
+export class ExecutionThreadView extends View {
+  controller: Controller;
+
+  constructor(elementID: string, controller: Controller) {
+    super(elementID);
+    this.controller = controller;
+  }
+
+  update() {
+    const recentInstructions = this.controller.getRecentInstructions();
+    const instructions = recentInstructions.slice(
+      recentInstructions.length - 16
+    );
+    instructions.reverse();
+    this.element.innerHTML = instructions
+      .map(i => utils.hexString(i.getAddress(), 16))
+      .join(" ");
+  }
+}
+
 export class BreakpointSetter extends View {
   controller: Controller;
 
