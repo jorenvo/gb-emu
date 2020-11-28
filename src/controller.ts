@@ -188,15 +188,28 @@ export class ControllerReal implements Controller {
     return (bank << 16) | address;
   }
 
+  private getBankAddressRange(
+    memory: Memory,
+    bankNr: number
+  ): [number, number] {
+    if (bankNr === -1) {
+      return [0, memory.bootROM.length];
+    } else if (bankNr === 0) {
+      return [0, Memory.BANKSIZE];
+    } else {
+      return [Memory.BANKSIZE, Memory.BANKSIZE + Memory.BANKSIZE];
+    }
+  }
+
   private createMemoryViews(cpu: CPU, memory: Memory) {
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
-      const bankSize = bank === -1 ? memory.bootROM.length : Memory.BANKSIZE;
+      let [bankStart, bankEnd] = this.getBankAddressRange(memory, bank);
       const bankView = this.bankViews!.get(bank);
       if (!bankView) {
         throw new Error(`Bank ${bank} doesn't exist.`);
       }
 
-      for (let addr = 0; addr < bankSize; ++addr) {
+      for (let addr = bankStart; addr < bankEnd; ++addr) {
         const instruction = memory.getInstruction(addr, bank);
         if (instruction) {
           const view = new MemoryView(bankView, addr, memory, cpu, this);

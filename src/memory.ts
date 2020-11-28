@@ -131,11 +131,22 @@ export class Memory {
     }
 
     for (let bankNr = 0; bankNr < this.romBanks.length; ++bankNr) {
-      const bank = this.romBanks[bankNr];
       bankToAddressToInstruction.set(bankNr, new Map());
-      let i = 0;
-      while (i < bank.length) {
-        const newInstruction = Disassembler.buildInstruction(i, bank);
+
+      let bank = this.romBanks[bankNr];
+      let addr = 0;
+      let lastAddr = 0x4000;
+      if (bankNr > 0) {
+        // all banks > 0 are mapped to 0x4000 - 0x7fff
+        addr += 0x4000;
+        lastAddr += 0x4000;
+        const paddedBank = new Uint8Array(0x8000); // initialized to 0
+        paddedBank.set(bank, addr);
+        bank = paddedBank;
+      }
+
+      while (addr < lastAddr) {
+        const newInstruction = Disassembler.buildInstruction(addr, bank);
         const size = newInstruction.size();
         if (size === 0) {
           const s = newInstruction.disassemble(
@@ -144,9 +155,12 @@ export class Memory {
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 
-        bankToAddressToInstruction.get(bankNr)!.set(i, newInstruction);
-        i += size;
+        bankToAddressToInstruction.get(bankNr)!.set(addr, newInstruction);
+        addr += size;
       }
+
+      const instNr = bankToAddressToInstruction.get(bankNr)!.size;
+      console.log(`${instNr} instructions in bank ${bankNr}`);
     }
 
     return bankToAddressToInstruction;
@@ -179,10 +193,15 @@ export class Memory {
       if (address < 0x100) {
         byte = this.bootROM[address];
       } else {
+        // for reading the logo on the cart
         byte = this.romBanks[0][address];
       }
     } else {
-      byte = this.romBanks[this.bank][address];
+      if (address < 0x4000) {
+        byte = this.romBanks[0][address];
+      } else if (address <= 0x7fff) {
+        byte = this.romBanks[this.bank][address - 0x4000];
+      } // anything above is RAM
     }
 
     if (byte === undefined) {
