@@ -56,11 +56,12 @@ export class Video {
 
   private getTile(address: number) {
     const lcdc = this.memory.getLCDC();
-    if (utils.getBit(lcdc, 4) === 0) {
-      throw new Error("No support for 0x8800-0x97ff tile addressing mode yet.");
+    if (utils.getBit(lcdc, 4) === 1) {
+      return 0x8000 + address * 16;
+    } else {
+      // 0x8800 addressing
+      return 0x8800 + utils.twosComplementToNumber(address) * 16;
     }
-
-    return 0x8000 + address * 16;
   }
 
   renderTile(image: ImageData, tileStart: number, x: number, y: number) {
