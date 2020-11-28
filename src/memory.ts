@@ -208,6 +208,12 @@ export class Memory {
     }
 
     if (value === undefined) debugger;
+
+    if (address >= 0x2000 && address <= 0x3fff) {
+      console.log(`TODO: select bank ${value}`);
+      return;
+    }
+
     if (address < Memory.RAMSTART) {
       throw new Error(`Can't write to rom @${utils.hexString(address, 16)}`);
     }
