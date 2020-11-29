@@ -289,7 +289,13 @@ export class BreakpointSetter extends View {
 
   private setBreakpoint(_e: Event) {
     const val = (this.element as HTMLInputElement).value;
-    this.controller.setBreakpoint(parseInt(val, 16));
+    if (val.includes(",")) {
+      const [bank, addr] = val.split(",");
+      this.controller.setBreakpointBank(parseInt(bank, 16));
+      this.controller.setBreakpoint(parseInt(addr, 16));
+    } else {
+      this.controller.setBreakpoint(parseInt(val, 16));
+    }
   }
 }
 

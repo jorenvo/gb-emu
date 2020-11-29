@@ -30,6 +30,7 @@ export abstract class Controller {
   public abstract togglePause(): void;
   public abstract stepNext(): void;
   public abstract setBreakpoint(address: number): void;
+  public abstract setBreakpointBank(bank: number): void;
   public abstract updatedReg(reg: number): void;
   public abstract updatedSP(): void;
   public abstract updatedStack(): void;
@@ -44,6 +45,7 @@ export class ControllerMock {
   public togglePause(): void {}
   public stepNext(): void {}
   public setBreakpoint(_address: number): void {}
+  public setBreakpointBank(_bank: number): void {}
   public updatedReg(_reg: number): void {}
   public updatedSP(): void {}
   public updatedStack(): void {}
@@ -91,6 +93,7 @@ export class ControllerReal implements Controller {
 
   // necessary in case emu is not yet running
   private breakpoint: number | undefined;
+  private breakpointBank: number | undefined;
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
@@ -129,10 +132,10 @@ export class ControllerReal implements Controller {
     this.markAllUpdated();
     this.updateLoop();
 
-    if (this.breakpoint) {
-      this.emu.setBreakpoint(this.breakpoint);
-      this.breakpoint = undefined;
-    }
+    this.emu.setBreakpoint(this.breakpoint);
+    this.breakpoint = undefined;
+    this.emu.setBreakpointBank(this.breakpointBank);
+    this.breakpointBank = undefined;
 
     this.emu.run();
   }
@@ -232,11 +235,18 @@ export class ControllerReal implements Controller {
   }
 
   public setBreakpoint(address: number) {
-    // TODO bank?
     if (this.emu) {
       this.emu.setBreakpoint(address);
     } else {
       this.breakpoint = address;
+    }
+  }
+
+  public setBreakpointBank(bank: number) {
+    if (this.emu) {
+      this.emu.setBreakpointBank(bank);
+    } else {
+      this.breakpointBank = bank;
     }
   }
 

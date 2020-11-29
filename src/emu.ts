@@ -15,6 +15,7 @@ export class Emulator {
   // debugger related
   paused: boolean;
   breakpoint: number | undefined;
+  breakpointBank: number | undefined;
 
   constructor(controller: Controller, bytes: Uint8Array) {
     this.memory = new Memory(bytes, controller);
@@ -31,8 +32,12 @@ export class Emulator {
     this.runBudgetMs = (1 / 60) * 1_000;
   }
 
-  setBreakpoint(addr: number) {
+  setBreakpoint(addr: number | undefined) {
     this.breakpoint = addr;
+  }
+
+  setBreakpointBank(bank: number | undefined) {
+    this.breakpointBank = bank;
   }
 
   // private updateMemRegs() {
@@ -77,7 +82,12 @@ export class Emulator {
         return;
       }
 
-      if (this.breakpoint !== undefined && this.breakpoint === this.cpu.PC) {
+      if (
+        this.breakpoint !== undefined &&
+        this.breakpoint === this.cpu.PC &&
+        (this.breakpointBank === undefined ||
+          this.breakpointBank === this.memory.bank)
+      ) {
         this.paused = true;
         return;
       }
