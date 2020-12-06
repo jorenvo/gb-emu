@@ -211,7 +211,7 @@ export class MemoryView extends View {
     this.restoreBank();
 
     if (
-      this.memory.bank === this.bankView.bank &&
+      (this.bankView.bank === 0 || this.bankView.bank === this.memory.bank) &&
       this.cpu.PC === this.address
     ) {
       this.centerInBankView(false);
