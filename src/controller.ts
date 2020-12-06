@@ -8,6 +8,7 @@ import {
   View,
   RegisterView,
   SPView,
+  PCView,
   BankView,
   MemoryView,
   StackView,
@@ -78,6 +79,7 @@ export class ControllerReal implements Controller {
   private memoryViews: Map<number, MemoryView> | undefined;
   private instructionToMemoryView: Map<Instruction, MemoryView> | undefined;
   private SPView: SPView | undefined;
+  private PCView: PCView | undefined;
   private stackView: StackView | undefined;
   private executionThreadView: ExecutionThreadView | undefined;
   private prevPCMemoryView: MemoryView | undefined;
@@ -126,6 +128,7 @@ export class ControllerReal implements Controller {
 
     this.stackView = new StackView("stack", this.emu.cpu, this.emu.memory);
     this.SPView = new SPView("SP", this.emu.cpu);
+    this.PCView = new PCView("PC", this.emu.cpu);
     this.executionThreadView = new ExecutionThreadView("thread", this);
 
     this.toUpdate = new Set();
@@ -316,6 +319,8 @@ export class ControllerReal implements Controller {
   }
 
   public movedPC(newAddr: number) {
+    this.toUpdate.add(this.PCView!);
+
     // TODO: Emulator should do this
     if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
       this.emu!.memory.setBank(0);

@@ -60,6 +60,19 @@ export class SPView extends View {
   }
 }
 
+export class PCView extends View {
+  cpu: CPU;
+
+  constructor(elementID: string, cpu: CPU) {
+    super(elementID);
+    this.cpu = cpu;
+  }
+
+  update() {
+    this.element.innerHTML = `PC: ${utils.hexString(this.cpu.PC, 16)}`;
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   bank: number;
