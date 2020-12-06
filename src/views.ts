@@ -210,9 +210,13 @@ export class MemoryView extends View {
     }
     this.restoreBank();
 
+    // Center if PC points to this and either:
+    // - the memory bank matches this memory, or
+    // - the memory bank is 0 (fixed RAM, always active) and we're not booting
     if (
-      (this.bankView.bank === 0 || this.bankView.bank === this.memory.bank) &&
-      this.cpu.PC === this.address
+      this.cpu.PC === this.address &&
+      ((this.bankView.bank === 0 && this.memory.bank !== -1) ||
+        this.bankView.bank === this.memory.bank)
     ) {
       this.centerInBankView(false);
     } else {
