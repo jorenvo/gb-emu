@@ -286,7 +286,7 @@ export class ExecutionThreadView extends View {
     );
     instructions.reverse();
     this.element.innerHTML = instructions
-      .map(i => utils.hexString(i.getAddress(), 16))
+      .map((i) => utils.hexString(i.getAddress(), 16))
       .join(" ");
   }
 }

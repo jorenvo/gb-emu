@@ -17,8 +17,8 @@ function createMemory(bytes: Uint8Array): Memory {
   return memory;
 }
 
-describe("OpLdD16ToR16", function() {
-  it("should correctly load", function() {
+describe("OpLdD16ToR16", function () {
+  it("should correctly load", function () {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array([0x21, 0x20, 0x21]));
     const ld = new instruction.OpLdD16ToR16(0x00);
@@ -34,8 +34,8 @@ describe("OpLdD16ToR16", function() {
   });
 });
 
-describe("OpLdD8ToR8", function() {
-  it("should correctly disassemble", function() {
+describe("OpLdD8ToR8", function () {
+  it("should correctly disassemble", function () {
     let memory = createMemory(new Uint8Array([0x16, 0x34]));
     const ld = new instruction.OpLdD8ToR8(0x00);
     assert.equal("LD D, $0x34", ld.disassemble(memory));
@@ -45,8 +45,8 @@ describe("OpLdD8ToR8", function() {
   });
 });
 
-describe("OpLdD8ToR8", function() {
-  it("should correctly disassemble", function() {
+describe("OpLdD8ToR8", function () {
+  it("should correctly disassemble", function () {
     const ld = new instruction.OpLdR8ToR8(0x00);
     let memory = createMemory(new Uint8Array([0x62]));
     assert.equal("LD H, D", ld.disassemble(memory));
@@ -59,8 +59,8 @@ describe("OpLdD8ToR8", function() {
   });
 });
 
-describe("OpLdR8ToA16", function() {
-  it("should correctly disassemble", function() {
+describe("OpLdR8ToA16", function () {
+  it("should correctly disassemble", function () {
     const ld = new instruction.OpLdR8ToA16(0x00);
 
     let memory = createMemory(new Uint8Array([0x22]));
@@ -83,8 +83,8 @@ describe("OpLdR8ToA16", function() {
   });
 });
 
-describe("rotations", function() {
-  it("should correctly rotate left", function() {
+describe("rotations", function () {
+  it("should correctly rotate left", function () {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array());
     const opRLCA = new instruction.OpRLCA(0x00);
@@ -108,7 +108,7 @@ describe("rotations", function() {
     // assert.equal(cpu.getCarryFlag(), 0);
   });
 
-  it("should correctly rotate right", function() {
+  it("should correctly rotate right", function () {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array());
     const opRRCA = new instruction.OpRRCA(0x00);
@@ -133,8 +133,8 @@ describe("rotations", function() {
   });
 });
 
-describe("bit extractions", function() {
-  it("should correctly disassemble bit ops", function() {
+describe("bit extractions", function () {
+  it("should correctly disassemble bit ops", function () {
     function getMemory(opcode: number) {
       return createMemory(new Uint8Array([0xcb, opcode]));
     }

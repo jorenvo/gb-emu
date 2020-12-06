@@ -17,7 +17,7 @@ import {
   RunBootRomButton,
   StepNextButton,
   CopyButton,
-  BreakpointSetter
+  BreakpointSetter,
 } from "./views.js";
 
 declare global {
@@ -104,7 +104,7 @@ export class ControllerReal implements Controller {
 
   constructor() {
     this.loader = new Loader();
-    this.loader.readFile.then(rom => this.boot(new Uint8Array(rom)));
+    this.loader.readFile.then((rom) => this.boot(new Uint8Array(rom)));
     this.toUpdate = new Set();
     this.recentInstructions = [];
     this.recentInstructionsCounter = new Map();
@@ -256,7 +256,7 @@ export class ControllerReal implements Controller {
   }
 
   private updatePending() {
-    this.toUpdate.forEach(view => {
+    this.toUpdate.forEach((view) => {
       view.update();
     });
     this.toUpdate.clear();
@@ -321,7 +321,12 @@ export class ControllerReal implements Controller {
   }
 
   public changedBank(): void {
-    console.log(`Changed bank from bank ${this.emu!.memory.bank} @${utils.hexString(this.emu!.cpu.PC, 16)}`);
+    console.log(
+      `Changed bank from bank ${this.emu!.memory.bank} @${utils.hexString(
+        this.emu!.cpu.PC,
+        16
+      )}`
+    );
   }
 
   public movedPC(newAddr: number) {
