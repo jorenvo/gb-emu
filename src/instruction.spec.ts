@@ -12,7 +12,10 @@ function createCPU(): CPU {
 }
 
 function createMemory(bytes: Uint8Array): Memory {
-  const memory = new Memory(bytes, new ControllerMock());
+  const fakeROM = new Uint8Array(0x4000);
+  fakeROM.set(bytes);
+
+  const memory = new Memory(fakeROM, new ControllerMock());
   memory.setBank(0);
   return memory;
 }

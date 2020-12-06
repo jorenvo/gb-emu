@@ -17,8 +17,9 @@ describe("Video subsystem", function () {
     // |  TILE 3  |  TILE 4  |
     // |          |          |
     // +----------+----------+
+    const fakeROM = new Uint8Array(0x4000);
     // prettier-ignore
-    const memory = new Memory(new Uint8Array([
+    fakeROM.set([
       0x5f, 0x3f, 0x3f, 0x5f, // tile 1 row 1 & 2
       0xff, 0xff, 0xff, 0xff, // tile 1 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 1 row 5 & 6
@@ -35,7 +36,8 @@ describe("Video subsystem", function () {
       0xff, 0xff, 0xff, 0xff, // tile 4 row 3 & 4
       0xff, 0xff, 0xff, 0xff, // tile 4 row 5 & 6
       0xff, 0xff, 0x5f, 0x3f, // tile 4 row 7 & 8
-    ]), new ControllerMock());
+    ]);
+    const memory = new Memory(fakeROM, new ControllerMock());
     memory.setBank(0);
 
     const { document } = new JSDOM("<canvas>").window;
