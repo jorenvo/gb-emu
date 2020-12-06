@@ -38,6 +38,7 @@ export abstract class Controller {
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
+  public abstract changedBank(): void;
   public abstract getRecentInstructions(): Instruction[];
 }
 
@@ -54,6 +55,7 @@ export class ControllerMock {
   public getActiveBankView(): BankView | undefined {
     return undefined;
   }
+  public changedBank(): void {}
   public movedPC(_newAddr: number): void {}
 }
 
@@ -316,6 +318,10 @@ export class ControllerReal implements Controller {
 
     const prev = this.recentInstructionsCounter.get(instruction)!;
     this.recentInstructionsCounter.set(instruction, prev + 1);
+  }
+
+  public changedBank(): void {
+    console.log(`Changed bank from bank ${this.emu!.memory.bank} @${utils.hexString(this.emu!.cpu.PC, 16)}`);
   }
 
   public movedPC(newAddr: number) {
