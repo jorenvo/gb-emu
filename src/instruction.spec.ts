@@ -86,6 +86,39 @@ describe("OpLdR8ToA16", function () {
   });
 });
 
+describe("OpPop & OpPush", function () {
+  it("should correctly pop/push", function () {
+    const cpu = createCPU();
+    const memory = createMemory(new Uint8Array([0xe1, 0xe5]));
+    const pop = new instruction.OpPop(0x00);
+    const push = new instruction.OpPush(0x01);
+
+    assert.equal("POP HL", pop.disassemble(memory));
+    assert.equal("PUSH HL", push.disassemble(memory));
+
+    const HLVal = 0x1122;
+    cpu.setHL(HLVal);
+    assert.equal(cpu.getHL(), HLVal);
+    push.exec(cpu, memory);
+
+    const HLValHigh = HLVal >> 8;
+    const HLValLow = HLVal & 0xff;
+
+    for (let i = cpu.SP - 5; i < cpu.SP + 2; ++i) {
+      console.log(i === cpu.SP ? "*" : " ", i.toString(16), memory.getByte(i).toString(16));
+    }
+    assert.equal(HLValLow, memory.getByte(cpu.SP));
+    assert.equal(HLValHigh, memory.getByte(cpu.SP + 1));
+
+    cpu.setHL(0);
+    assert.equal(cpu.getHL(), 0);
+
+    pop.exec(cpu, memory);
+    assert.equal(cpu.getHL(), HLVal);
+  });
+});
+
+
 describe("rotations", function () {
   it("should correctly rotate left", function () {
     const cpu = createCPU();

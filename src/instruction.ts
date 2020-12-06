@@ -1377,7 +1377,7 @@ export class OpPush extends Instruction {
   }
 
   private getR16(memory: Memory) {
-    return (this.getByte(memory) >> 4) - 0xc;
+    return ((this.getByte(memory) >> 4) - 0xc) * 2;
   }
 
   exec(cpu: CPU, memory: Memory): number {
@@ -1399,7 +1399,7 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this.getR16(memory));
+    const r16 = this.getStringForR16(this.getR16(memory) / 2);
     return `PUSH ${r16}`;
   }
 }
