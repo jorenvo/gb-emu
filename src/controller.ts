@@ -55,8 +55,11 @@ export class ControllerMock {
   public getActiveBankView(): BankView | undefined {
     return undefined;
   }
-  public changedBank(): void {}
   public movedPC(_newAddr: number): void {}
+  public changedBank(): void {}
+  public getRecentInstructions(): Instruction[] {
+    return [];
+  }
 }
 
 export class ControllerReal implements Controller {
@@ -340,6 +343,7 @@ export class ControllerReal implements Controller {
 
     const instruction = this.emu!.memory.getInstruction(newAddr);
     if (!instruction) {
+      console.log(`${utils.hexString(newAddr, 16)}, ${this.emu!.memory.bank}`);
       throw new Error(`No instruction at ${utils.hexString(newAddr, 16)}`);
     }
 
