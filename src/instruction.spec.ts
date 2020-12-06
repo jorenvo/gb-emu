@@ -104,9 +104,6 @@ describe("OpPop & OpPush", function () {
     const HLValHigh = HLVal >> 8;
     const HLValLow = HLVal & 0xff;
 
-    for (let i = cpu.SP - 5; i < cpu.SP + 2; ++i) {
-      console.log(i === cpu.SP ? "*" : " ", i.toString(16), memory.getByte(i).toString(16));
-    }
     assert.equal(HLValLow, memory.getByte(cpu.SP));
     assert.equal(HLValHigh, memory.getByte(cpu.SP + 1));
 

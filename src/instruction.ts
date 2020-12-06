@@ -40,11 +40,11 @@ export abstract class Instruction {
     switch (n) {
       case 0:
         return "BC";
-      case 1:
-        return "DE";
       case 2:
+        return "DE";
+      case 4:
         return "HL";
-      case 3:
+      case 6:
         return "SP";
       default:
         throw new Error(`Register ${n} doesn't exist.`);
@@ -538,7 +538,7 @@ export abstract class OpDecInc16 extends Instruction {
   getRegName(memory: Memory) {
     let reg = "SP";
     if (!this.isSP(memory)) {
-      reg = this.getStringForR16(this.getByte(memory) >> 4);
+      reg = this.getStringForR16((this.getByte(memory) >> 4) * 2);
     }
     return reg;
   }
@@ -914,7 +914,7 @@ export class OpAddR16ToHL extends Instruction {
     const opcode = this.getByte(memory);
     let reg = "SP";
     if (opcode !== 0x39) {
-      reg = this.getStringForR16(this.getReg(memory) / 2);
+      reg = this.getStringForR16(this.getReg(memory));
     }
 
     return `ADD HL, ${reg}`;
@@ -1399,7 +1399,7 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this.getR16(memory) / 2);
+    const r16 = this.getStringForR16(this.getR16(memory));
     return `PUSH ${r16}`;
   }
 }
@@ -1410,7 +1410,7 @@ export class OpPop extends Instruction {
   }
 
   private getR16(memory: Memory) {
-    return (this.getByte(memory) >> 4) - 0xc;
+    return ((this.getByte(memory) >> 4) - 0xc) * 2;
   }
 
   exec(cpu: CPU, memory: Memory): number {
