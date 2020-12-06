@@ -1399,7 +1399,12 @@ export class OpPush extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this.getR16(memory));
+    let r16;
+    if (this.getByte(memory) === 0xf5) {
+      r16 = "AF";
+    } else {
+      r16 = this.getStringForR16(this.getR16(memory));
+    }
     return `PUSH ${r16}`;
   }
 }
@@ -1427,7 +1432,12 @@ export class OpPop extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    const r16 = this.getStringForR16(this.getR16(memory));
+    let r16;
+    if (this.getByte(memory) === 0xf1) {
+      r16 = "AF";
+    } else {
+      r16 = this.getStringForR16(this.getR16(memory));
+    }
     return `POP ${r16}`;
   }
 }

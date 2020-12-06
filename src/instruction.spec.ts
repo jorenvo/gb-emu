@@ -88,30 +88,58 @@ describe("OpLdR8ToA16", function () {
 
 describe("OpPop & OpPush", function () {
   it("should correctly pop/push", function () {
-    const cpu = createCPU();
-    const memory = createMemory(new Uint8Array([0xe1, 0xe5]));
-    const pop = new instruction.OpPop(0x00);
-    const push = new instruction.OpPush(0x01);
+    function testR16(name: string, opcodePush: number, opcodePop: number) {
+      let r1: number, r2: number;
+      switch (name) {
+        case "BC":
+          r1 = 0;
+          r2 = 1;
+          break;
+        case "DE":
+          r1 = 2;
+          r2 = 3;
+          break;
+        case "HL":
+          r1 = 4;
+          r2 = 5;
+          break;
+        case "AF":
+          r1 = 7;
+          r2 = 6;
+          break;
+        default:
+          throw new Error(`Unknown register ${name}`);
+      }
+      const cpu = createCPU();
+      const memory = createMemory(new Uint8Array([opcodePush, opcodePop]));
+      const push = new instruction.OpPush(0x00);
+      const pop = new instruction.OpPop(0x01);
 
-    assert.equal("POP HL", pop.disassemble(memory));
-    assert.equal("PUSH HL", push.disassemble(memory));
+      assert.equal(`POP ${name}`, pop.disassemble(memory));
+      assert.equal(`PUSH ${name}`, push.disassemble(memory));
 
-    const HLVal = 0x1122;
-    cpu.setHL(HLVal);
-    assert.equal(cpu.getHL(), HLVal);
-    push.exec(cpu, memory);
+      const HLVal = 0x1122;
+      cpu.setCombinedRegister(r1, r2, HLVal)
+      assert.equal(cpu.getCombinedRegister(r1, r2), HLVal);
+      push.exec(cpu, memory);
 
-    const HLValHigh = HLVal >> 8;
-    const HLValLow = HLVal & 0xff;
+      const HLValHigh = HLVal >> 8;
+      const HLValLow = HLVal & 0xff;
 
-    assert.equal(HLValLow, memory.getByte(cpu.SP));
-    assert.equal(HLValHigh, memory.getByte(cpu.SP + 1));
+      assert.equal(HLValLow, memory.getByte(cpu.SP));
+      assert.equal(HLValHigh, memory.getByte(cpu.SP + 1));
 
-    cpu.setHL(0);
-    assert.equal(cpu.getHL(), 0);
+      cpu.setCombinedRegister(r1, r2, 0);
+      assert.equal(cpu.getCombinedRegister(r1, r2), 0);
 
-    pop.exec(cpu, memory);
-    assert.equal(cpu.getHL(), HLVal);
+      pop.exec(cpu, memory);
+      assert.equal(cpu.getCombinedRegister(r1, r2), HLVal);
+    }
+
+    testR16("BC", 0xc5, 0xc1);
+    testR16("DE", 0xd5, 0xd1);
+    testR16("HL", 0xe5, 0xe1);
+    testR16("AF", 0xf5, 0xf1);
   });
 });
 
