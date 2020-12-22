@@ -285,7 +285,8 @@ export class ExecutionThreadView extends View {
       recentInstructions.length - 16
     );
     instructions.reverse();
-    this.element.innerHTML = instructions
+    this.element.innerHTML = "PCs: ";
+    this.element.innerHTML += instructions
       .map((i) => utils.hexString(i.getAddress(), 16))
       .join(" ");
   }
