@@ -16,7 +16,7 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
-- jump at 0x28 bank 0 is wrong. It should go to 0xdf8a but is now going to 0x92ef. Bisect from fc460095288.
+- jump at 0x28 bank 0 is wrong. It should go to 0xdf8a but is now going to 0x92ef. Bisect from fc460095288. Bad commit is 8fa3937.
 
 MVC
 ===
