@@ -1093,7 +1093,7 @@ export class OpJC extends Instruction {
         throw new Error("Unknown conditional jump");
     }
 
-    return `JP ${condition}, ${utils.hexString(addr, 16)}`;
+    return `JP ${condition}, $${utils.hexString(addr, 16)}`;
   }
 }
 
@@ -1113,7 +1113,7 @@ export class OpJA16 extends Instruction {
 
   disassemble(memory: Memory) {
     const addr = this.getNext16Bits(memory);
-    return `JP ${utils.hexString(addr, 16)}`;
+    return `JP $${utils.hexString(addr, 16)}`;
   }
 }
 
