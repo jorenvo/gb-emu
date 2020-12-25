@@ -461,7 +461,7 @@ export class OpLdSPToA16 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `LD $${utils.hexString(this.getNext16Bits(memory), 16)}, SP`;
+    return `LD ($${utils.hexString(this.getNext16Bits(memory), 16)}), SP`;
   }
 }
 
