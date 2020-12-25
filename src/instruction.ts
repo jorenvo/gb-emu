@@ -587,7 +587,7 @@ export class OpDec16 extends OpDecInc16 {
   }
 
   disassemble(memory: Memory) {
-    return `INC ${this.getRegName(memory)}`;
+    return `DEC ${this.getRegName(memory)}`;
   }
 }
 
