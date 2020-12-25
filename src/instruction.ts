@@ -1949,7 +1949,7 @@ export class OpSwap extends Instruction {
   disassemble(memory: Memory) {
     const opcode = this.getNext8Bits(memory);
     let regString = "";
-    if (opcode === 0x36) {
+    if (opcode !== 0x36) {
       const reg = opcode & 0xf;
       regString = this.getStringForR8(reg);
     } else {
