@@ -1168,7 +1168,7 @@ export class OpXorR8 extends OpXor {
   }
 
   private isHL(memory: Memory) {
-    return this.getByte(memory) === 0x7e;
+    return this.getByte(memory) === 0xae;
   }
 
   private getReg(memory: Memory) {
