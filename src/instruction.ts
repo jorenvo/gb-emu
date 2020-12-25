@@ -2015,7 +2015,7 @@ export class OpRST extends Instruction {
 
   disassemble(memory: Memory) {
     const addr = this.getAddr(memory);
-    return `RST ${utils.hexString(addr, 16)}`;
+    return `RST $${utils.hexString(addr)}`;
   }
 }
 
