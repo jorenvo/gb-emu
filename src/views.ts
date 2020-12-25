@@ -286,9 +286,17 @@ export class ExecutionThreadView extends View {
     );
     instructions.reverse();
     this.element.innerHTML = "PCs: ";
-    this.element.innerHTML += instructions
-      .map((i) => utils.hexString(i.getAddress(), 16))
-      .join(" ");
+    instructions.forEach((i) => {
+      const instructionElement = document.createElement("span");
+      const addr = i.getAddress();
+      instructionElement.innerHTML = utils.hexString(addr, 16) + " ";
+      instructionElement.addEventListener("click", (e: MouseEvent) => this.clickJumpToRelated(e, addr));
+      this.element.appendChild(instructionElement);
+    });
+  }
+
+  private clickJumpToRelated(_e: MouseEvent, addr: number) {
+    this.controller.viewAddressInCurrentBank(addr);
   }
 }
 

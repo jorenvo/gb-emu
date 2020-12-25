@@ -36,6 +36,7 @@ export abstract class Controller {
   public abstract updatedSP(): void;
   public abstract updatedStack(): void;
   public abstract viewAddress(address: number, bank: number): void;
+  public abstract viewAddressInCurrentBank(address: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
   public abstract changedBank(): void;
@@ -52,6 +53,7 @@ export class ControllerMock {
   public updatedSP(): void {}
   public updatedStack(): void {}
   public viewAddress(_address: number, _bank: number): void {}
+  public viewAddressInCurrentBank(_address: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
   }
@@ -308,6 +310,16 @@ export class ControllerReal implements Controller {
 
   public viewAddress(address: number, bank: number) {
     this.getMemoryView(address, bank).centerInBankView(true);
+  }
+
+  public viewAddressInCurrentBank(address: number) {
+    // TODO: callers should use viewAddress instead, there's no way to
+    // determine the bank reliably.
+    let bank = 0;
+    if (address >= Memory.BANKSIZE) {
+      bank = 1;
+    }
+    this.viewAddress(address, bank);
   }
 
   public getActiveBankView() {
