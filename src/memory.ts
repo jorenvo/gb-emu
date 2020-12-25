@@ -158,9 +158,6 @@ export class Memory {
         bankToAddressToInstruction.get(bankNr)!.set(addr, newInstruction);
         addr += size;
       }
-
-      const instNr = bankToAddressToInstruction.get(bankNr)!.size;
-      console.log(`${instNr} instructions in bank ${bankNr}`);
     }
 
     return bankToAddressToInstruction;
