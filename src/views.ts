@@ -295,8 +295,13 @@ export class ExecutionThreadView extends View {
     });
   }
 
-  private clickJumpToRelated(_e: MouseEvent, addr: number) {
-    this.controller.viewAddressInCurrentBank(addr);
+  private clickJumpToRelated(_e: MouseEvent, address: number) {
+    // TODO: the bank should stored in the clickable elements
+    let bank = 0;
+    if (address >= Memory.BANKSIZE) {
+      bank = 1;
+    }
+    this.controller.viewAddress(address, bank);
   }
 }
 
