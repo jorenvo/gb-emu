@@ -411,7 +411,7 @@ export class OpLdA16ToA extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    return `LD A, (${utils.hexString(this.getNext16Bits(memory), 16)})`;
+    return `LD A, ($${utils.hexString(this.getNext16Bits(memory), 16)})`;
   }
 }
 
@@ -535,17 +535,17 @@ export abstract class OpDecInc16 extends Instruction {
     return 1;
   }
 
+  isSP(memory: Memory): boolean {
+    const opcode = this.getByte(memory);
+    return opcode === 0x30 || opcode === 0x3b;
+  }
+
   getRegName(memory: Memory) {
     let reg = "SP";
     if (!this.isSP(memory)) {
       reg = this.getStringForR16((this.getByte(memory) >> 4) * 2);
     }
     return reg;
-  }
-
-  isSP(memory: Memory): boolean {
-    const opcode = this.getByte(memory);
-    return opcode === 0x30 || opcode === 0x3b;
   }
 
   getVal(cpu: CPU, memory: Memory): number {
