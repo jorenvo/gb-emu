@@ -290,12 +290,12 @@ export class ExecutionThreadView extends View {
       const instructionElement = document.createElement("span");
       const addr = i.getAddress();
       instructionElement.innerHTML = utils.hexString(addr, 16) + " ";
-      instructionElement.addEventListener("click", (e: MouseEvent) => this.clickJumpToRelated(e, addr));
+      instructionElement.addEventListener("click", (_e: MouseEvent) => this.clickJumpToRelated(addr));
       this.element.appendChild(instructionElement);
     });
   }
 
-  private clickJumpToRelated(_e: MouseEvent, address: number) {
+  private clickJumpToRelated(address: number) {
     // TODO: the bank should stored in the clickable elements
     let bank = 0;
     if (address >= Memory.BANKSIZE) {
