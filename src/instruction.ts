@@ -1652,7 +1652,7 @@ export class OpSubCarryR8 extends OpSubR8 {
   }
 
   disassemble(memory: Memory) {
-    return super.disassemble(memory).replace("SUB", "SDC");
+    return super.disassemble(memory).replace("SUB", "SBC");
   }
 }
 
