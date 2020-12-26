@@ -177,6 +177,19 @@ export class CPU {
     return n;
   }
 
+  rotateRight(n: number): number {
+    const lsb = n & 1;
+    n >>= 1;
+    n |= this.getCarryFlag() << 7;
+
+    this.setCarryFlagDirect(lsb);
+    this.setHalfCarryFlagAdd(0, 0);
+    this.setSubtractFlag(0);
+    this.setZeroFlag(0);
+
+    return n;
+  }
+
   tick(memory: Memory) {
     const currentInstruction = memory.getInstruction(this.PC);
     if (currentInstruction === undefined) {

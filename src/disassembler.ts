@@ -33,8 +33,7 @@ export class Disassembler {
       case 0x0d:
       case 0x0e:
       case 0x0f:
-        Disassembler.logNotImplemented(address, byte, !!"prefixed");
-        return new instruction.NotImplemented(address);
+        return new instruction.OpRRC(address);
       case 0x10:
       case 0x11:
       case 0x12:

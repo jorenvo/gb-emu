@@ -837,6 +837,38 @@ export class OpRLC extends Instruction {
   }
 }
 
+export class OpRRC extends Instruction {
+  size() {
+    return 2;
+  }
+
+  private getReg(memory: Memory) {
+    return this.getNext8Bits(memory) & 0b111;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const register = this.getReg(memory);
+    // TODO: fix carry, rotateLeft already sets it which is probably wrong
+    if (register === 6) {
+      cpu.setHL(cpu.rotateRight(cpu.getHL()));
+      return 16;
+    } else {
+      cpu.setReg(register, cpu.rotateRight(cpu.getReg(register)));
+      return 8;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    const reg = this.getReg(memory);
+    let regString = "(HL)";
+    if (reg !== 6) {
+      regString = this.getStringForR8(reg);
+    }
+
+    return `RRC ${regString}`;
+  }
+}
+
 export class OpRR extends Instruction {
   size() {
     return 2;
