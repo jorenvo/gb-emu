@@ -64,7 +64,7 @@ memoryview.recentlyExecuted {
     background-color: rgb(240, 230, 181);
 }
 
-memoryview.jumpToAddr {
+thread > span, memoryview.jumpToAddr {
     cursor: pointer;
 }
 
