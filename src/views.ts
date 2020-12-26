@@ -73,6 +73,19 @@ export class PCView extends View {
   }
 }
 
+export class BankNrView extends View {
+  memory: Memory;
+
+  constructor(elementID: string, memory: Memory) {
+    super(elementID);
+    this.memory = memory;
+  }
+
+  update() {
+    this.element.innerHTML = `BNK: ${this.memory.bank}`;
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   bank: number;
@@ -166,15 +179,17 @@ export class MemoryView extends View {
   }
 
   private switchToInstructionBank() {
+    if (this.memory.bank === this.bankView.bank) {
+      return;
+    }
     this.originalBank = this.memory.bank;
     this.memory.setBank(this.bankView.bank);
   }
 
   private restoreBank() {
     if (this.originalBank === undefined) {
-      throw new Error("restoreBank called without corresponding switchToBank");
+      return;
     }
-
     this.memory.setBank(this.originalBank);
     this.originalBank = undefined;
   }

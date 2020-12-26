@@ -9,6 +9,7 @@ import {
   RegisterView,
   SPView,
   PCView,
+  BankNrView,
   BankView,
   MemoryView,
   StackView,
@@ -85,6 +86,7 @@ export class ControllerReal implements Controller {
   private instructionToMemoryView: Map<Instruction, MemoryView> | undefined;
   private SPView: SPView | undefined;
   private PCView: PCView | undefined;
+  private bankNrView: BankNrView | undefined;
   private stackView: StackView | undefined;
   private executionThreadView: ExecutionThreadView | undefined;
   private prevPCMemoryView: MemoryView | undefined;
@@ -125,6 +127,8 @@ export class ControllerReal implements Controller {
     window.controller = this;
 
     this.registerViews = this.createRegisterViews(this.emu.cpu);
+    this.bankNrView = new BankNrView("bankNr", this.emu.memory);
+
     this.bankViews = this.createBankViews(this.emu.memory);
 
     this.memoryViews = new Map();
@@ -153,6 +157,7 @@ export class ControllerReal implements Controller {
       this.toUpdate.add(view);
     }
 
+    this.toUpdate.add(this.bankNrView!);
     this.toUpdate.add(this.SPView!);
 
     for (const view of this.bankViews!.values()) {
@@ -324,12 +329,9 @@ export class ControllerReal implements Controller {
   }
 
   public changedBank(): void {
-    console.log(
-      `Changed bank from bank ${this.emu!.memory.bank} @${utils.hexString(
-        this.emu!.cpu.PC,
-        16
-      )}`
-    );
+    // TODO: this is called a lot when initially disassembling by the
+    // MemoryView views.
+    this.toUpdate.add(this.bankNrView!);
   }
 
   public movedPC(newAddr: number) {

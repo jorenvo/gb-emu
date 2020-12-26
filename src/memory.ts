@@ -191,6 +191,7 @@ export class Memory {
   }
 
   setBank(bank: number) {
+    this.controller.changedBank();
     this.bank = bank;
   }
 
@@ -236,9 +237,7 @@ export class Memory {
     if (value === undefined) debugger;
 
     if (address >= 0x2000 && address <= 0x3fff) {
-      this.controller.changedBank();
-      this.bank = value;
-      console.log(`selected bank ${value}`);
+      this.setBank(value);
       return;
     }
 
