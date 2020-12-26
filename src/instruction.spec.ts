@@ -119,7 +119,7 @@ describe("OpPop & OpPush", function () {
       assert.equal(`PUSH ${name}`, push.disassemble(memory));
 
       const HLVal = 0x1122;
-      cpu.setCombinedRegister(r1, r2, HLVal)
+      cpu.setCombinedRegister(r1, r2, HLVal);
       assert.equal(cpu.getCombinedRegister(r1, r2), HLVal);
       push.exec(cpu, memory);
 
@@ -142,7 +142,6 @@ describe("OpPop & OpPush", function () {
     testR16("AF", 0xf5, 0xf1);
   });
 });
-
 
 describe("rotations", function () {
   it("should correctly rotate left", function () {

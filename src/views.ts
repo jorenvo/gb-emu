@@ -305,7 +305,9 @@ export class ExecutionThreadView extends View {
       const instructionElement = document.createElement("span");
       const addr = i.getAddress();
       instructionElement.innerHTML = utils.hexString(addr, 16) + " ";
-      instructionElement.addEventListener("click", (_e: MouseEvent) => this.clickJumpToRelated(addr));
+      instructionElement.addEventListener("click", (_e: MouseEvent) =>
+        this.clickJumpToRelated(addr)
+      );
       this.element.appendChild(instructionElement);
     });
   }
