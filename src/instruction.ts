@@ -2072,11 +2072,12 @@ abstract class OpShift extends Instruction {
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
-      const reg = cpu.getReg(this.getRegNr(memory));
+      const regNr = this.getRegNr(memory);
+      const reg = cpu.getReg(regNr);
       const [carry, val] = this.shift(reg);
       cpu.setCarryFlagDirect(carry);
       cpu.setZeroFlag(val === 0 ? 1 : 0);
-      cpu.setReg(reg, val);
+      cpu.setReg(regNr, val);
       return 8;
     }
   }
