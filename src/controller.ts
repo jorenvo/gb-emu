@@ -345,8 +345,8 @@ export class ControllerReal implements Controller {
 
     const instruction = this.emu!.memory.getInstruction(newAddr);
     if (!instruction) {
-      console.log(`${utils.hexString(newAddr, 16)}, ${this.emu!.memory.bank}`);
-      throw new Error(`No instruction at ${utils.hexString(newAddr, 16)}`);
+      // Could be RAM which will be JIT-ed. Don't visualize.
+      return;
     }
 
     while (

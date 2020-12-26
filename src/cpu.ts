@@ -1,7 +1,7 @@
 import * as utils from "./utils.js";
-import { Instruction } from "./instruction.js";
 import { Memory } from "./memory.js";
 import { Controller } from "./controller.js";
+import { Disassembler } from "./disassembler.js";
 
 export class CPU {
   // reg indexes in regs
@@ -191,12 +191,10 @@ export class CPU {
   }
 
   tick(memory: Memory) {
-    const currentInstruction = memory.getInstruction(this.PC);
+    let currentInstruction = memory.getInstruction(this.PC);
     if (currentInstruction === undefined) {
-      const hexPC = utils.hexString(this.PC, 16);
-      throw new Error(
-        `Trying to read outside of memory (PC: ${hexPC}), stopping CPU.`
-      );
+      // Probably RAM, attempt to JIT
+      currentInstruction = Disassembler.buildInstruction(this.PC, memory.ram);
     }
 
     this.tickCounter++;
