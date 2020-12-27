@@ -163,6 +163,11 @@ export class ControllerReal implements Controller {
     }
 
     this.toUpdate.add(this.bankNrView!);
+
+    for (const view of this.addrToMemRegView!.values()) {
+      this.toUpdate.add(view);
+    }
+
     this.toUpdate.add(this.SPView!);
 
     for (const view of this.bankViews!.values()) {
@@ -196,6 +201,8 @@ export class ControllerReal implements Controller {
     const views = new Map();
     views.set(Memory.LCDC, new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, memory));
     views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, memory));
+    views.set(Memory.SCY, new MemRegView("memRegSCY", "SCY", Memory.SCY, memory));
+    views.set(Memory.SCX, new MemRegView("memRegSCX", "SCX", Memory.SCX, memory));
 
     return views;
   }

@@ -12,6 +12,8 @@ import { Controller } from "./controller.js";
 export class Memory {
   // Memory register addresses
   static LCDC = 0xff40;
+  static SCY = 0xff42;
+  static SCX = 0xff43;
   static LY = 0xff44;
 
   static BANKSIZE = 16_384; // 16 KiB
@@ -258,15 +260,15 @@ export class Memory {
   }
 
   getSCY() {
-    return this.getByte(0xff42);
+    return this.getByte(Memory.SCY);
   }
 
   getSCX() {
-    return this.getByte(0xff43);
+    return this.getByte(Memory.SCX);
   }
 
   setLY(x: number) {
-    this.setByte(0xff44, x);
+    this.setByte(Memory.LY, x);
   }
 
   getLY() {
