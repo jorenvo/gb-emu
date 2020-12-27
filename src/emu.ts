@@ -40,18 +40,6 @@ export class Emulator {
     this.breakpointBank = bank;
   }
 
-  // private updateMemRegs() {
-  //   let s = `LCDC: ${utils.binString(this.memory.getLCDC())}  `;
-  //   s += `SCY: ${utils.hexString(this.memory.getSCY())}  `;
-  //   s += `SCX: ${utils.hexString(this.memory.getSCX())}  `;
-  //   s += `LY: ${utils.hexString(this.memory.getLY())}  `;
-  //   s += `LYC: ${utils.hexString(this.memory.getLYC())}  `;
-  //   s += `WY: ${utils.hexString(this.memory.getWY())}  `;
-  //   s += `WX: ${utils.hexString(this.memory.getWX())}  `;
-
-  //   document.getElementById("memRegs")!.innerText = s;
-  // }
-
   private renderVideo() {
     // LCD enable
     if (utils.getBit(this.memory.getLCDC(), 7)) {
