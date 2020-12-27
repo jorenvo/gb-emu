@@ -15,6 +15,9 @@ export class Memory {
   static SCY = 0xff42;
   static SCX = 0xff43;
   static LY = 0xff44;
+  static LYC = 0xff45;
+  static WY = 0xff4a;
+  static WX = 0xff4b;
 
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
@@ -276,15 +279,15 @@ export class Memory {
   }
 
   getLYC() {
-    return this.getByte(0xff45);
+    return this.getByte(Memory.LYC);
   }
 
   getWY() {
-    return this.getByte(0xff4a);
+    return this.getByte(Memory.WY);
   }
 
   getWX() {
-    return this.getByte(0xff4b);
+    return this.getByte(Memory.WX);
   }
 
   getLCDC() {

@@ -203,6 +203,9 @@ export class ControllerReal implements Controller {
     views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, memory));
     views.set(Memory.SCY, new MemRegView("memRegSCY", "SCY", Memory.SCY, memory));
     views.set(Memory.SCX, new MemRegView("memRegSCX", "SCX", Memory.SCX, memory));
+    views.set(Memory.LYC, new MemRegView("memRegLYC", "LYC", Memory.LYC, memory));
+    views.set(Memory.WY, new MemRegView("memRegWY", "WY", Memory.WY, memory));
+    views.set(Memory.WX, new MemRegView("memRegWX", "WX", Memory.WX, memory));
 
     return views;
   }
