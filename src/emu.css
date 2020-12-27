@@ -33,7 +33,11 @@
     height: 256px;
 }
 
-register {
+registers {
+    display: block;
+}
+
+register, memregister {
   margin-right: 5px;
 }
 

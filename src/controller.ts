@@ -11,6 +11,7 @@ import {
   PCView,
   BankNrView,
   BankView,
+  MemRegView,
   MemoryView,
   StackView,
   ExecutionThreadView,
@@ -36,6 +37,7 @@ export abstract class Controller {
   public abstract updatedReg(reg: number): void;
   public abstract updatedSP(): void;
   public abstract updatedStack(): void;
+  public abstract updatedMemReg(address: number): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
@@ -52,6 +54,7 @@ export class ControllerMock {
   public updatedReg(_reg: number): void {}
   public updatedSP(): void {}
   public updatedStack(): void {}
+  public updatedMemReg(_address: number): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
@@ -87,6 +90,7 @@ export class ControllerReal implements Controller {
   private SPView: SPView | undefined;
   private PCView: PCView | undefined;
   private bankNrView: BankNrView | undefined;
+  private addrToMemRegView: Map<number, MemRegView> | undefined;
   private stackView: StackView | undefined;
   private executionThreadView: ExecutionThreadView | undefined;
   private prevPCMemoryView: MemoryView | undefined;
@@ -128,6 +132,7 @@ export class ControllerReal implements Controller {
 
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankNrView = new BankNrView("bankNr", this.emu.memory);
+    this.addrToMemRegView = this.createMemRegisterViews(this.emu.memory);
 
     this.bankViews = this.createBankViews(this.emu.memory);
 
@@ -183,6 +188,14 @@ export class ControllerReal implements Controller {
     views.set(CPU.L, new RegisterView("regL", "L", cpu, CPU.L));
     views.set(CPU.F, new RegisterView("regF", "F", cpu, CPU.F));
     views.set(CPU.A, new RegisterView("regA", "A", cpu, CPU.A));
+
+    return views;
+  }
+
+  private createMemRegisterViews(memory: Memory) {
+    const views = new Map();
+    views.set(Memory.LCDC, new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, memory));
+    views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, memory));
 
     return views;
   }
@@ -309,6 +322,13 @@ export class ControllerReal implements Controller {
 
   public updatedStack() {
     this.toUpdate.add(this.stackView!);
+  }
+
+  public updatedMemReg(address: number) {
+    const view = this.addrToMemRegView!.get(address);
+    if (view) {
+      this.toUpdate.add(view);
+    }
   }
 
   public viewAddress(address: number, bank: number) {

@@ -86,6 +86,25 @@ export class BankNrView extends View {
   }
 }
 
+export class MemRegView extends View {
+  memory: Memory;
+  name: string;
+  address: number;
+
+  // "memRegLCDC", "LCDC", Memory.LCDC, memory
+  constructor(elementID: string, name: string, address: number, memory: Memory) {
+    super(elementID);
+    this.name = name;
+    this.address = address;
+    this.memory = memory;
+  }
+
+  update() {
+    const value = this.memory.getByte(this.address);
+    this.element.innerHTML = `${this.name}: ${utils.hexString(value)}`;
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   bank: number;

@@ -10,6 +10,10 @@ import { Controller } from "./controller.js";
  * 0xfe00-0xfe9f: sprite attribute table aka object attribute memory (OAM)
  */
 export class Memory {
+  // Memory register addresses
+  static LCDC = 0xff40;
+  static LY = 0xff44;
+
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
 
@@ -245,6 +249,10 @@ export class Memory {
       throw new Error(`Can't write to rom @${utils.hexString(address, 16)}`);
     }
 
+    if (address >= 0xff00 && address <= 0xff70) {
+      this.controller.updatedMemReg(address);
+    }
+
     this.ram[address] = value;
     this.controller.updatedStack();
   }
@@ -262,7 +270,7 @@ export class Memory {
   }
 
   getLY() {
-    return this.getByte(0xff44);
+    return this.getByte(Memory.LY);
   }
 
   getLYC() {
@@ -278,6 +286,6 @@ export class Memory {
   }
 
   getLCDC() {
-    return this.getByte(0xff40);
+    return this.getByte(Memory.LCDC);
   }
 }
