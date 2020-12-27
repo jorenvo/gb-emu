@@ -90,18 +90,25 @@ export class MemRegView extends View {
   memory: Memory;
   name: string;
   address: number;
+  asBits: boolean;
 
-  // "memRegLCDC", "LCDC", Memory.LCDC, memory
-  constructor(elementID: string, name: string, address: number, memory: Memory) {
+  constructor(elementID: string, name: string, address: number, asBits: boolean, memory: Memory) {
     super(elementID);
     this.name = name;
     this.address = address;
+    this.asBits = asBits;
     this.memory = memory;
   }
 
   update() {
     const value = this.memory.getByte(this.address);
-    this.element.innerHTML = `${this.name}: ${utils.hexString(value)}`;
+    let formatted = "";
+    if (this.asBits) {
+      formatted = utils.binString(value);
+    } else {
+      formatted = utils.hexString(value);
+    }
+    this.element.innerHTML = `${this.name}: ${formatted}`;
   }
 }
 

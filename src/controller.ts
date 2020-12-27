@@ -198,14 +198,16 @@ export class ControllerReal implements Controller {
   }
 
   private createMemRegisterViews(memory: Memory) {
+    const displayBits = true;
+    const displayHex = false;
     const views = new Map();
-    views.set(Memory.LCDC, new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, memory));
-    views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, memory));
-    views.set(Memory.SCY, new MemRegView("memRegSCY", "SCY", Memory.SCY, memory));
-    views.set(Memory.SCX, new MemRegView("memRegSCX", "SCX", Memory.SCX, memory));
-    views.set(Memory.LYC, new MemRegView("memRegLYC", "LYC", Memory.LYC, memory));
-    views.set(Memory.WY, new MemRegView("memRegWY", "WY", Memory.WY, memory));
-    views.set(Memory.WX, new MemRegView("memRegWX", "WX", Memory.WX, memory));
+    views.set(Memory.LCDC, new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, displayBits, memory));
+    views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, displayHex, memory));
+    views.set(Memory.SCY, new MemRegView("memRegSCY", "SCY", Memory.SCY, displayHex, memory));
+    views.set(Memory.SCX, new MemRegView("memRegSCX", "SCX", Memory.SCX, displayHex, memory));
+    views.set(Memory.LYC, new MemRegView("memRegLYC", "LYC", Memory.LYC, displayHex, memory));
+    views.set(Memory.WY, new MemRegView("memRegWY", "WY", Memory.WY, displayHex, memory));
+    views.set(Memory.WX, new MemRegView("memRegWX", "WX", Memory.WX, displayHex, memory));
 
     return views;
   }
