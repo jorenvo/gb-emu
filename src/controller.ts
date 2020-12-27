@@ -339,8 +339,8 @@ export class ControllerReal implements Controller {
 
     // TODO: Emulator should do this
     if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
-      this.emu!.memory.setBank(0);
-      console.log("Switched out boot ROM and switched to bank 0");
+      this.emu!.memory.setBank(1);
+      console.log("Switched out boot ROM and switched to bank 1");
     }
 
     const instruction = this.emu!.memory.getInstruction(newAddr);
