@@ -2,6 +2,7 @@ import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Controller } from "./controller.js";
 import { Instruction } from "./instruction.js";
+import { Video } from "./video.js";
 import * as utils from "./utils.js";
 
 export abstract class View {
@@ -109,6 +110,34 @@ export class MemRegView extends View {
       formatted = utils.hexString(value);
     }
     this.element.innerHTML = `${this.name}: ${formatted}`;
+  }
+}
+
+export class TileMapView extends View {
+  video: Video;
+
+  constructor(elementID: string, video: Video) {
+    super(elementID);
+    this.video = video;
+  }
+
+  update() {
+    this.element.innerHTML = "";
+
+    // 32x32 tile pointers
+    for (let row = 0; row < 32; row++) {
+      const rowEl = document.createElement("tilemaprow");
+      for (let col = 0; col < 32; col++) {
+        const ptrEl = document.createElement("tilemappointer");
+        const ptr = this.video.getTilePointer(row, col)
+        ptrEl.innerHTML = utils.hexString(ptr).replace("0x", "");
+        if (ptr !== 0) {
+          ptrEl.classList.add("setTilePointer");
+        }
+        rowEl.appendChild(ptrEl);
+      }
+      this.element.appendChild(rowEl);
+    }
   }
 }
 

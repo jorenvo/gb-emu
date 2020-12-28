@@ -7,7 +7,7 @@ import { Controller } from "./controller.js";
 export class Emulator {
   cpu: CPU;
   memory: Memory;
-  private video: Video;
+  video: Video;
 
   // run loop related
   private runBudgetMs: number;

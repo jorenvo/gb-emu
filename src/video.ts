@@ -85,16 +85,20 @@ export class Video {
     }
   }
 
-  private renderNormalBackground(image: ImageData) {
+  getTilePointer(row: number, col: number): number {
     const lcdc = this.memory.getLCDC();
     let tileMapStart = 0x9800;
     if (utils.getBit(lcdc, 3)) {
       tileMapStart = 0x9c00;
     }
 
+    return this.memory.getByte(tileMapStart + row * 32 + col);
+  }
+
+  private renderNormalBackground(image: ImageData) {
     for (let row = 0; row < 32; row++) {
       for (let col = 0; col < 32; col++) {
-        let tilePointer = this.memory.getByte(tileMapStart + row * 32 + col);
+        let tilePointer = this.getTilePointer(row, col);
         this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8);
       }
     }

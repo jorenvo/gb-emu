@@ -77,10 +77,27 @@ thread > span, memoryview.jumpToAddr {
     margin-top: 20px;
 }
 
+stack {
+    margin-right: 5px;
+}
+
 stackbyte {
     display: block;
 }
 
 stackbyte.stackBottom {
     background-color: rgb(228, 58, 59);
+}
+
+tilemaprow {
+    display: block;
+    font-size: 6px;
+}
+
+tilemappointer {
+    margin-right: 1px;
+}
+
+tilemappointer.setTilePointer {
+    background-color: rgb(138, 203, 174);
 }

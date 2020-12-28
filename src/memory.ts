@@ -258,6 +258,10 @@ export class Memory {
       this.controller.updatedMemReg(address);
     }
 
+    if ((address >= 0x9800 && address <= 0x9bff) || (address >= 0x9c00 && address <= 0x9fff)) {
+      this.controller.updatedTileMapPointers();
+    }
+
     this.ram[address] = value;
     this.controller.updatedStack();
   }
