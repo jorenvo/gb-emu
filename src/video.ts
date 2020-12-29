@@ -74,7 +74,14 @@ export class Video {
     }
   }
 
-  renderTile(image: ImageData, tileStart: number, x: number, y: number, scx: number, scy: number) {
+  renderTile(
+    image: ImageData,
+    tileStart: number,
+    x: number,
+    y: number,
+    scx: number,
+    scy: number
+  ) {
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
@@ -112,7 +119,14 @@ export class Video {
     for (let row = 0; row < 32; row++) {
       for (let col = 0; col < 32; col++) {
         let tilePointer = this.getTilePointer(row, col);
-        this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8, this.memory.getSCX(), this.memory.getSCY());
+        this.renderTile(
+          image,
+          this.getTile(tilePointer),
+          col * 8,
+          row * 8,
+          this.memory.getSCX(),
+          this.memory.getSCY()
+        );
       }
     }
   }

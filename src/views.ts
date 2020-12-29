@@ -93,7 +93,13 @@ export class MemRegView extends View {
   address: number;
   asBits: boolean;
 
-  constructor(elementID: string, name: string, address: number, asBits: boolean, memory: Memory) {
+  constructor(
+    elementID: string,
+    name: string,
+    address: number,
+    asBits: boolean,
+    memory: Memory
+  ) {
     super(elementID);
     this.name = name;
     this.address = address;
@@ -129,7 +135,7 @@ export class TileMapView extends View {
       const rowEl = document.createElement("tilemaprow");
       for (let col = 0; col < 32; col++) {
         const ptrEl = document.createElement("tilemappointer");
-        const ptr = this.video.getTilePointer(row, col)
+        const ptr = this.video.getTilePointer(row, col);
         ptrEl.innerHTML = utils.hexString(ptr).replace("0x", "");
         if (ptr !== 0) {
           ptrEl.classList.add("setTilePointer");
