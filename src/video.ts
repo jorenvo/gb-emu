@@ -54,28 +54,37 @@ export class Video {
     return this.colorMap;
   }
 
-  private getTile(address: number) {
+  getTileDataStart(): number {
     const lcdc = this.memory.getLCDC();
-    if (utils.getBit(lcdc, 4) === 1) {
-      return 0x8000 + address * 16;
+    if (utils.getBit(lcdc, 4)) {
+      return 0x8000;
     } else {
-      // 0x8800 addressing
-      return 0x8800 + utils.twosComplementToNumber(address) * 16;
+      return 0x8800;
     }
   }
 
-  renderTile(image: ImageData, tileStart: number, x: number, y: number) {
+  private getTile(address: number) {
+    const lcdc = this.memory.getLCDC();
+    const tileDataStart = this.getTileDataStart();
+    if (utils.getBit(lcdc, 4)) {
+      return tileDataStart + address * 16;
+    } else {
+      // 0x8800 addressing
+      return tileDataStart + utils.twosComplementToNumber(address) * 16;
+    }
+  }
+
+  renderTile(image: ImageData, tileStart: number, x: number, y: number, scx: number, scy: number) {
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
       const msb = this.memory.getByte(tileStart + byte + 1);
 
       for (let bit = 7; bit >= 0; bit--) {
-        let colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
-
-        let color = this.colorMap[colorGB];
-        const colorCoordX = x - this.memory.getSCX() + Math.abs(bit - 7);
-        const colorCoordY = y - this.memory.getSCY() + byte / 2;
+        const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
+        const color = this.colorMap[colorGB];
+        const colorCoordX = x - scx + Math.abs(bit - 7);
+        const colorCoordY = y - scy + byte / 2;
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
         for (let i = 0; i < 4; i++) {
@@ -85,13 +94,17 @@ export class Video {
     }
   }
 
-  getTilePointer(row: number, col: number): number {
+  private getTileMapStart(): number {
     const lcdc = this.memory.getLCDC();
-    let tileMapStart = 0x9800;
     if (utils.getBit(lcdc, 3)) {
-      tileMapStart = 0x9c00;
+      return 0x9c00;
+    } else {
+      return 0x9800;
     }
+  }
 
+  getTilePointer(row: number, col: number): number {
+    const tileMapStart = this.getTileMapStart();
     return this.memory.getByte(tileMapStart + row * 32 + col);
   }
 
@@ -99,7 +112,7 @@ export class Video {
     for (let row = 0; row < 32; row++) {
       for (let col = 0; col < 32; col++) {
         let tilePointer = this.getTilePointer(row, col);
-        this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8);
+        this.renderTile(image, this.getTile(tilePointer), col * 8, row * 8, this.memory.getSCX(), this.memory.getSCY());
       }
     }
   }

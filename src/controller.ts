@@ -16,6 +16,7 @@ import {
   StackView,
   ExecutionThreadView,
   TileMapView,
+  TileDataView,
   PauseButton,
   RunBootRomButton,
   StepNextButton,
@@ -40,6 +41,7 @@ export abstract class Controller {
   public abstract updatedStack(): void;
   public abstract updatedMemReg(address: number): void;
   public abstract updatedTileMapPointers(): void;
+  public abstract updatedTileData(): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
@@ -58,6 +60,7 @@ export class ControllerMock {
   public updatedStack(): void {}
   public updatedMemReg(_address: number): void {}
   public updatedTileMapPointers(): void {}
+  public updatedTileData(): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
@@ -98,6 +101,7 @@ export class ControllerReal implements Controller {
   private executionThreadView: ExecutionThreadView | undefined;
   private prevPCMemoryView: MemoryView | undefined;
   private tileMapView: TileMapView | undefined;
+  private tileDataView: TileDataView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
@@ -149,6 +153,7 @@ export class ControllerReal implements Controller {
     this.PCView = new PCView("PC", this.emu.cpu);
     this.executionThreadView = new ExecutionThreadView("thread", this);
     this.tileMapView = new TileMapView("bgTileMap", this.emu.video);
+    this.tileDataView = new TileDataView("tileData", this.emu.video);
 
     this.toUpdate = new Set();
     this.markAllUpdated();
@@ -181,6 +186,7 @@ export class ControllerReal implements Controller {
 
     this.toUpdate.add(this.stackView!);
     this.toUpdate.add(this.tileMapView!);
+    this.toUpdate.add(this.tileDataView!);
 
     // Updates happen in insertion order, keep this last in case of
     // disassemble errors.
@@ -351,6 +357,10 @@ export class ControllerReal implements Controller {
 
   public updatedTileMapPointers() {
     this.toUpdate.add(this.tileMapView!);
+  }
+
+  public updatedTileData() {
+    this.toUpdate.add(this.tileDataView!);
   }
 
   public viewAddress(address: number, bank: number) {

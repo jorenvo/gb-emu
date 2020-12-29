@@ -101,3 +101,12 @@ tilemappointer {
 tilemappointer.setTilePointer {
     background-color: rgb(138, 203, 174);
 }
+
+tiledatarow {
+    display: block;
+    height: 8px;
+}
+
+tiledatarow > canvas {
+    display: inline;
+}

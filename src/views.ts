@@ -141,6 +141,38 @@ export class TileMapView extends View {
   }
 }
 
+export class TileDataView extends View {
+  video: Video;
+
+  constructor(elementID: string, video: Video) {
+    super(elementID);
+    this.video = video;
+  }
+
+  update() {
+    const tileDataStart = this.video.getTileDataStart();
+    this.element.innerHTML = "";
+
+    // 256 tiles total, show as 16x16 tiles
+    for (let row = 0; row < 16; row++) {
+      const rowEl = document.createElement("tiledatarow");
+      for (let col = 0; col < 16; col++) {
+        const tileEl = document.createElement("canvas");
+        tileEl.setAttribute("width", "8");
+        tileEl.setAttribute("height", "8");
+
+        const ctx = tileEl.getContext("2d")!;
+        const imgData = ctx.createImageData(8, 8);
+        const ptr = tileDataStart + (row * 16 + col) * 16;
+        this.video.renderTile(imgData, ptr, 0, 0, 0, 0);
+        ctx.putImageData(imgData, 0, 0);
+        rowEl.appendChild(tileEl);
+      }
+      this.element.appendChild(rowEl);
+    }
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   bank: number;
