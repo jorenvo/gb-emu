@@ -160,6 +160,9 @@ export class TileMapView extends View {
   }
 }
 
+// TODO: there could be a IndividualTileDataView that is composed by
+// this view. Then we can individually update these tiles when they
+// change.
 export class TileDataView extends View {
   video: Video;
   highlightedCol: number | undefined;
