@@ -63,6 +63,17 @@ export class Video {
     }
   }
 
+  getTileColRow(address: number) {
+    const lcdc = this.memory.getLCDC();
+    if (utils.getBit(lcdc, 4)) {
+      let row = Math.floor(address / 16);
+      let col = address % 16;
+      return [col, row];
+    } else {
+      throw new Error("Not implemented");
+    }
+  }
+
   private getTile(address: number) {
     const lcdc = this.memory.getLCDC();
     const tileDataStart = this.getTileDataStart();
@@ -76,6 +87,7 @@ export class Video {
 
   renderTile(
     image: ImageData,
+    colorMap: number[][], // TODO define type
     tileStart: number,
     x: number,
     y: number,
@@ -89,7 +101,7 @@ export class Video {
 
       for (let bit = 7; bit >= 0; bit--) {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
-        const color = this.colorMap[colorGB];
+        const color = colorMap[colorGB];
         const colorCoordX = x - scx + Math.abs(bit - 7);
         const colorCoordY = y - scy + byte / 2;
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
@@ -121,6 +133,7 @@ export class Video {
         let tilePointer = this.getTilePointer(row, col);
         this.renderTile(
           image,
+          this.colorMap,
           this.getTile(tilePointer),
           col * 8,
           row * 8,

@@ -120,11 +120,21 @@ export class MemRegView extends View {
 }
 
 export class TileMapView extends View {
+  controller: Controller;
   video: Video;
 
-  constructor(elementID: string, video: Video) {
+  constructor(elementID: string, controller: Controller, video: Video) {
     super(elementID);
+    this.controller = controller;
     this.video = video;
+  }
+
+  hover(pointer: number) {
+    this.controller.highlightTile(pointer);
+  }
+
+  hoverStop() {
+    this.controller.clearHighlightTile();
   }
 
   update() {
@@ -140,6 +150,9 @@ export class TileMapView extends View {
         if (ptr !== 0) {
           ptrEl.classList.add("setTilePointer");
         }
+        ptrEl.addEventListener("mouseenter", () => this.hover(ptr));
+        ptrEl.addEventListener("mouseleave", () => this.hoverStop());
+
         rowEl.appendChild(ptrEl);
       }
       this.element.appendChild(rowEl);
@@ -149,10 +162,22 @@ export class TileMapView extends View {
 
 export class TileDataView extends View {
   video: Video;
+  highlightedCol: number | undefined;
+  highlightedRow: number | undefined;
 
   constructor(elementID: string, video: Video) {
     super(elementID);
     this.video = video;
+  }
+
+  highlight(col: number, row: number) {
+    this.highlightedCol = col;
+    this.highlightedRow = row;
+  }
+
+  clearHighlight() {
+    this.highlightedCol = undefined;
+    this.highlightedRow = undefined;
   }
 
   update() {
@@ -167,10 +192,20 @@ export class TileDataView extends View {
         tileEl.setAttribute("width", "8");
         tileEl.setAttribute("height", "8");
 
+        let colorMap = this.video.getColorMap();
+        if (row === this.highlightedRow && col === this.highlightedCol) {
+          colorMap = [
+            [255, 255, 255, 255],
+            [320, 170, 170, 255],
+            [235, 85, 85, 255],
+            [200, 0, 0, 255],
+          ];
+        }
+
         const ctx = tileEl.getContext("2d")!;
         const imgData = ctx.createImageData(8, 8);
         const ptr = tileDataStart + (row * 16 + col) * 16;
-        this.video.renderTile(imgData, ptr, 0, 0, 0, 0);
+        this.video.renderTile(imgData, colorMap, ptr, 0, 0, 0, 0);
         ctx.putImageData(imgData, 0, 0);
         rowEl.appendChild(tileEl);
       }

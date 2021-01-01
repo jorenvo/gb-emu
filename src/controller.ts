@@ -42,6 +42,8 @@ export abstract class Controller {
   public abstract updatedMemReg(address: number): void;
   public abstract updatedTileMapPointers(): void;
   public abstract updatedTileData(): void;
+  public abstract highlightTile(pointer: number): void;
+  public abstract clearHighlightTile(): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
@@ -61,6 +63,8 @@ export class ControllerMock {
   public updatedMemReg(_address: number): void {}
   public updatedTileMapPointers(): void {}
   public updatedTileData(): void {}
+  public highlightTile(pointer: number): void {}
+  public clearHighlightTile(): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
@@ -152,7 +156,7 @@ export class ControllerReal implements Controller {
     this.SPView = new SPView("SP", this.emu.cpu);
     this.PCView = new PCView("PC", this.emu.cpu);
     this.executionThreadView = new ExecutionThreadView("thread", this);
-    this.tileMapView = new TileMapView("bgTileMap", this.emu.video);
+    this.tileMapView = new TileMapView("bgTileMap", this, this.emu.video);
     this.tileDataView = new TileDataView("tileData", this.emu.video);
 
     this.toUpdate = new Set();
@@ -381,6 +385,17 @@ export class ControllerReal implements Controller {
   }
 
   public updatedTileData() {
+    this.toUpdate.add(this.tileDataView!);
+  }
+
+  public highlightTile(pointer: number) {
+    let [col, row] = this.emu!.video.getTileColRow(pointer);
+    this.tileDataView!.highlight(col, row);
+    this.toUpdate.add(this.tileDataView!);
+  }
+
+  public clearHighlightTile() {
+    this.tileDataView!.clearHighlight();
     this.toUpdate.add(this.tileDataView!);
   }
 
