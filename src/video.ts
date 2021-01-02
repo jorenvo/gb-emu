@@ -1,11 +1,14 @@
 import { Memory } from "./memory.js";
 import * as utils from "./utils.js";
 
+type RGBA = [number, number, number, number];
+type ColorMap = [RGBA, RGBA, RGBA, RGBA];
+
 export class Video {
   private memory: Memory;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private colorMap: number[][];
+  private colorMap: ColorMap;
 
   private nextVLineStartMs: number;
   private nextVBlankStopMs: number | undefined;
@@ -87,7 +90,7 @@ export class Video {
 
   renderTile(
     image: ImageData,
-    colorMap: number[][], // TODO define type
+    colorMap: ColorMap,
     tileStart: number,
     x: number,
     y: number,
