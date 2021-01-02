@@ -103,7 +103,15 @@ export class Video {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
         const color = colorMap[colorGB];
         const colorCoordX = x - scx + Math.abs(bit - 7);
-        const colorCoordY = y - scy + byte / 2;
+
+        let colorCoordY = y - scy + byte / 2;
+        while (colorCoordY < 0) {
+          colorCoordY += 256;
+        }
+        while (colorCoordY > 255) {
+          colorCoordY -= 256;
+        }
+
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
         for (let i = 0; i < 4; i++) {
