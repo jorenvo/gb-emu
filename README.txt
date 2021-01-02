@@ -16,7 +16,9 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
-- 01-special.gb uses Window
+- 01-special.gb fails with:
+  POP AF
+  Failed #005
 
 MVC
 ===
