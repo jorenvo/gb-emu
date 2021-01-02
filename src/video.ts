@@ -152,9 +152,48 @@ export class Video {
     }
   }
 
+  private renderPhysicalScreenBorder(image: ImageData) {
+    let toDataOffset = (col: number, row: number) => {
+      const numbersPerPixel = 4;
+      return (row * 256 + col) * numbersPerPixel;
+    };
+
+    // Physical Gameboy screen shows 160x144 pixels
+    // left and right border
+    for (let row = 0; row <= 143; ++row) {
+      const offsetStartLeft = toDataOffset(0, row);
+      image.data[offsetStartLeft + 0] = 255;
+      image.data[offsetStartLeft + 1] = 0;
+      image.data[offsetStartLeft + 2] = 0;
+      image.data[offsetStartLeft + 3] = 255;
+
+      const offsetStartRight = toDataOffset(159, row);
+      image.data[offsetStartRight + 0] = 255;
+      image.data[offsetStartRight + 1] = 0;
+      image.data[offsetStartRight + 2] = 0;
+      image.data[offsetStartRight + 3] = 255;
+    }
+
+    // top and bottom border
+    for (let col = 0; col <= 159; ++col) {
+      const offsetStartTop = toDataOffset(col, 0);
+      image.data[offsetStartTop + 0] = 255;
+      image.data[offsetStartTop + 1] = 0;
+      image.data[offsetStartTop + 2] = 0;
+      image.data[offsetStartTop + 3] = 255;
+
+      const offsetStartBottom = toDataOffset(col, 143);
+      image.data[offsetStartBottom + 0] = 255;
+      image.data[offsetStartBottom + 1] = 0;
+      image.data[offsetStartBottom + 2] = 0;
+      image.data[offsetStartBottom + 3] = 255;
+    }
+  }
+
   render() {
     const image = this.ctx.createImageData(256, 256);
     this.renderNormalBackground(image);
+    this.renderPhysicalScreenBorder(image);
 
     if (utils.getBit(this.memory.getLCDC(), 5)) {
       utils.log(this.memory.getLCDC(), "render window");
