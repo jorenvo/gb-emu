@@ -154,7 +154,14 @@ export class Video {
     }
   }
 
+  private getBorderColor(): RGBA {
+    const rgbString = window.getComputedStyle(document.body).getPropertyValue("--color-red");
+    const rgb = rgbString.replace(/[^\d,]/g, '').split(',').map(x => parseInt(x, 10));
+    return [rgb[0], rgb[1], rgb[2], 255]; // can't push to rgb because needs to be RGBA for tsc
+  }
+
   private renderPhysicalScreenBorder(image: ImageData) {
+    const color = this.getBorderColor();
     let toDataOffset = (col: number, row: number) => {
       const numbersPerPixel = 4;
       return (row * 256 + col) * numbersPerPixel;
@@ -164,31 +171,31 @@ export class Video {
     // left and right border
     for (let row = 0; row <= 143; ++row) {
       const offsetStartLeft = toDataOffset(0, row);
-      image.data[offsetStartLeft + 0] = 255;
-      image.data[offsetStartLeft + 1] = 0;
-      image.data[offsetStartLeft + 2] = 0;
-      image.data[offsetStartLeft + 3] = 255;
+      image.data[offsetStartLeft + 0] = color[0];
+      image.data[offsetStartLeft + 1] = color[1];
+      image.data[offsetStartLeft + 2] = color[2];
+      image.data[offsetStartLeft + 3] = color[3];
 
       const offsetStartRight = toDataOffset(159, row);
-      image.data[offsetStartRight + 0] = 255;
-      image.data[offsetStartRight + 1] = 0;
-      image.data[offsetStartRight + 2] = 0;
-      image.data[offsetStartRight + 3] = 255;
+      image.data[offsetStartRight + 0] = color[0];
+      image.data[offsetStartRight + 1] = color[1];
+      image.data[offsetStartRight + 2] = color[2];
+      image.data[offsetStartRight + 3] = color[3];
     }
 
     // top and bottom border
     for (let col = 0; col <= 159; ++col) {
       const offsetStartTop = toDataOffset(col, 0);
-      image.data[offsetStartTop + 0] = 255;
-      image.data[offsetStartTop + 1] = 0;
-      image.data[offsetStartTop + 2] = 0;
-      image.data[offsetStartTop + 3] = 255;
+      image.data[offsetStartTop + 0] = color[0];
+      image.data[offsetStartTop + 1] = color[1];
+      image.data[offsetStartTop + 2] = color[2];
+      image.data[offsetStartTop + 3] = color[3];
 
       const offsetStartBottom = toDataOffset(col, 143);
-      image.data[offsetStartBottom + 0] = 255;
-      image.data[offsetStartBottom + 1] = 0;
-      image.data[offsetStartBottom + 2] = 0;
-      image.data[offsetStartBottom + 3] = 255;
+      image.data[offsetStartBottom + 0] = color[0];
+      image.data[offsetStartBottom + 1] = color[1];
+      image.data[offsetStartBottom + 2] = color[2];
+      image.data[offsetStartBottom + 3] = color[3];
     }
   }
 
