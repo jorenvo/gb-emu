@@ -1,3 +1,11 @@
+/* color palette: https://colorhunt.co/palette/220258 */
+:root {
+    --color-green: rgb(138, 203, 174);
+    --color-yellow: rgb(240, 230, 181);
+    --color-orange: rgb(234, 161, 77);
+    --color-red: rgb(228, 58, 59);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -29,7 +37,7 @@
 }
 
 #memoryBanks .ramBank {
-    border: 3px solid rgb(240, 230, 181);
+    border: 3px solid var(--color-yellow);
 }
 
 #video {
@@ -60,16 +68,12 @@ memoryview {
     white-space: nowrap;
 }
 
-/* remaining palette colors (https://colorhunt.co/palette/220258)
- * rgb(138, 203, 174)
- * rgb(234, 161, 77)
- */
 memoryview.highlightedInstruction {
-    background-color: rgb(228, 58, 59) !important;
+    background-color: var(--color-red) !important;
 }
 
 memoryview.recentlyExecuted {
-    background-color: rgb(240, 230, 181);
+    background-color: var(--color-yellow);
 }
 
 thread > span, memoryview.jumpToAddr {
@@ -90,7 +94,7 @@ stackbyte {
 }
 
 stackbyte.stackBottom {
-    background-color: rgb(228, 58, 59);
+    background-color: var(--color-red);
 }
 
 tilemaprow {
@@ -103,7 +107,7 @@ tilemappointer {
 }
 
 tilemappointer.setTilePointer {
-    background-color: rgb(138, 203, 174);
+    background-color: var(--color-green);
 }
 
 tiledatarow {
