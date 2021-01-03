@@ -29,7 +29,7 @@
 }
 
 #memoryBanks .specialBank {
-    background-color: rgb(234, 161, 77);
+    border: 3px solid rgb(240, 230, 181);
 }
 
 #video {
