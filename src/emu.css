@@ -28,6 +28,10 @@
     /* background-color: grey; */
 }
 
+#memoryBanks .specialBank {
+    background-color: rgb(234, 161, 77);
+}
+
 #video {
     width: 256px;
     height: 256px;

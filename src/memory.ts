@@ -21,6 +21,7 @@ export class Memory {
 
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
+  static WORKRAMSIZE = 0x1fff;
 
   controller: Controller;
   bank: number; // -1 means bootROM
@@ -170,6 +171,18 @@ export class Memory {
     }
 
     return bankToAddressToInstruction;
+  }
+
+  disassembleRam(startAddress: number) {
+    // Clear previous disassembled RAM
+    this.bankToAddressToInstruction.set(-2, new Map());
+
+    let addr = startAddress;
+    while(addr < startAddress + Memory.WORKRAMSIZE) {
+      let instruction = Disassembler.buildInstruction(addr, this.ram);
+      this.bankToAddressToInstruction.get(-2)!.set(addr, instruction);
+      addr += instruction.size();
+    }
   }
 
   getBankBasedOnAddress(address: number): number {

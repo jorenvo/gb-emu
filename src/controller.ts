@@ -1,9 +1,9 @@
-import * as utils from "./utils.js";
 import { CPU } from "./cpu.js";
 import { Memory } from "./memory.js";
 import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
 import { Instruction } from "./instruction.js";
+import { Disassembler } from "./disassembler.js";
 import {
   View,
   RegisterView,
@@ -63,7 +63,7 @@ export class ControllerMock {
   public updatedMemReg(_address: number): void {}
   public updatedTileMapPointers(): void {}
   public updatedTileData(): void {}
-  public highlightTile(pointer: number): void {}
+  public highlightTile(_pointer: number): void {}
   public clearHighlightTile(): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
@@ -250,13 +250,17 @@ export class ControllerReal implements Controller {
   }
 
   private createBankViews(memory: Memory) {
+    const parent = document.getElementById("memoryBanks")!;
     const views = new Map();
+
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
       views.set(
         bank,
-        new BankView(bank, memory, document.getElementById("memoryBanks")!)
+        new BankView(bank, memory, parent)
       );
     }
+
+    views.set(-2, new BankView(-2, memory, parent)); // TODO: -2 is RAM, do something less hacky
 
     return views;
   }
@@ -351,22 +355,12 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.SPView!);
   }
 
-  private getMemoryView(address: number, bank?: number): MemoryView {
+  private getMemoryView(address: number, bank?: number): MemoryView | undefined {
     if (bank === undefined) {
       bank = this.emu!.memory.getBankBasedOnAddress(address);
     }
 
-    const view = this.memoryViews!.get(this.createMemoryViewKey(bank, address));
-    if (!view) {
-      throw new Error(
-        `Memory view at bank ${bank} address ${utils.hexString(
-          address,
-          16
-        )} doesn't exist`
-      );
-    }
-
-    return view;
+    return this.memoryViews!.get(this.createMemoryViewKey(bank, address));
   }
 
   public updatedStack() {
@@ -399,8 +393,29 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.tileDataView!);
   }
 
+  private createRamMemoryViews(startAddress: number) {
+    const memory = this.emu!.memory;
+    const bankView = this.bankViews!.get(-2)!;
+    bankView.clear();
+
+    for (let addr = startAddress; addr < startAddress + Memory.WORKRAMSIZE; addr++) {
+      if (memory.getInstruction(addr, -2) !== undefined) {
+        const view = new MemoryView(bankView, addr, memory, this.emu!.cpu, this);
+        this.toUpdate.add(view);
+      }
+    }
+  }
+
   public viewAddress(address: number, bank: number) {
-    this.getMemoryView(address, bank).centerInBankView(true);
+    const view = this.getMemoryView(address, bank);
+    if (view) {
+      // ROM
+      view.centerInBankView(true);
+    } else {
+      // RAM
+      this.emu!.memory.disassembleRam(address);
+      this.createRamMemoryViews(address);
+    }
   }
 
   public getActiveBankView() {
@@ -470,7 +485,7 @@ export class ControllerReal implements Controller {
       this.toUpdate.add(this.prevPCMemoryView);
     }
 
-    const newView = this.getMemoryView(newAddr);
+    const newView = this.getMemoryView(newAddr)!;
     this.toUpdate.add(newView);
     this.prevPCMemoryView = newView;
 

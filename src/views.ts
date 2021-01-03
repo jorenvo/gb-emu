@@ -236,7 +236,15 @@ export class BankView extends View {
     this.element.classList.add("inactiveBank");
   }
 
+  clear() {
+    this.element.innerHTML = "";
+  }
+
   update() {
+    if (this.bank === -2) {
+      this.element.classList.add("specialBank");
+    }
+
     if (this.memory.bank === this.bank) {
       this.element.classList.remove("inactiveBank");
       this.element.classList.add("activeBank");
@@ -283,11 +291,18 @@ export class MemoryView extends View {
     controller: Controller
   ) {
     let elementID = "memBank";
-    if (bankView.bank === -1) {
-      elementID += "Boot";
-    } else {
-      elementID += utils.decString(bankView.bank, 3);
+
+    switch (bankView.bank) {
+      case -2:
+        elementID += "RAM";
+        break;
+      case -1:
+        elementID += "Boot";
+        break;
+      default:
+        elementID += utils.decString(bankView.bank, 3);
     }
+
     elementID += `-${utils.hexString(address, 16)}`;
 
     super(elementID, bankView.element, "memoryview");
