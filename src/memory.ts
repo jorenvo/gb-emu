@@ -21,6 +21,7 @@ export class Memory {
 
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
+  static WORKRAMSTART = 0xc000;
   static WORKRAMSIZE = 0x1fff;
 
   controller: Controller;
@@ -178,7 +179,7 @@ export class Memory {
     this.bankToAddressToInstruction.set(-2, new Map());
 
     let addr = startAddress;
-    while(addr < startAddress + Memory.WORKRAMSIZE) {
+    while (addr < startAddress + Memory.WORKRAMSIZE) {
       let instruction = Disassembler.buildInstruction(addr, this.ram);
       this.bankToAddressToInstruction.get(-2)!.set(addr, instruction);
       addr += instruction.size();

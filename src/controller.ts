@@ -254,10 +254,7 @@ export class ControllerReal implements Controller {
     const views = new Map();
 
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
-      views.set(
-        bank,
-        new BankView(bank, memory, parent)
-      );
+      views.set(bank, new BankView(bank, memory, parent));
     }
 
     views.set(-2, new BankView(-2, memory, parent)); // TODO: -2 is RAM, do something less hacky
@@ -355,7 +352,10 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.SPView!);
   }
 
-  private getMemoryView(address: number, bank?: number): MemoryView | undefined {
+  private getMemoryView(
+    address: number,
+    bank?: number
+  ): MemoryView | undefined {
     if (bank === undefined) {
       bank = this.emu!.memory.getBankBasedOnAddress(address);
     }
@@ -394,13 +394,34 @@ export class ControllerReal implements Controller {
   }
 
   private createRamMemoryViews(startAddress: number) {
+    const ramBank = -2;
     const memory = this.emu!.memory;
-    const bankView = this.bankViews!.get(-2)!;
+    const bankView = this.bankViews!.get(ramBank)!;
+
+    // clear old views
+    for (
+      let addr = Memory.WORKRAMSTART;
+      addr < Memory.WORKRAMSTART + Memory.WORKRAMSIZE;
+      addr++
+    ) {
+      this.memoryViews!.delete(this.createMemoryViewKey(ramBank, addr));
+    }
     bankView.clear();
 
-    for (let addr = startAddress; addr < startAddress + Memory.WORKRAMSIZE; addr++) {
-      if (memory.getInstruction(addr, -2) !== undefined) {
-        const view = new MemoryView(bankView, addr, memory, this.emu!.cpu, this);
+    for (
+      let addr = startAddress;
+      addr < startAddress + Memory.WORKRAMSIZE;
+      addr++
+    ) {
+      if (memory.getInstruction(addr, ramBank) !== undefined) {
+        const view = new MemoryView(
+          bankView,
+          addr,
+          memory,
+          this.emu!.cpu,
+          this
+        );
+        this.memoryViews!.set(this.createMemoryViewKey(ramBank, addr), view);
         this.toUpdate.add(view);
       }
     }
