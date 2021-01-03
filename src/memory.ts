@@ -195,6 +195,11 @@ export class Memory {
       }
     } else if (address < Memory.BANKSIZE) {
       return 0;
+    } else if (
+      address >= Memory.WORKRAMSTART &&
+      address < Memory.WORKRAMSTART + Memory.WORKRAMSIZE
+    ) {
+      return -2;
     } else {
       return this.bank;
     }
@@ -208,7 +213,8 @@ export class Memory {
 
     const addressToInstruction = this.bankToAddressToInstruction.get(bank);
     if (!addressToInstruction) {
-      throw new Error(`Unknown bank: ${bank}`);
+      // Could be RAM which wasn't disassembled
+      return undefined;
     }
     return addressToInstruction.get(address);
   }

@@ -377,6 +377,7 @@ export class MemoryView extends View {
     if (
       this.cpu.PC === this.address &&
       ((this.bankView.bank === 0 && this.memory.bank !== -1) ||
+        this.bankView.bank === -2 || // RAMBank
         this.bankView.bank === this.memory.bank)
     ) {
       this.centerInBankView(false);

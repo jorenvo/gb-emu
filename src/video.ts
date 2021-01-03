@@ -155,8 +155,13 @@ export class Video {
   }
 
   private getBorderColor(): RGBA {
-    const rgbString = window.getComputedStyle(document.body).getPropertyValue("--color-red");
-    const rgb = rgbString.replace(/[^\d,]/g, '').split(',').map(x => parseInt(x, 10));
+    const rgbString = window
+      .getComputedStyle(document.body)
+      .getPropertyValue("--color-red");
+    const rgb = rgbString
+      .replace(/[^\d,]/g, "")
+      .split(",")
+      .map((x) => parseInt(x, 10));
     return [rgb[0], rgb[1], rgb[2], 255]; // can't push to rgb because needs to be RGBA for tsc
   }
 
