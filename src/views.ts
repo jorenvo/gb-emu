@@ -242,7 +242,7 @@ export class BankView extends View {
 
   update() {
     if (this.bank === -2) {
-      this.element.classList.add("specialBank");
+      this.element.classList.add("ramBank");
     }
 
     if (this.memory.bank === this.bank) {
