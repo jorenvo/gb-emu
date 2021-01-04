@@ -44,6 +44,7 @@ export abstract class Controller {
   public abstract updatedTileData(): void;
   public abstract highlightTile(pointer: number): void;
   public abstract clearHighlightTile(): void;
+  public abstract updatedWorkRam(): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
   public abstract movedPC(newAddr: number): void;
@@ -65,6 +66,7 @@ export class ControllerMock {
   public updatedTileData(): void {}
   public highlightTile(_pointer: number): void {}
   public clearHighlightTile(): void {}
+  public updatedWorkRam(): void {}
   public viewAddress(_address: number, _bank: number): void {}
   public getActiveBankView(): BankView | undefined {
     return undefined;
@@ -393,12 +395,13 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.tileDataView!);
   }
 
-  private createRamMemoryViews(startAddress: number) {
+  public updatedWorkRam() {
+    console.log("Clearing work ram");
+    // remove everything, only disassemble again when the user clicks
     const ramBank = -2;
-    const memory = this.emu!.memory;
     const bankView = this.bankViews!.get(ramBank)!;
 
-    // clear old views
+    // clear views
     for (
       let addr = Memory.WORKRAMSTART;
       addr < Memory.WORKRAMSTART + Memory.WORKRAMSIZE;
@@ -406,7 +409,16 @@ export class ControllerReal implements Controller {
     ) {
       this.memoryViews!.delete(this.createMemoryViewKey(ramBank, addr));
     }
+
     bankView.clear();
+  }
+
+  private createWorkRamMemoryViews(startAddress: number) {
+    const ramBank = -2;
+    const memory = this.emu!.memory;
+    const bankView = this.bankViews!.get(ramBank)!;
+
+    this.updatedWorkRam();
 
     for (
       let addr = startAddress;
@@ -435,7 +447,7 @@ export class ControllerReal implements Controller {
     } else {
       // RAM
       this.emu!.memory.disassembleRam(address);
-      this.createRamMemoryViews(address);
+      this.createWorkRamMemoryViews(address);
     }
   }
 

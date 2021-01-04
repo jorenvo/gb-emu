@@ -174,9 +174,13 @@ export class Memory {
     return bankToAddressToInstruction;
   }
 
+  clearDisassembledRam() {
+    this.bankToAddressToInstruction.set(-2, new Map());
+  }
+
   disassembleRam(startAddress: number) {
     // Clear previous disassembled RAM
-    this.bankToAddressToInstruction.set(-2, new Map());
+    this.clearDisassembledRam();
 
     let addr = startAddress;
     while (addr < startAddress + Memory.WORKRAMSIZE) {
@@ -286,6 +290,8 @@ export class Memory {
       this.controller.updatedTileMapPointers();
     } else if (address >= 0xff00 && address <= 0xff70) {
       this.controller.updatedMemReg(address);
+    } else if (address >= Memory.WORKRAMSTART && address <= Memory.WORKRAMSTART + Memory.WORKRAMSIZE) {
+      // this.controller.updatedWorkRam(); // TODO: this is way too expensive
     }
 
     this.ram[address] = value;
