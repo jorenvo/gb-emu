@@ -1949,7 +1949,7 @@ export class OpDAA extends Instruction {
     // gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
     cpu.setAF(cpu.getAF() & (GB_HALF_CARRY_FLAG ^ 0xffff));
     // gb->registers[GB_REGISTER_AF] |= result << 8;
-    cpu.setAF(cpu.getAF() | (result << 8));
+    cpu.setAF(cpu.getAF() | ((result << 8) & 0xffff));
 
     return 4;
   }
