@@ -1902,20 +1902,20 @@ export class OpDAA extends Instruction {
     let result = cpu.getAF() >> 8;
 
     // gb->registers[GB_REGISTER_AF] &= ~(0xFF00 | GB_ZERO_FLAG);
-    cpu.setAF(cpu.getAF() & ~(0xff00 | GB_ZERO_FLAG));
+    cpu.setAF(cpu.getAF() & ((0xff00 | GB_ZERO_FLAG) ^ 0xffff));
 
     // if (gb->registers[GB_REGISTER_AF] & GB_SUBTRACT_FLAG) {
     if (cpu.getAF() & GB_SUBTRACT_FLAG) {
       // if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
       if (cpu.getAF() & GB_HALF_CARRY_FLAG) {
         // result = (result - 0x06) & 0xFF;
-        result = (result - 0x06) & 0xff;
+        result = utils.wrapping16BitSub(result, 0x06) & 0xff;
       }
 
       // if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
       if (cpu.getAF() & GB_CARRY_FLAG) {
         // result -= 0x60;
-        result -= 0x60;
+        result = utils.wrapping16BitSub(result, 0x60);
       }
     }
 
@@ -1924,13 +1924,13 @@ export class OpDAA extends Instruction {
       // if ((gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
       if ((cpu.getAF() & GB_HALF_CARRY_FLAG) || (result & 0x0f) > 0x09) {
         // result += 0x06;
-        result += 0x06;
+        result = utils.wrapping16BitAdd(result, 0x06);
       }
 
       // if ((gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) || result > 0x9F) {
       if ((cpu.getAF() & GB_CARRY_FLAG) || result > 0x9f) {
         // result += 0x60;
-        result += 0x60;
+        result = utils.wrapping16BitAdd(result, 0x60);
       }
     }
 
@@ -1947,7 +1947,7 @@ export class OpDAA extends Instruction {
     }
 
     // gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
-    cpu.setAF(cpu.getAF() & ~GB_HALF_CARRY_FLAG);
+    cpu.setAF(cpu.getAF() & (GB_HALF_CARRY_FLAG ^ 0xffff));
     // gb->registers[GB_REGISTER_AF] |= result << 8;
     cpu.setAF(cpu.getAF() | (result << 8));
 

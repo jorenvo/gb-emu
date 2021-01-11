@@ -56,18 +56,35 @@ export function twosComplementToNumber(x: number): number {
   }
 }
 
-export function wrapping8BitSub(a: number, b: number): number {
+function wrappingSub(a: number, b: number, bits: number): number {
   if (a >= b) {
     return a - b;
   } else {
+    // for 8 bit:
     // 0 - 1 => 255
     // 5 - 7 => 254
-    return 256 - (b - a);
+    return (1 << bits) - (b - a);
   }
 }
 
+export function wrapping8BitSub(a: number, b: number): number {
+  return wrappingSub(a, b, 8);
+}
+
+export function wrapping16BitSub(a: number, b: number): number {
+  return wrappingSub(a, b, 16);
+}
+
+function wrappingAdd(a: number, b: number, bits: number): number {
+  return (a + b) % (1 << bits);
+}
+
 export function wrapping8BitAdd(a: number, b: number): number {
-  return (a + b) % 256;
+  return wrappingAdd(a, b, 8);
+}
+
+export function wrapping16BitAdd(a: number, b: number): number {
+  return wrappingAdd(a, b, 16);
 }
 
 const tCyclesPerSecond = 4_194_304;
