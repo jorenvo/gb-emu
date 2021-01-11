@@ -1885,50 +1885,71 @@ export class OpAndD8 extends OpAndR8 {
 }
 
 // There's no complete explanation for how this works,
-// this implementation has therefore been ported from MAME:
-// https://github.com/mamedev/mame/blob/99e6e4b67919bbb449ec259b4955d5c862216d97/src/devices/cpu/lr35902/opc_main.hxx#L354
+// this implementation has therefore been ported from SameBoy:
+// https://github.com/LIJI32/SameBoy/blob/07e76a4ecf14e2968eae52005634b464375397f6/Core/sm83_cpu.c#L667
 export class OpDAA extends Instruction {
   size() {
     return 1;
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    let tmp = cpu.getReg(CPU.A);
+    const GB_CARRY_FLAG = 16;
+    const GB_HALF_CARRY_FLAG = 32;
+    const GB_SUBTRACT_FLAG = 64;
+    const GB_ZERO_FLAG = 128;
 
-    if (!cpu.getSubtractFlag()) {
-      // addition
-      if (cpu.getHalfCarryFlag() || tmp > 0x9) {
-        tmp += 6;
+    // int16_t result = gb->registers[GB_REGISTER_AF] >> 8;
+    let result = cpu.getAF() >> 8;
+
+    // gb->registers[GB_REGISTER_AF] &= ~(0xFF00 | GB_ZERO_FLAG);
+    cpu.setAF(cpu.getAF() & ~(0xff00 | GB_ZERO_FLAG));
+
+    // if (gb->registers[GB_REGISTER_AF] & GB_SUBTRACT_FLAG) {
+    if (cpu.getAF() & GB_SUBTRACT_FLAG) {
+      // if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
+      if (cpu.getAF() & GB_HALF_CARRY_FLAG) {
+        // result = (result - 0x06) & 0xFF;
+        result = (result - 0x06) & 0xff;
       }
 
-      if (cpu.getCarryFlag() || tmp > 0x9f) {
-        tmp += 0x60;
-      }
-    } else {
-      // subtraction
-      if (cpu.getHalfCarryFlag()) {
-        tmp -= 0x6;
-
-        if (!cpu.getCarryFlag()) {
-          tmp &= 0xff;
-        }
-      }
-
-      if (cpu.getCarryFlag()) {
-        tmp -= 0x60;
+      // if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
+      if (cpu.getAF() & GB_CARRY_FLAG) {
+        // result -= 0x60;
+        result -= 0x60;
       }
     }
 
-    cpu.setHalfCarryFlagDirect(0);
-    cpu.setZeroFlag(0);
+    // else {
+    else {
+      // if ((gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
+      if ((cpu.getAF() & GB_HALF_CARRY_FLAG) || (result & 0x0f) > 0x09) {
+        // result += 0x06;
+        result += 0x06;
+      }
 
-    if (tmp & 0x100) {
-      cpu.setCarryFlagDirect(1);
+      // if ((gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) || result > 0x9F) {
+      if ((cpu.getAF() & GB_CARRY_FLAG) || result > 0x9f) {
+        // result += 0x60;
+        result += 0x60;
+      }
     }
-    cpu.setReg(CPU.A, tmp & 0xff);
-    if (cpu.getReg(CPU.A) === 0) {
-      cpu.setZeroFlag(1);
+
+    // if ((result & 0xFF) == 0) {
+    if ((result & 0xff) === 0) {
+      // gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+      cpu.setAF(cpu.getAF() | GB_ZERO_FLAG);
     }
+
+    // if ((result & 0x100) == 0x100) {
+    if ((result & 0x100) === 0x100) {
+      // gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+      cpu.setAF(cpu.getAF() | GB_CARRY_FLAG);
+    }
+
+    // gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
+    cpu.setAF(cpu.getAF() & ~GB_HALF_CARRY_FLAG);
+    // gb->registers[GB_REGISTER_AF] |= result << 8;
+    cpu.setAF(cpu.getAF() | (result << 8));
 
     return 4;
   }
