@@ -70,11 +70,6 @@ export class Emulator {
         return;
       }
 
-      if (this.cpu.PC >= 0x4000 && this.cpu.PC <= 0x7fff) {
-        this.paused = true;
-        return;
-      }
-
       if (
         this.breakpoint !== undefined &&
         this.breakpoint === this.cpu.PC &&

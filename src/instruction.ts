@@ -1417,7 +1417,7 @@ export class OpPush extends Instruction {
     let high = 0;
     if (this.getByte(memory) === 0xf5) {
       high = cpu.getReg(CPU.A);
-      low = cpu.getReg(CPU.F);
+      low = cpu.getReg(CPU.F) & 0xf0; // the 4 non-flag bits are unused
     } else {
       const register = this.getR16(memory);
       high = cpu.getReg(register);
