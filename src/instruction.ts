@@ -1534,8 +1534,8 @@ export abstract class OpCP extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const d8 = this.getToCompare(cpu, memory);
     cpu.setSubtractFlag(1);
-    cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), d8);
-    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), d8);
+    cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), d8);
+    cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), d8);
     cpu.setZeroFlag(cpu.getReg(CPU.A) - d8 === 0 ? 1 : 0);
     return this.tStates();
   }
