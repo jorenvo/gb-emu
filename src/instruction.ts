@@ -944,7 +944,7 @@ export class OpAddR16ToHL extends Instruction {
     let hl = cpu.getHL();
     cpu.setHalfCarryFlagAdd(r16, hl);
     cpu.setCarryFlagAdd(r16, hl);
-    cpu.setHL(hl + r16);
+    cpu.setHL(utils.wrapping16BitAdd(hl, r16));
     cpu.setSubtractFlag(0);
     return 8;
   }
@@ -2273,7 +2273,7 @@ export class OpAddSPR8 extends Instruction {
     cpu.setCarryFlagAdd(cpu.SP, offset);
     cpu.setHalfCarryFlagAdd(cpu.SP, offset);
 
-    cpu.SP += offset;
+    utils.wrapping16BitAdd(cpu.SP, offset);
 
     return 16;
   }
