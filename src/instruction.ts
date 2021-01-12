@@ -51,11 +51,18 @@ export abstract class Instruction {
     }
   }
 
+  // some ROMS (notably the Blargg test roms) do:
+  // JR 0
+  // to end the program and loop forever.
+  protected skipPCIncr() {
+    return false;
+  }
+
   execAndIncrementPC(cpu: CPU, memory: Memory): number {
     const originalPC = cpu.PC;
     const spentTStates = this.exec(cpu, memory);
 
-    if (originalPC === cpu.PC) {
+    if (!this.skipPCIncr() && originalPC === cpu.PC) {
       cpu.PC += this.size();
     }
     this.executions++;
@@ -988,6 +995,10 @@ export class OpJR extends Instruction {
     return 2;
   }
 
+  skipPCIncr() {
+    return true;
+  }
+
   getRelatedAddress(memory: Memory) {
     return this.address + this.size() + this.getRelativeOffset(memory);
   }
@@ -1134,6 +1145,10 @@ export class OpJA16 extends Instruction {
     return 3;
   }
 
+  skipPCIncr() {
+    return true;
+  }
+
   getRelatedAddress(memory: Memory) {
     return this.getNext16Bits(memory);
   }
@@ -1152,6 +1167,10 @@ export class OpJA16 extends Instruction {
 export class OpJHL extends Instruction {
   size() {
     return 1;
+  }
+
+  skipPCIncr() {
+    return true;
   }
 
   exec(cpu: CPU, _memory: Memory): number {
