@@ -90,10 +90,10 @@ describe("Video subsystem", function () {
     expectedColorsTile[249] = colorMap[1];
     expectedColorsTile[250] = colorMap[2];
 
-    video.renderTile(image, 0, 0, 0); // tile 1
-    video.renderTile(image, 16, 8, 0); // tile 2
-    video.renderTile(image, 32, 0, 8); // tile 3
-    video.renderTile(image, 48, 8, 8); // tile 4
+    video.renderTile(image, video.getColorMap(), 0, 0, 0, 0, 0); // tile 1
+    video.renderTile(image, video.getColorMap(), 16, 8, 0, 0, 0); // tile 2
+    video.renderTile(image, video.getColorMap(), 32, 0, 8, 0, 0); // tile 3
+    video.renderTile(image, video.getColorMap(), 48, 8, 8, 0, 0); // tile 4
 
     let colorIndex = 0;
     let offset = 0;
