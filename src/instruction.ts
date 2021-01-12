@@ -1209,7 +1209,7 @@ export class OpXorR8 extends OpXor {
 
   getVal(cpu: CPU, memory: Memory): number {
     if (this.isHL(memory)) {
-      return cpu.getHL();
+      return memory.getByte(cpu.getHL());
     } else {
       return cpu.getReg(this.getReg(memory));
     }

@@ -258,6 +258,7 @@ export class Memory {
   }
 
   setByte(address: number, value: number) {
+    utils.assert(value >= 0 && value <= 255, `${value} written to ${utils.hexString(address, 16)} is out of range`);
     switch (address) {
       case 0xff46:
         const sourceStart = value * 0x100;

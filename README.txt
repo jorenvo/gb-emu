@@ -16,7 +16,6 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
-- Assert that values set in memory are between 0 and 255
 
 MVC
 ===
