@@ -682,13 +682,13 @@ export class OpDec8 extends Instruction {
     if (this.getByte(memory) === 0x35) {
       let addr = cpu.getHL();
       cpu.setHalfCarryFlagAdd(memory.getByte(addr), -1);
-      memory.setByte(addr, memory.getByte(addr) - 1);
+      memory.setByte(addr, utils.wrapping8BitSub(memory.getByte(addr), 1));
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
       tStates = 12;
     } else {
       const register = this.getReg(memory);
       cpu.setHalfCarryFlagAdd(cpu.getReg(register), -1);
-      cpu.setReg(register, cpu.getReg(register) - 1);
+      cpu.setReg(register, utils.wrapping8BitSub(cpu.getReg(register), 1));
       cpu.setZeroFlag(cpu.getReg(register) === 0 ? 1 : 0);
       tStates = 4;
     }
