@@ -46,7 +46,7 @@ describe("Video subsystem", function () {
 
     const image = canvas.getContext("2d")!.createImageData(16, 16);
     for (let i = 0; i < image.data.length; i++) {
-      assert.equal(image.data[i], 0);
+      assert.strictEqual(image.data[i], 0);
     }
 
     const colorMap = video.getColorMap();
@@ -99,7 +99,7 @@ describe("Video subsystem", function () {
     let offset = 0;
     for (const colorExpected of expectedColorsTile) {
       for (let i = 0; i < 4; i++) {
-        assert.equal(
+        assert.strictEqual(
           image.data[offset + i],
           colorExpected[i],
           `wrong color at index ${colorIndex}, color should be ${colorExpected} but is ${image.data.slice(
