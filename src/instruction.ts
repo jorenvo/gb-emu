@@ -571,7 +571,7 @@ export abstract class OpDecInc16 extends Instruction {
 
 export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(cpu, memory, this.getVal(cpu, memory) + 1);
+    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), 1));
     return 8;
   }
 
@@ -582,7 +582,7 @@ export class OpInc16 extends OpDecInc16 {
 
 export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(cpu, memory, this.getVal(cpu, memory) - 1);
+    this.setVal(cpu, memory, utils.wrapping16BitSub(this.getVal(cpu, memory), 1));
     return 8;
   }
 
