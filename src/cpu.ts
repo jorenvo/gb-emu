@@ -167,7 +167,7 @@ export class CPU {
 
   rotateLeft(n: number): number {
     const msb = n >> 7;
-    n <<= 1;
+    n = (n << 1) & 0xff;
     n |= this.getCarryFlag();
 
     this.setCarryFlagDirect(msb);

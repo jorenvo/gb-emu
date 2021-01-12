@@ -28,4 +28,15 @@ describe("flags", function () {
     cpu.setHalfCarryFlagAdd(0b1100, 0b0100);
     assert.strictEqual(cpu.getHalfCarryFlag(), 1);
   });
+
+  it("should correctly rotate large values", function () {
+    const controller = new ControllerMock();
+    const cpu = new CPU();
+    cpu.setController(controller);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+
+    const res = cpu.rotateLeft(0b1111_1111);
+    assert.strictEqual(res, 0b1111_1110);
+    assert.strictEqual(cpu.getCarryFlag(), 1);
+  });
 });
