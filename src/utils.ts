@@ -98,3 +98,9 @@ export function tCyclesToMs(tCycles: number): number {
 export function mCyclesToMs(mCycles: number): number {
   return tCyclesToMs(mCycles * 4);
 }
+
+export function assert(condition: boolean, msg: string) {
+  if (!condition) {
+    throw new Error(`assertion failed: ${msg}`);
+  }
+}

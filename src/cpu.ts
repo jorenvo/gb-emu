@@ -64,6 +64,7 @@ export class CPU {
   }
 
   setReg(r: number, val: number) {
+    utils.assert(val >= 0 && val <= 255, `Setting invalid value ${val} in 8 bit register ${r}`);
     this._regs[r] = val;
     this.controller.updatedReg(r);
   }

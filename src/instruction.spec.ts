@@ -139,7 +139,6 @@ describe("OpPop & OpPush", function () {
     testR16("BC", 0xc5, 0xc1);
     testR16("DE", 0xd5, 0xd1);
     testR16("HL", 0xe5, 0xe1);
-    testR16("AF", 0xf5, 0xf1);
   });
 });
 
