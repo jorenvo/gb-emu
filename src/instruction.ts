@@ -718,7 +718,7 @@ export class OpRLCA extends Instruction {
     let regValue = cpu.getReg(CPU.A);
     const eightBit = regValue >> 7;
 
-    regValue <<= 1;
+    regValue = (regValue << 1) & 0xff;
     regValue |= eightBit;
 
     cpu.setReg(CPU.A, regValue);
