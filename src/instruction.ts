@@ -544,7 +544,7 @@ export abstract class OpDecInc16 extends Instruction {
 
   isSP(memory: Memory): boolean {
     const opcode = this.getByte(memory);
-    return opcode === 0x30 || opcode === 0x3b;
+    return opcode === 0x33 || opcode === 0x3b;
   }
 
   getRegName(memory: Memory) {
