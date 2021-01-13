@@ -22,10 +22,10 @@ describe("flags", function () {
     cpu.setController(controller);
     assert.strictEqual(cpu.getHalfCarryFlag(), 0);
 
-    cpu.setHalfCarryFlagAdd(0b1000, 0b0100);
+    cpu.setHalfCarryFlag8BitAdd(0b1000, 0b0100);
     assert.strictEqual(cpu.getHalfCarryFlag(), 0);
 
-    cpu.setHalfCarryFlagAdd(0b1100, 0b0100);
+    cpu.setHalfCarryFlag8BitAdd(0b1100, 0b0100);
     assert.strictEqual(cpu.getHalfCarryFlag(), 1);
   });
 

@@ -128,7 +128,12 @@ export class CPU {
     );
   }
 
-  setHalfCarryFlagAdd(a: number, b: number) {
+  setHalfCarryFlag16BitAdd(a: number, b: number) {
+    const halfCarryFlag = (a & 0xff) + (b & 0xff) >= 0x100 ? 1 : 0;
+    this.setHalfCarryFlagDirect(halfCarryFlag);
+  }
+
+  setHalfCarryFlag8BitAdd(a: number, b: number) {
     const halfCarryFlag = (a & 0xf) + (b & 0xf) >= 0x10 ? 1 : 0;
     this.setHalfCarryFlagDirect(halfCarryFlag);
   }
@@ -177,7 +182,7 @@ export class CPU {
     n |= this.getCarryFlag();
 
     this.setCarryFlagDirect(msb);
-    this.setHalfCarryFlagAdd(0, 0);
+    this.setHalfCarryFlag8BitAdd(0, 0);
     this.setSubtractFlag(0);
     this.setZeroFlag(0);
 
@@ -190,7 +195,7 @@ export class CPU {
     n |= this.getCarryFlag() << 7;
 
     this.setCarryFlagDirect(lsb);
-    this.setHalfCarryFlagAdd(0, 0);
+    this.setHalfCarryFlag8BitAdd(0, 0);
     this.setSubtractFlag(0);
     this.setZeroFlag(0);
 
