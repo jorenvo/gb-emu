@@ -57,7 +57,6 @@ export function twosComplementToNumber(x: number): number {
 }
 
 function wrappingAdd(a: number, b: number, bits: number): number {
-  assert(a >= 0, `a should be positive but is ${a}`);
   assert(a >= 0 && a < 1 << bits, `${a} cannot be represented in ${bits} bits`);
   assert(b > -1 << bits && b < 1 << bits, `${b} cannot be represented in ${bits} bits`)
   return (a + b) & ((1 << bits) - 1);
