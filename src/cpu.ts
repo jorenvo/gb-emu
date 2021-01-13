@@ -149,9 +149,17 @@ export class CPU {
     this.setReg(CPU.F, (this.getReg(CPU.F) & 0b1110_1111) | (carryFlag << 4));
   }
 
-  setCarryFlagAdd(a: number, b: number) {
-    const carryFlag = (a + b > 0xff) ? 1 : 0;
+  private setCarryFlagAdd(a: number, b: number, bits: number) {
+    const carryFlag = (a + b > (1 << bits) - 1) ? 1 : 0;
     this.setCarryFlagDirect(carryFlag);
+  }
+
+  setCarryFlag8BitAdd(a: number, b: number) {
+    return this.setCarryFlagAdd(a, b, 8);
+  }
+
+  setCarryFlag16BitAdd(a: number, b: number) {
+    return this.setCarryFlagAdd(a, b, 16);
   }
 
   setCarryFlagSubtract(a: number, b: number) {

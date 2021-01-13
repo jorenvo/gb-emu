@@ -943,8 +943,7 @@ export class OpAddR16ToHL extends Instruction {
 
     let hl = cpu.getHL();
     cpu.setHalfCarryFlagAdd(r16, hl);
-    cpu.setCarryFlagAdd(r16, hl);
-
+    cpu.setCarryFlag16BitAdd(r16, hl);
     cpu.setHL(utils.wrapping16BitAdd(hl, r16));
     cpu.setSubtractFlag(0);
     return 8;
@@ -1763,7 +1762,7 @@ export class OpAddR8 extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const toAdd = this.getToAdd(cpu, memory);
     cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
-    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), toAdd);
     cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), toAdd));
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
@@ -1829,7 +1828,7 @@ export class OpAddCarryD8 extends Instruction {
       cpu.getCarryFlag()
     );
     cpu.setHalfCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
-    cpu.setCarryFlagAdd(cpu.getReg(CPU.A), toAdd);
+    cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), toAdd);
     cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), toAdd));
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
@@ -2271,7 +2270,7 @@ export class OpAddSPR8 extends Instruction {
     const offset = this.getOffset(memory);
     cpu.setZeroFlag(0);
     cpu.setSubtractFlag(0);
-    cpu.setCarryFlagAdd(cpu.SP, offset);
+    cpu.setCarryFlag8BitAdd(cpu.SP, offset);
     cpu.setHalfCarryFlagAdd(cpu.SP, offset);
 
     utils.wrapping16BitAdd(cpu.SP, offset);
@@ -2380,7 +2379,7 @@ export class OpLdSPPlusToHL extends Instruction {
     const offset = this.getOffset(memory);
     cpu.setSubtractFlag(0);
     cpu.setZeroFlag(0);
-    cpu.setCarryFlagAdd(cpu.SP, offset);
+    cpu.setCarryFlag8BitAdd(cpu.SP, offset);
     cpu.setHalfCarryFlagAdd(cpu.SP, offset);
     cpu.setHL(utils.wrapping16BitAdd(cpu.SP, offset));
     return 12;
