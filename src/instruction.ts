@@ -589,7 +589,7 @@ export class OpInc16 extends OpDecInc16 {
 
 export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(cpu, memory, utils.wrapping16BitSub(this.getVal(cpu, memory), 1));
+    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), -1));
     return 8;
   }
 
@@ -689,13 +689,13 @@ export class OpDec8 extends Instruction {
     if (this.getByte(memory) === 0x35) {
       let addr = cpu.getHL();
       cpu.setHalfCarryFlagAdd(memory.getByte(addr), -1);
-      memory.setByte(addr, utils.wrapping8BitSub(memory.getByte(addr), 1));
+      memory.setByte(addr, utils.wrapping8BitAdd(memory.getByte(addr), -1));
       cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
       tStates = 12;
     } else {
       const register = this.getReg(memory);
       cpu.setHalfCarryFlagAdd(cpu.getReg(register), -1);
-      cpu.setReg(register, utils.wrapping8BitSub(cpu.getReg(register), 1));
+      cpu.setReg(register, utils.wrapping8BitAdd(cpu.getReg(register), -1));
       cpu.setZeroFlag(cpu.getReg(register) === 0 ? 1 : 0);
       tStates = 4;
     }
@@ -1676,7 +1676,7 @@ export class OpSubR8 extends Instruction {
     const toSub = this.getToSubtract(cpu, memory);
     cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), toSub);
     cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), toSub);
-    cpu.setReg(CPU.A, utils.wrapping8BitSub(cpu.getReg(CPU.A), toSub));
+    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), -toSub));
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(1);
 
@@ -1928,13 +1928,13 @@ export class OpDAA extends Instruction {
       // if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
       if (cpu.getAF() & GB_HALF_CARRY_FLAG) {
         // result = (result - 0x06) & 0xFF;
-        result = utils.wrapping16BitSub(result, 0x06) & 0xff;
+        result = utils.wrapping16BitAdd(result, -0x06) & 0xff;
       }
 
       // if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
       if (cpu.getAF() & GB_CARRY_FLAG) {
         // result -= 0x60;
-        result = utils.wrapping16BitSub(result, 0x60);
+        result = utils.wrapping16BitAdd(result, -0x60);
       }
     }
 

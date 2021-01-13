@@ -56,27 +56,21 @@ export function twosComplementToNumber(x: number): number {
   }
 }
 
-function wrappingSub(a: number, b: number, bits: number): number {
-  if (a >= b) {
-    return a - b;
-  } else {
-    // for 8 bit:
-    // 0 - 1 => 255
-    // 5 - 7 => 254
-    return (1 << bits) - (b - a);
-  }
-}
-
-export function wrapping8BitSub(a: number, b: number): number {
-  return wrappingSub(a, b, 8);
-}
-
-export function wrapping16BitSub(a: number, b: number): number {
-  return wrappingSub(a, b, 16);
-}
-
 function wrappingAdd(a: number, b: number, bits: number): number {
-  return (a + b) % (1 << bits);
+  assert(a >= 0, `a should be positive but is ${a}`);
+  if (b > 0) { // addition
+    return (a + b) % (1 << bits);
+  } else { // subtraction
+    b = -b; // flip the sign of b to be more explicit
+    if (a >= b) {
+      return a - b;
+    } else {
+      // for 8 bit:
+      // 0 - 1 => 255
+      // 5 - 7 => 254
+      return (1 << bits) - (b - a);
+    }
+  }
 }
 
 export function wrapping8BitAdd(a: number, b: number): number {
