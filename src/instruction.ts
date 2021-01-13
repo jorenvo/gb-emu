@@ -934,16 +934,17 @@ export class OpAddR16ToHL extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     let r16;
     const opcode = this.getByte(memory);
-    if (opcode !== 0x39) {
+    if (opcode === 0x39) {
+      r16 = cpu.SP;
+    } else {
       const register = this.getReg(memory);
       r16 = cpu.getCombinedRegister(register, register + 1);
-    } else {
-      r16 = cpu.SP;
     }
 
     let hl = cpu.getHL();
     cpu.setHalfCarryFlagAdd(r16, hl);
     cpu.setCarryFlagAdd(r16, hl);
+
     cpu.setHL(utils.wrapping16BitAdd(hl, r16));
     cpu.setSubtractFlag(0);
     return 8;
