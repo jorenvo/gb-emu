@@ -2381,7 +2381,6 @@ export class OpLdSPPlusToHL extends Instruction {
     cpu.setZeroFlag(0);
     cpu.setCarryFlagAdd(cpu.SP, offset);
     cpu.setHalfCarryFlagAdd(cpu.SP, offset);
-
     cpu.setHL(utils.wrapping16BitAdd(cpu.SP, offset));
     return 12;
   }

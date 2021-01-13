@@ -58,19 +58,9 @@ export function twosComplementToNumber(x: number): number {
 
 function wrappingAdd(a: number, b: number, bits: number): number {
   assert(a >= 0, `a should be positive but is ${a}`);
-  if (b > 0) { // addition
-    return (a + b) % (1 << bits);
-  } else { // subtraction
-    b = -b; // flip the sign of b to be more explicit
-    if (a >= b) {
-      return a - b;
-    } else {
-      // for 8 bit:
-      // 0 - 1 => 255
-      // 5 - 7 => 254
-      return (1 << bits) - (b - a);
-    }
-  }
+  assert(a >= 0 && a < 1 << bits, `${a} cannot be represented in ${bits} bits`);
+  assert(b > -1 << bits && b < 1 << bits, `${b} cannot be represented in ${bits} bits`)
+  return (a + b) & ((1 << bits) - 1);
 }
 
 export function wrapping8BitAdd(a: number, b: number): number {
