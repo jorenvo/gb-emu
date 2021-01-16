@@ -129,7 +129,7 @@ export class CPU {
   }
 
   setHalfCarryFlag16BitAdd(a: number, b: number) {
-    const halfCarryFlag = (a & 0xff) + (b & 0xff) >= 0x100 ? 1 : 0;
+    const halfCarryFlag = (a & 0xfff) + (b & 0xfff) >= 0x1000 ? 1 : 0;
     this.setHalfCarryFlagDirect(halfCarryFlag);
   }
 
