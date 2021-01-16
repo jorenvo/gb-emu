@@ -2270,8 +2270,10 @@ export class OpAddSPR8 extends Instruction {
     const offset = this.getOffset(memory);
     cpu.setZeroFlag(0);
     cpu.setSubtractFlag(0);
-    cpu.setCarryFlag8BitAdd(cpu.SP, offset);
-    cpu.setHalfCarryFlag8BitAdd(cpu.SP, offset);
+    cpu.setCarryFlag8BitAdd(cpu.SP & 0xff, offset & 0xff);
+
+    const halfCarry = (cpu.SP & 0xf) + (offset & 0xf) >= 0x10;
+    cpu.setHalfCarryFlagDirect(halfCarry ? 1 : 0);
 
     utils.wrapping16BitAdd(cpu.SP, offset);
 
