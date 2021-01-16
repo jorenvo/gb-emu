@@ -2275,6 +2275,7 @@ export class OpAddSPR8 extends Instruction {
     const halfCarry = (cpu.SP & 0xf) + (offset & 0xf) >= 0x10;
     cpu.setHalfCarryFlagDirect(halfCarry ? 1 : 0);
 
+    // TODO: implement OAM bug shenanigans?
     utils.wrapping16BitAdd(cpu.SP, offset);
 
     return 16;
