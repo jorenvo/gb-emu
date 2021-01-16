@@ -2384,6 +2384,8 @@ export class OpLdSPPlusToHL extends Instruction {
     cpu.setZeroFlag(0);
     cpu.setCarryFlag8BitAdd(cpu.SP, offset);
     cpu.setHalfCarryFlag8BitAdd(cpu.SP, offset);
+
+    // TODO: implement OAM bug shenanigans?
     cpu.setHL(utils.wrapping16BitAdd(cpu.SP, offset));
     return 12;
   }
