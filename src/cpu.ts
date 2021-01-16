@@ -140,10 +140,7 @@ export class CPU {
 
   setHalfCarryFlagSubtract(a: number, b: number) {
     const halfCarryFlag = (b & 0xf) > (a & 0xf) ? 1 : 0;
-    this.setReg(
-      CPU.F,
-      (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5)
-    );
+    this.setHalfCarryFlagDirect(halfCarryFlag);
   }
 
   getHalfCarryFlag(): number {
@@ -155,7 +152,7 @@ export class CPU {
   }
 
   private setCarryFlagAdd(a: number, b: number, bits: number) {
-    const carryFlag = (a + b > (1 << bits) - 1) ? 1 : 0;
+    const carryFlag = (a + b >= 1 << bits) ? 1 : 0;
     this.setCarryFlagDirect(carryFlag);
   }
 
