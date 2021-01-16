@@ -66,15 +66,15 @@ export class Video {
     }
   }
 
-  getTileColRow(address: number) {
+  getTileColRow(address: number): [number, number] {
     const lcdc = this.memory.getLCDC();
-    if (utils.getBit(lcdc, 4)) {
-      let row = Math.floor(address / 16);
-      let col = address % 16;
-      return [col, row];
-    } else {
-      throw new Error("Not implemented");
+    if (!utils.getBit(lcdc, 4)) {
+      address += 128; // smallest 8-bit 2s complement: -128
     }
+
+    let row = Math.floor(address / 16);
+    let col = address % 16;
+    return [col, row];
   }
 
   private getTile(address: number) {
