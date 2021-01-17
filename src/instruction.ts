@@ -2220,7 +2220,12 @@ export class OpOrR8 extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) | this.getVal(cpu, memory));
+
+    cpu.setCarryFlagDirect(0);
+    cpu.setHalfCarryFlagDirect(0);
+    cpu.setSubtractFlag(0);
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
+
     return this.isHL(memory) ? 8 : 4;
   }
 
