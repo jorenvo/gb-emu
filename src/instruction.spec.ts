@@ -1,6 +1,7 @@
 import "mocha";
 import * as assert from "assert";
 import * as instruction from "./instruction";
+import * as utils from "./utils";
 import { CPU } from "./cpu";
 import { Memory } from "./memory";
 import { ControllerMock } from "./controller";
@@ -234,4 +235,28 @@ describe("bit extractions", function () {
     opBit.execAndIncrementPC(cpu, memory);
     assert.strictEqual(cpu.getZeroFlag(), 1);
   });
+
+  describe("sub carry immediate", function () {
+    for (let d8 = 0; d8 <= 0xff; d8++) {
+      const cpu = createCPU();
+      const memory = createMemory(new Uint8Array([0xde, d8]));
+      const instr = new instruction.OpSubCarryD8(0x00);
+
+      assert.strictEqual(cpu.getCarryFlag(), 0);
+      assert.strictEqual(cpu.getReg(CPU.A), 0);
+
+      instr.exec(cpu, memory);
+
+      // 0 - d8 (no carry)
+      let a = 0;
+      let expected = 0;
+      if (a < d8) {
+        expected = 256 + (a - d8);
+      } else {
+        expected = a - d8;
+      }
+
+      assert.strictEqual(cpu.getReg(CPU.A), expected);
+    }
+  })
 });

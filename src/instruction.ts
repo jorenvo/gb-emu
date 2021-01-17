@@ -1699,7 +1699,7 @@ export class OpSubR8 extends Instruction {
 
 export class OpSubCarryR8 extends OpSubR8 {
   protected getToSubtract(cpu: CPU, memory: Memory) {
-    return utils.wrapping8BitAdd(super.getToSubtract(cpu, memory), cpu.getCarryFlag());
+    return super.getToSubtract(cpu, memory), cpu.getCarryFlag();
   }
 
   disassemble(memory: Memory) {
@@ -1713,7 +1713,7 @@ export class OpSubCarryD8 extends OpSubR8 {
   }
 
   protected getToSubtract(cpu: CPU, memory: Memory) {
-    return utils.wrapping8BitAdd(this.getNext8Bits(memory), cpu.getCarryFlag());
+    return this.getNext8Bits(memory) - cpu.getCarryFlag();
   }
 
   disassemble(memory: Memory) {
