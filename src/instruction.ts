@@ -1823,15 +1823,22 @@ export class OpAddCarryD8 extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    const toAdd = utils.wrapping8BitAdd(
-      this.getToAdd(memory),
-      cpu.getCarryFlag()
-    );
-    cpu.setHalfCarryFlag8BitAdd(cpu.getReg(CPU.A), toAdd);
-    cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), toAdd);
+    const d8 = this.getToAdd(memory);
+    const carry = cpu.getCarryFlag();
+
+    const halfCarry = ((cpu.getReg(CPU.A) & 0xf) + (d8 & 0xf) + carry >= 0x10) ? 1 : 0;
+    cpu.setHalfCarryFlagDirect(halfCarry);
+
+    const newCarry = (cpu.getReg(CPU.A) + d8 + carry >= 0x100) ? 1 : 0;
+    cpu.setCarryFlagDirect(newCarry);
+    // cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), d8, carry);
+
+    const toAdd = utils.wrapping8BitAdd(d8, carry);
     cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), toAdd));
+
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
+
     return 4;
   }
 
