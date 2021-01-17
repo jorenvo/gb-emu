@@ -63,6 +63,7 @@ function wrappingAdd(a: number, b: number, bits: number): number {
   return (a + b) & ((1 << bits) - 1);
 }
 
+// TODO: turn these into variadic functions?
 export function wrapping8BitAdd(a: number, b: number): number {
   return wrappingAdd(a, b, 8);
 }
