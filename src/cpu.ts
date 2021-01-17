@@ -133,9 +133,9 @@ export class CPU {
     this.setHalfCarryFlagDirect(halfCarryFlag);
   }
 
-  setHalfCarryFlag8BitAdd(a: number, b: number) {
-    const halfCarryFlag = (a & 0xf) + (b & 0xf) >= 0x10 ? 1 : 0;
-    this.setHalfCarryFlagDirect(halfCarryFlag);
+  setHalfCarryFlag8BitAdd(...numbers: number[]) {
+    const sum = numbers.reduce((prev, curr) => prev + (curr & 0xf), 0);
+    this.setHalfCarryFlagDirect(sum >= 0x10 ? 1 : 0);
   }
 
   setHalfCarryFlagSubtract(a: number, b: number) {
@@ -151,17 +151,17 @@ export class CPU {
     this.setReg(CPU.F, (this.getReg(CPU.F) & 0b1110_1111) | (carryFlag << 4));
   }
 
-  private setCarryFlagAdd(a: number, b: number, bits: number) {
-    const carryFlag = (a + b >= 1 << bits) ? 1 : 0;
-    this.setCarryFlagDirect(carryFlag);
+  private setCarryFlagAdd(numbers: number[], bits: number) {
+    const sum = numbers.reduce((prev, curr) => prev + (curr & 0xff), 0);
+    this.setCarryFlagDirect(sum >= 1 << bits ? 1 : 0);
   }
 
-  setCarryFlag8BitAdd(a: number, b: number) {
-    return this.setCarryFlagAdd(a, b, 8);
+  setCarryFlag8BitAdd(...numbers: number[]) {
+    return this.setCarryFlagAdd(numbers, 8);
   }
 
-  setCarryFlag16BitAdd(a: number, b: number) {
-    return this.setCarryFlagAdd(a, b, 16);
+  setCarryFlag16BitAdd(...numbers: number[]) {
+    return this.setCarryFlagAdd(numbers, 16);
   }
 
   setCarryFlagSubtract(a: number, b: number) {
