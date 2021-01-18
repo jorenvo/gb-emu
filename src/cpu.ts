@@ -152,7 +152,8 @@ export class CPU {
   }
 
   private setCarryFlagAdd(numbers: number[], bits: number) {
-    const sum = numbers.reduce((prev, curr) => prev + (curr & 0xff), 0);
+    const mask = (1 << bits) - 1;
+    const sum = numbers.reduce((prev, curr) => prev + (curr & mask), 0);
     this.setCarryFlagDirect(sum >= 1 << bits ? 1 : 0);
   }
 
