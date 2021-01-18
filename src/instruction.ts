@@ -1699,6 +1699,7 @@ export class OpSubR8 extends Instruction {
 
 export class OpSubCarryR8 extends OpSubR8 {
   protected getToSubtract(cpu: CPU, memory: Memory) {
+    // TODO: do the same as OpSubCarryD8
     return super.getToSubtract(cpu, memory) + cpu.getCarryFlag();
   }
 
@@ -1716,8 +1717,7 @@ export class OpSubCarryD8 extends Instruction {
     const carry = cpu.getCarryFlag();
     const d8 = this.getNext8Bits(memory);
 
-    const halfCarry = (cpu.getReg(CPU.A) & 0xf) < (d8 & 0xf) + carry ? 1 : 0;
-    cpu.setHalfCarryFlagDirect(halfCarry);
+    cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), d8, carry);
 
     const newCarry = cpu.getReg(CPU.A) - d8 - carry < 0 ? 1 : 0;
     cpu.setCarryFlagDirect(newCarry);

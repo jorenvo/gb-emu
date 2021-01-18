@@ -138,9 +138,9 @@ export class CPU {
     this.setHalfCarryFlagDirect(sum >= 0x10 ? 1 : 0);
   }
 
-  setHalfCarryFlagSubtract(a: number, b: number) {
-    const halfCarryFlag = (b & 0xf) > (a & 0xf) ? 1 : 0;
-    this.setHalfCarryFlagDirect(halfCarryFlag);
+  setHalfCarryFlagSubtract(...numbers: number[]) {
+    const total = numbers.map(n => n & 0xf).reduce((prev, curr) => prev - curr);
+    this.setHalfCarryFlagDirect(total < 0 ? 1 : 0);
   }
 
   getHalfCarryFlag(): number {
