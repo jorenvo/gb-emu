@@ -2292,11 +2292,9 @@ export class OpAddSPR8 extends Instruction {
     cpu.setZeroFlag(0);
     cpu.setSubtractFlag(0);
 
-    const halfCarry = (cpu.SP & 0xf) + (offset & 0xf) >= 0x10;
-    cpu.setHalfCarryFlagDirect(halfCarry ? 1 : 0);
-
-    const carry = (cpu.SP & 0xff) + (offset & 0xff) >= 0x100;
-    cpu.setCarryFlagDirect(carry ? 1 : 0);
+    // This is a 16-bit addition but the carry flag is set if it carries from bit 7 to 8 ¯\_(ツ)_/¯
+    cpu.setCarryFlag8BitAdd(cpu.SP & 0xff, offset & 0xff);
+    cpu.setHalfCarryFlag8BitAdd(cpu.SP, offset);
 
     // TODO: implement OAM bug shenanigans?
     cpu.SP = utils.wrapping16BitAdd(cpu.SP, offset);
