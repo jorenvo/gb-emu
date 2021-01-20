@@ -2291,13 +2291,15 @@ export class OpAddSPR8 extends Instruction {
     const offset = this.getOffset(memory);
     cpu.setZeroFlag(0);
     cpu.setSubtractFlag(0);
-    cpu.setCarryFlag8BitAdd(cpu.SP & 0xff, offset & 0xff);
 
     const halfCarry = (cpu.SP & 0xf) + (offset & 0xf) >= 0x10;
     cpu.setHalfCarryFlagDirect(halfCarry ? 1 : 0);
 
+    const carry = (cpu.SP & 0xff) + (offset & 0xff) >= 0x100;
+    cpu.setCarryFlagDirect(carry ? 1 : 0);
+
     // TODO: implement OAM bug shenanigans?
-    utils.wrapping16BitAdd(cpu.SP, offset);
+    cpu.SP = utils.wrapping16BitAdd(cpu.SP, offset);
 
     return 16;
   }
