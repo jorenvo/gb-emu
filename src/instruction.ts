@@ -443,7 +443,7 @@ export class OpLdAddrCToA extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    cpu.setReg(CPU.A, memory.getByte(cpu.getReg(CPU.C)));
+    cpu.setReg(CPU.A, memory.getByte(0xff00 + cpu.getReg(CPU.C)));
     return 8;
   }
 
