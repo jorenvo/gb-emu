@@ -193,6 +193,45 @@ describe("rotations", function () {
   });
 });
 
+describe("shifts", function () {
+  it("should correctly SRA", function () {
+    const cpu = createCPU();
+    const memory = createMemory(new Uint8Array([0xcb, 0x2f]));
+    const opSRA = new instruction.OpSRA(0x00);
+
+    cpu.setReg(CPU.A, 0);
+    cpu.setCarryFlagDirect(0);
+    opSRA.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(CPU.A), 0);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 1);
+
+    // 0b1_1111_1111 turns into
+    // 0b1_1111_1111
+    cpu.setReg(CPU.A, 0b1111_1111);
+    cpu.setCarryFlagDirect(1);
+    opSRA.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(CPU.A), 0b1111_1111);
+    assert.strictEqual(cpu.getCarryFlag(), 1);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 0);
+
+    // 0b1_1010_0000 turns into
+    // 0b0_1101_0000
+    cpu.setReg(CPU.A, 0b1010_0000);
+    cpu.setCarryFlagDirect(1);
+    opSRA.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(CPU.A), 0b1101_0000);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 0);
+  });
+});
+
 describe("bit extractions", function () {
   it("should correctly disassemble bit ops", function () {
     function getMemory(opcode: number) {
