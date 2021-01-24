@@ -2317,6 +2317,8 @@ export class OpCCF extends Instruction {
 
   exec(cpu: CPU, _memory: Memory): number {
     cpu.setCarryFlagDirect(cpu.getCarryFlag() === 1 ? 0 : 1);
+    cpu.setSubtractFlag(0);
+    cpu.setHalfCarryFlagDirect(0);
     return 1;
   }
 
