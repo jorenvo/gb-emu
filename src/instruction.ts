@@ -1190,7 +1190,7 @@ export class OpCPL extends Instruction {
 
   exec(cpu: CPU, _memory: Memory): number {
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) ^ 0xff);
-    cpu.setZeroFlag(1);
+    cpu.setHalfCarryFlagDirect(1);
     cpu.setSubtractFlag(1);
     return 4;
   }
