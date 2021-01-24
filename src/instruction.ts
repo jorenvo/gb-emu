@@ -2121,6 +2121,9 @@ abstract class OpShift extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
+    cpu.setSubtractFlag(0);
+    cpu.setHalfCarryFlagSubtract(0);
+
     if (this.isHL(memory)) {
       const [carry, val] = this.shift(memory.getByte(cpu.getHL()));
       cpu.setCarryFlagDirect(carry);
