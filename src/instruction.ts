@@ -578,7 +578,11 @@ export abstract class OpDecInc16 extends Instruction {
 
 export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), 1));
+    this.setVal(
+      cpu,
+      memory,
+      utils.wrapping16BitAdd(this.getVal(cpu, memory), 1)
+    );
     return 8;
   }
 
@@ -589,7 +593,11 @@ export class OpInc16 extends OpDecInc16 {
 
 export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), -1));
+    this.setVal(
+      cpu,
+      memory,
+      utils.wrapping16BitAdd(this.getVal(cpu, memory), -1)
+    );
     return 8;
   }
 
@@ -1840,7 +1848,13 @@ export class OpAddCarryR8 extends Instruction {
     const carry = cpu.getCarryFlag();
     cpu.setHalfCarryFlag8BitAdd(cpu.getReg(CPU.A), carry, toAdd);
     cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), carry, toAdd);
-    cpu.setReg(CPU.A, utils.wrapping8BitAdd(cpu.getReg(CPU.A), utils.wrapping8BitAdd(toAdd, carry)));
+    cpu.setReg(
+      CPU.A,
+      utils.wrapping8BitAdd(
+        cpu.getReg(CPU.A),
+        utils.wrapping8BitAdd(toAdd, carry)
+      )
+    );
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
 
@@ -1992,13 +2006,13 @@ export class OpDAA extends Instruction {
     // else {
     else {
       // if ((gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
-      if ((cpu.getAF() & GB_HALF_CARRY_FLAG) || (result & 0x0f) > 0x09) {
+      if (cpu.getAF() & GB_HALF_CARRY_FLAG || (result & 0x0f) > 0x09) {
         // result += 0x06;
         result = utils.wrapping16BitAdd(result, 0x06);
       }
 
       // if ((gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) || result > 0x9F) {
-      if ((cpu.getAF() & GB_CARRY_FLAG) || result > 0x9f) {
+      if (cpu.getAF() & GB_CARRY_FLAG || result > 0x9f) {
         // result += 0x60;
         result = utils.wrapping16BitAdd(result, 0x60);
       }

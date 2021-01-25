@@ -55,7 +55,10 @@ export class CPU {
   }
 
   set SP(addr: number) {
-    utils.assert(addr >= 0 && addr <= 0xffff, `Setting invalid address ${utils.hexString(addr, 16)} in SP`);
+    utils.assert(
+      addr >= 0 && addr <= 0xffff,
+      `Setting invalid address ${utils.hexString(addr, 16)} in SP`
+    );
     this.controller.updatedSP();
     this._SP = addr;
   }
@@ -65,7 +68,10 @@ export class CPU {
   }
 
   setReg(r: number, val: number) {
-    utils.assert(val >= 0 && val <= 0xff, `Setting invalid value ${val} in 8 bit register ${r}`);
+    utils.assert(
+      val >= 0 && val <= 0xff,
+      `Setting invalid value ${val} in 8 bit register ${r}`
+    );
     this._regs[r] = val;
     this.controller.updatedReg(r);
   }
@@ -139,7 +145,9 @@ export class CPU {
   }
 
   setHalfCarryFlagSubtract(...numbers: number[]) {
-    const total = numbers.map(n => n & 0xf).reduce((prev, curr) => prev - curr);
+    const total = numbers
+      .map((n) => n & 0xf)
+      .reduce((prev, curr) => prev - curr);
     this.setHalfCarryFlagDirect(total < 0 ? 1 : 0);
   }
 

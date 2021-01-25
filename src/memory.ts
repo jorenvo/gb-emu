@@ -258,7 +258,10 @@ export class Memory {
   }
 
   setByte(address: number, value: number) {
-    utils.assert(value >= 0 && value <= 255, `${value} written to ${utils.hexString(address, 16)} is out of range`);
+    utils.assert(
+      value >= 0 && value <= 255,
+      `${value} written to ${utils.hexString(address, 16)} is out of range`
+    );
     switch (address) {
       case 0xff46:
         const sourceStart = value * 0x100;
@@ -291,7 +294,10 @@ export class Memory {
       this.controller.updatedTileMapPointers();
     } else if (address >= 0xff00 && address <= 0xff70) {
       this.controller.updatedMemReg(address);
-    } else if (address >= Memory.WORKRAMSTART && address <= Memory.WORKRAMSTART + Memory.WORKRAMSIZE) {
+    } else if (
+      address >= Memory.WORKRAMSTART &&
+      address <= Memory.WORKRAMSTART + Memory.WORKRAMSIZE
+    ) {
       // this.controller.updatedWorkRam(); // TODO: this is way too expensive
     }
 
