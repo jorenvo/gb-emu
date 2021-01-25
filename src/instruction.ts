@@ -670,7 +670,7 @@ export class OpDec8 extends Instruction {
     return 1;
   }
 
-  private getReg(memory: Memory) {
+  private getRegNr(memory: Memory) {
     const opcode = this.getByte(memory);
     switch (opcode) {
       case 0x05:
@@ -692,19 +692,24 @@ export class OpDec8 extends Instruction {
     }
   }
 
+  private isHL(memory: Memory) {
+    return this.getByte(memory) === 0x35;
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     let tStates;
-    if (this.getByte(memory) === 0x35) {
-      let addr = cpu.getHL();
-      cpu.setHalfCarryFlag8BitAdd(memory.getByte(addr), -1);
-      memory.setByte(addr, utils.wrapping8BitAdd(memory.getByte(addr), -1));
-      cpu.setZeroFlag(memory.getByte(addr) === 0 ? 1 : 0);
+
+    if (this.isHL(memory)) {
+      let hl = cpu.getHL();
+      cpu.setHalfCarryFlagSubtract(memory.getByte(hl), 1);
+      memory.setByte(hl, utils.wrapping8BitAdd(memory.getByte(hl), -1));
+      cpu.setZeroFlag(memory.getByte(hl) === 0 ? 1 : 0);
       tStates = 12;
     } else {
-      const register = this.getReg(memory);
-      cpu.setHalfCarryFlag8BitAdd(cpu.getReg(register), -1);
-      cpu.setReg(register, utils.wrapping8BitAdd(cpu.getReg(register), -1));
-      cpu.setZeroFlag(cpu.getReg(register) === 0 ? 1 : 0);
+      const regNr = this.getRegNr(memory);
+      cpu.setHalfCarryFlagSubtract(cpu.getReg(regNr), 1);
+      cpu.setReg(regNr, utils.wrapping8BitAdd(cpu.getReg(regNr), -1));
+      cpu.setZeroFlag(cpu.getReg(regNr) === 0 ? 1 : 0);
       tStates = 4;
     }
     cpu.setSubtractFlag(1);
@@ -717,7 +722,7 @@ export class OpDec8 extends Instruction {
     if (this.getByte(memory) === 0x35) {
       reg = "(HL)";
     } else {
-      reg = this.getStringForR8(this.getReg(memory));
+      reg = this.getStringForR8(this.getRegNr(memory));
     }
 
     return `DEC ${reg}`;
