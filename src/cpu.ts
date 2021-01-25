@@ -151,6 +151,13 @@ export class CPU {
     this.setHalfCarryFlagDirect(total < 0 ? 1 : 0);
   }
 
+  setCarryFlagSubtract(...numbers: number[]) {
+    const total = numbers
+      .map((n) => n & 0xff)
+      .reduce((prev, curr) => prev - curr);
+    this.setCarryFlagDirect(total < 0 ? 1 : 0);
+  }
+
   getHalfCarryFlag(): number {
     return (this.getReg(CPU.F) & 0b0010_0000) > 0 ? 1 : 0;
   }
@@ -171,11 +178,6 @@ export class CPU {
 
   setCarryFlag16BitAdd(...numbers: number[]) {
     return this.setCarryFlagAdd(numbers, 16);
-  }
-
-  setCarryFlagSubtract(a: number, b: number) {
-    const carryFlag = b > a ? 1 : 0;
-    this.setCarryFlagDirect(carryFlag);
   }
 
   getCarryFlag(): number {

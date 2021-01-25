@@ -1705,14 +1705,54 @@ export class OpSubR8 extends Instruction {
   }
 }
 
-export class OpSubCarryR8 extends OpSubR8 {
-  protected getToSubtract(cpu: CPU, memory: Memory) {
-    // TODO: do the same as OpSubCarryD8
-    return super.getToSubtract(cpu, memory) + cpu.getCarryFlag();
+export class OpSubCarryR8 extends Instruction {
+  size() {
+    return 1;
+  }
+
+  private getRegNr(memory: Memory) {
+    const opcode = this.getByte(memory);
+    return opcode & 0b111;
+  }
+
+  private isHL(memory: Memory) {
+    return this.getByte(memory) === 0x9e;
+  }
+
+  protected getToAdd(cpu: CPU, memory: Memory) {
+    const regNr = this.getRegNr(memory);
+    return this.isHL(memory) ? memory.getByte(cpu.getHL()) : cpu.getReg(regNr);
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const toAdd = this.getToAdd(cpu, memory);
+    const carry = cpu.getCarryFlag();
+    cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), carry, toAdd);
+    cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), carry, toAdd);
+    cpu.setReg(
+      CPU.A,
+      utils.wrapping8BitAdd(
+        cpu.getReg(CPU.A),
+        -utils.wrapping8BitAdd(toAdd, carry)
+      )
+    );
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
+    cpu.setSubtractFlag(1);
+
+    if (this.isHL(memory)) {
+      return 8;
+    } else {
+      return 4;
+    }
   }
 
   disassemble(memory: Memory) {
-    return super.disassemble(memory).replace("SUB", "SBC");
+    const regNr = this.getRegNr(memory);
+    let reg = "(HL)";
+    if (!this.isHL(memory)) {
+      reg = this.getStringForR8(regNr);
+    }
+    return `SBC ${reg}`;
   }
 }
 
