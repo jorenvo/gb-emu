@@ -190,7 +190,7 @@ export class CPU {
     n |= this.getCarryFlag();
 
     this.setCarryFlagDirect(msb);
-    this.setHalfCarryFlag8BitAdd(0, 0);
+    this.setHalfCarryFlagDirect(0);
     this.setSubtractFlag(0);
     this.setZeroFlag(0);
 

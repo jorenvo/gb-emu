@@ -21,8 +21,8 @@ function createMemory(bytes: Uint8Array): Memory {
   return memory;
 }
 
-describe("OpLdD16ToR16", function () {
-  it("should correctly load", function () {
+describe("OpLdD16ToR16", function() {
+  it("should correctly load", function() {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array([0x21, 0x20, 0x21]));
     const ld = new instruction.OpLdD16ToR16(0x00);
@@ -38,8 +38,8 @@ describe("OpLdD16ToR16", function () {
   });
 });
 
-describe("OpLdD8ToR8", function () {
-  it("should correctly disassemble", function () {
+describe("OpLdD8ToR8", function() {
+  it("should correctly disassemble", function() {
     let memory = createMemory(new Uint8Array([0x16, 0x34]));
     const ld = new instruction.OpLdD8ToR8(0x00);
     assert.strictEqual("LD D, $0x34", ld.disassemble(memory));
@@ -49,8 +49,8 @@ describe("OpLdD8ToR8", function () {
   });
 });
 
-describe("OpLdD8ToR8", function () {
-  it("should correctly disassemble", function () {
+describe("OpLdD8ToR8", function() {
+  it("should correctly disassemble", function() {
     const ld = new instruction.OpLdR8ToR8(0x00);
     let memory = createMemory(new Uint8Array([0x62]));
     assert.strictEqual("LD H, D", ld.disassemble(memory));
@@ -63,8 +63,8 @@ describe("OpLdD8ToR8", function () {
   });
 });
 
-describe("OpLdR8ToA16", function () {
-  it("should correctly disassemble", function () {
+describe("OpLdR8ToA16", function() {
+  it("should correctly disassemble", function() {
     const ld = new instruction.OpLdR8ToA16(0x00);
 
     let memory = createMemory(new Uint8Array([0x22]));
@@ -87,8 +87,8 @@ describe("OpLdR8ToA16", function () {
   });
 });
 
-describe("OpPop & OpPush", function () {
-  it("should correctly pop/push", function () {
+describe("OpPop & OpPush", function() {
+  it("should correctly pop/push", function() {
     function testR16(name: string, opcodePush: number, opcodePop: number) {
       let r1: number, r2: number;
       switch (name) {
@@ -143,8 +143,8 @@ describe("OpPop & OpPush", function () {
   });
 });
 
-describe("rotations", function () {
-  it("should correctly rotate left", function () {
+describe("rotations", function() {
+  it("should correctly rotate A left", function() {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array());
     const opRLCA = new instruction.OpRLCA(0x00);
@@ -168,7 +168,7 @@ describe("rotations", function () {
     // assert.strictEqual(cpu.getCarryFlag(), 0);
   });
 
-  it("should correctly rotate right", function () {
+  it("should correctly rotate A right", function() {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array());
     const opRRCA = new instruction.OpRRCA(0x00);
@@ -191,10 +191,46 @@ describe("rotations", function () {
     assert.strictEqual(cpu.getReg(0x7), 0b0000_1011);
     assert.strictEqual(cpu.getCarryFlag(), 0);
   });
+
+  it("should correctly rotate left", function() {
+    const cpu = createCPU();
+    const memory = createMemory(new Uint8Array([0xcb, 0x00]));
+    const opRLC = new instruction.OpRLC(0x00);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 0);
+
+    // 0b1000_0000 rotated is
+    // 0b0000_0001
+    cpu.setReg(0x00, 0b1000_0000);
+    opRLC.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(0x00), 0b0000_0001);
+    assert.strictEqual(cpu.getCarryFlag(), 1);
+    assert.strictEqual(cpu.getZeroFlag(), 1);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+
+    cpu.setReg(0x00, 0b0000_0000);
+    opRLC.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(0x00), 0b0000_0000);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 1);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+
+    // 0b0111_1111 rotated is
+    // 0b1111_1110
+    cpu.setReg(0x00, 0b0111_1111);
+    opRLC.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(0x00), 0b1111_1110);
+    assert.strictEqual(cpu.getCarryFlag(), 0);
+    assert.strictEqual(cpu.getZeroFlag(), 0);
+    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
+    assert.strictEqual(cpu.getSubtractFlag(), 0);
+  });
 });
 
-describe("shifts", function () {
-  it("should correctly SRA", function () {
+describe("shifts", function() {
+  it("should correctly SRA", function() {
     const cpu = createCPU();
     const memory = createMemory(new Uint8Array([0xcb, 0x2f]));
     const opSRA = new instruction.OpSRA(0x00);
@@ -232,8 +268,8 @@ describe("shifts", function () {
   });
 });
 
-describe("bit extractions", function () {
-  it("should correctly disassemble bit ops", function () {
+describe("bit extractions", function() {
+  it("should correctly disassemble bit ops", function() {
     function getMemory(opcode: number) {
       return createMemory(new Uint8Array([0xcb, opcode]));
     }
