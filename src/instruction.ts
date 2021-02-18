@@ -855,7 +855,7 @@ export class OpRLC extends Instruction {
       tStates = 8;
     }
 
-    cpu.setZeroFlag(((val << 1) & 0xff) === 0 ? 1 : 0);
+    cpu.setZeroFlag(val << 1 === 0 ? 1 : 0);
     cpu.setHalfCarryFlagDirect(0);
     cpu.setSubtractFlag(0);
 
