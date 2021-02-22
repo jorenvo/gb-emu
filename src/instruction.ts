@@ -835,7 +835,6 @@ export class OpRLC extends Instruction {
   }
 
   private rotate(cpu: CPU, val: number) {
-    // TODO: remove cpu as an arg and have the caller set it
     const msb = (val & 0x80) !== 0 ? 1 : 0;
     cpu.setCarryFlagDirect(msb);
     return ((val << 1) & 0xff) | msb;
@@ -882,14 +881,33 @@ export class OpRRC extends Instruction {
     return this.getNext8Bits(memory) & 0b111;
   }
 
+  private rotate(cpu: CPU, value: number): number {
+    const carry = value & 1;
+    value = ((value >> 1) | (carry << 7)) & 0xff;
+
+    cpu.setHalfCarryFlagDirect(0);
+    cpu.setSubtractFlag(0);
+    cpu.setZeroFlag(0);
+    cpu.setCarryFlagDirect(0);
+
+    if (carry) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if (value === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return value;
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
-    // TODO: fix carry, rotateLeft already sets it which is probably wrong
     if (register === 6) {
-      cpu.setHL(cpu.rotateRight(cpu.getHL()));
+      cpu.setHL(this.rotate(cpu, cpu.getHL()));
       return 16;
     } else {
-      cpu.setReg(register, cpu.rotateRight(cpu.getReg(register)));
+      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
       return 8;
     }
   }
