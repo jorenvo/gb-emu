@@ -945,24 +945,46 @@ export class OpRR extends Instruction {
   }
 
   protected getReg(memory: Memory) {
-    return (this.getNext8Bits(memory) & 0xf) - 0x8;
+    return this.getNext8Bits(memory) & 0b111;
+  }
+
+  private rotate(cpu: CPU, value: number): number {
+    const carry = cpu.getCarryFlag();
+    const bit1 = value & 1;
+    value = ((value >> 1) | (carry << 7)) & 0xff;
+
+    cpu.clearAllFlags();
+
+    if (bit1) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if (value === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return value;
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    const reg = this.getReg(memory);
-    const lsb = cpu.getReg(reg) & 1;
-    cpu.setReg(reg, cpu.getReg(reg) >> 1);
-    cpu.setReg(reg, cpu.getReg(reg) | (cpu.getCarryFlag() << 7));
-    cpu.setCarryFlagDirect(lsb);
-
-    cpu.setHalfCarryFlag8BitAdd(0, 0);
-    cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(0);
-    return 8;
+    const register = this.getReg(memory);
+    if (register === 6) {
+      cpu.setHL(this.rotate(cpu, cpu.getHL()));
+      return 16;
+    } else {
+      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
+      return 8;
+    }
   }
 
   disassemble(memory: Memory) {
-    return `RR ${this.getStringForR8(this.getReg(memory))}`;
+    const regNr = this.getReg(memory);
+    let str = "(HL)";
+    if (regNr !== 6) {
+      str = this.getStringForR8(this.getReg(memory));
+    }
+
+    return `RR ${str}`;
   }
 }
 
