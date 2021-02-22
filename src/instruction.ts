@@ -762,6 +762,7 @@ export class OpRRCA extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
+    // TODO: this is wrong. Copy logic from OpRRC.
     const lsb = cpu.getReg(CPU.A) & 1;
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) >> 1);
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) | (lsb << 7));
@@ -803,13 +804,31 @@ export class OpRL extends Instruction {
     return this.getNext8Bits(memory) & 0xf;
   }
 
+  private rotate(cpu: CPU, value: number): number {
+    const carry = cpu.getCarryFlag();
+    const bit7 = value & 0x80;
+    value = ((value << 1) | carry) & 0xff;
+
+    cpu.clearAllFlags();
+
+    if (bit7) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if (value === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return value;
+  }
+
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     if (register === 6) {
-      cpu.setHL(cpu.rotateLeft(cpu.getHL()));
+      cpu.setHL(this.rotate(cpu, cpu.getHL()));
       return 16;
     } else {
-      cpu.setReg(register, cpu.rotateLeft(cpu.getReg(register)));
+      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
       return 8;
     }
   }
@@ -885,10 +904,7 @@ export class OpRRC extends Instruction {
     const carry = value & 1;
     value = ((value >> 1) | (carry << 7)) & 0xff;
 
-    cpu.setHalfCarryFlagDirect(0);
-    cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(0);
-    cpu.setCarryFlagDirect(0);
+    cpu.clearAllFlags();
 
     if (carry) {
       cpu.setCarryFlagDirect(1);

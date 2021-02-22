@@ -184,6 +184,13 @@ export class CPU {
     return (this.getReg(CPU.F) & 0b0001_0000) > 0 ? 1 : 0;
   }
 
+  clearAllFlags() {
+    this.setHalfCarryFlagDirect(0);
+    this.setSubtractFlag(0);
+    this.setZeroFlag(0);
+    this.setCarryFlagDirect(0);
+  }
+
   rotateLeft(n: number): number {
     const msb = n >> 7;
     n = (n << 1) & 0xff;
