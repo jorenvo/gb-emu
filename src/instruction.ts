@@ -756,22 +756,67 @@ export class OpRLCA extends Instruction {
   }
 }
 
-export class OpRRCA extends Instruction {
+export class OpRRC extends Instruction {
+  size() {
+    return 2;
+  }
+
+  protected getReg(memory: Memory) {
+    return this.getNext8Bits(memory) & 0b111;
+  }
+
+  private rotate(cpu: CPU, value: number): number {
+    const carry = value & 1;
+    value = ((value >> 1) | (carry << 7)) & 0xff;
+
+    cpu.clearAllFlags();
+
+    if (carry) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if (value === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return value;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const register = this.getReg(memory);
+    if (register === 6) {
+      cpu.setHL(this.rotate(cpu, cpu.getHL()));
+      return 16;
+    } else {
+      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
+      return 8;
+    }
+  }
+
+  disassemble(memory: Memory) {
+    const reg = this.getReg(memory);
+    let regString = "(HL)";
+    if (reg !== 6) {
+      regString = this.getStringForR8(reg);
+    }
+
+    return `RRC ${regString}`;
+  }
+}
+
+export class OpRRCA extends OpRRC {
   size() {
     return 1;
   }
 
-  exec(cpu: CPU, _memory: Memory): number {
-    // TODO: this is wrong. Copy logic from OpRRC.
-    const lsb = cpu.getReg(CPU.A) & 1;
-    cpu.setReg(CPU.A, cpu.getReg(CPU.A) >> 1);
-    cpu.setReg(CPU.A, cpu.getReg(CPU.A) | (lsb << 7));
-    cpu.setCarryFlagDirect(lsb);
+  protected getReg(_memory: Memory) {
+    return 7;
+  }
 
-    cpu.setHalfCarryFlag8BitAdd(0, 0);
-    cpu.setSubtractFlag(0);
+  exec(cpu: CPU, memory: Memory): number {
+    super.exec(cpu, memory);
+    // The prefixed RRC sets the zeroflag but this shorthand instruction does not.
     cpu.setZeroFlag(0);
-
     return 4;
   }
 
@@ -891,54 +936,6 @@ export class OpRLC extends Instruction {
   }
 }
 
-export class OpRRC extends Instruction {
-  size() {
-    return 2;
-  }
-
-  private getReg(memory: Memory) {
-    return this.getNext8Bits(memory) & 0b111;
-  }
-
-  private rotate(cpu: CPU, value: number): number {
-    const carry = value & 1;
-    value = ((value >> 1) | (carry << 7)) & 0xff;
-
-    cpu.clearAllFlags();
-
-    if (carry) {
-      cpu.setCarryFlagDirect(1);
-    }
-
-    if (value === 0) {
-      cpu.setZeroFlag(1);
-    }
-
-    return value;
-  }
-
-  exec(cpu: CPU, memory: Memory): number {
-    const register = this.getReg(memory);
-    if (register === 6) {
-      cpu.setHL(this.rotate(cpu, cpu.getHL()));
-      return 16;
-    } else {
-      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
-      return 8;
-    }
-  }
-
-  disassemble(memory: Memory) {
-    const reg = this.getReg(memory);
-    let regString = "(HL)";
-    if (reg !== 6) {
-      regString = this.getStringForR8(reg);
-    }
-
-    return `RRC ${regString}`;
-  }
-}
-
 export class OpRR extends Instruction {
   size() {
     return 2;
@@ -999,6 +996,10 @@ export class OpRRA extends OpRR {
 
   exec(cpu: CPU, memory: Memory): number {
     super.exec(cpu, memory);
+
+    // Prefixed RRA instructions set the zero flag but these shorthand ones do not.
+    cpu.setZeroFlag(0);
+
     return 4;
   }
 
