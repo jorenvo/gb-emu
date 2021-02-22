@@ -185,21 +185,14 @@ export class CPU {
   }
 
   rotateLeft(n: number): number {
-    const carry = n & 1;
-    n = ((n >> 1) | (carry << 7)) & 0xff;
+    const msb = n >> 7;
+    n = (n << 1) & 0xff;
+    n |= this.getCarryFlag();
 
+    this.setCarryFlagDirect(msb);
     this.setHalfCarryFlagDirect(0);
     this.setSubtractFlag(0);
     this.setZeroFlag(0);
-    this.setCarryFlagDirect(0);
-
-    if (carry) {
-      this.setCarryFlagDirect(1);
-    }
-
-    if (n === 0) {
-      this.setZeroFlag(1);
-    }
 
     return n;
   }
