@@ -881,33 +881,13 @@ export class OpRRC extends Instruction {
     return this.getNext8Bits(memory) & 0b111;
   }
 
-  private rotate(cpu: CPU, value: number): number {
-    const carry = value & 1;
-    value = ((value >> 1) | (carry << 7)) & 0xff;
-
-    cpu.setHalfCarryFlagDirect(0);
-    cpu.setSubtractFlag(0);
-    cpu.setZeroFlag(0);
-    cpu.setCarryFlagDirect(0);
-
-    if (carry) {
-      cpu.setCarryFlagDirect(1);
-    }
-
-    if (value === 0) {
-      cpu.setZeroFlag(1);
-    }
-
-    return value;
-  }
-
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     if (register === 6) {
-      cpu.setHL(this.rotate(cpu, cpu.getHL()));
+      cpu.setHL(cpu.rotateLeft(cpu.getHL()));
       return 16;
     } else {
-      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
+      cpu.setReg(register, cpu.rotateLeft(cpu.getReg(register)));
       return 8;
     }
   }
