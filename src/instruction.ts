@@ -2039,18 +2039,22 @@ export class OpAndR8 extends Instruction {
   }
 
   protected getToAnd(cpu: CPU, memory: Memory) {
-    return this.isHL(memory) ? cpu.getHL() : cpu.getReg(this.getReg(memory));
+    if (this.isHL(memory)) {
+      return memory.getByte(cpu.getHL());
+    } else {
+      return cpu.getReg(this.getReg(memory));
+    }
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    const isHL = this.isHL(memory);
     const toAnd = this.getToAnd(cpu, memory);
     cpu.setReg(CPU.A, cpu.getReg(CPU.A) & toAnd);
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);
     cpu.setHalfCarryFlagDirect(1);
     cpu.setCarryFlagDirect(0);
-    if (isHL) {
+
+    if (this.isHL(memory)) {
       return 8;
     } else {
       return 4;
