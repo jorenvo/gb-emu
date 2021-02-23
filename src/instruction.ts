@@ -2309,18 +2309,49 @@ abstract class OpShift extends Instruction {
   }
 }
 
-export class OpSLA extends OpShift {
+export class OpSLA extends Instruction {
+  size() {
+    return 2;
+  }
+
+  getRegNr(memory: Memory): number {
+    const opcode = this.getNext8Bits(memory);
+    return opcode & 0b111;
+  }
+
   isHL(memory: Memory): boolean {
     const opcode = this.getNext8Bits(memory);
     return opcode === 0x26;
   }
 
-  shift(val: number): [number, number] {
-    let carry = val >> 7;
-    let sign = val & 0b1000_0000;
-    let shifted = (val & 0b0011_1111) << 1;
-    shifted |= sign;
-    return [carry, shifted];
+  shift(cpu: CPU, value: number): number {
+    const carry = value >> 7;
+    const shifted = (value << 1) & 0xff;
+
+    cpu.clearAllFlags();
+
+    if (carry) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if ((value & 0x7f) === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return shifted;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    if (this.isHL(memory)) {
+      const shifted = this.shift(cpu, cpu.getHL());
+      cpu.setHL(shifted);
+      return 16;
+    } else {
+      const regNr = this.getRegNr(memory);
+      const shifted = this.shift(cpu, cpu.getReg(regNr));
+      cpu.setReg(regNr, shifted);
+      return 8;
+    }
   }
 
   disassemble(memory: Memory) {
