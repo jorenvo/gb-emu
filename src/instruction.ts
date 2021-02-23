@@ -2285,6 +2285,7 @@ export class OpRST extends Instruction {
   }
 }
 
+// TODO: everything using this is probably broken
 abstract class OpShift extends Instruction {
   size() {
     return 2;
