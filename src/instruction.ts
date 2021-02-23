@@ -2183,20 +2183,31 @@ export class OpSwap extends Instruction {
     return 2;
   }
 
+  private isHL(memory: Memory) {
+    const opcode = this.getNext8Bits(memory);
+    return opcode === 0x36;
+  }
+
+  private getRegNr(memory: Memory) {
+    const opcode = this.getNext8Bits(memory);
+    return opcode & 0xf;
+  }
+
   private swap(byte: number) {
-    return (byte >> 4) | ((byte & 0xf) << 4);
+    return (byte >> 4) | ((byte << 4) & 0xff);
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    const opcode = this.getNext8Bits(memory);
-    if (opcode === 0x36) {
-      cpu.setHL(this.swap(cpu.getHL()));
+    cpu.clearAllFlags();
+
+    if (this.isHL(memory)) {
       cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
+      cpu.setHL(this.swap(cpu.getHL()));
       return 16;
     } else {
-      const reg = opcode & 0xf;
-      cpu.setReg(reg, this.swap(cpu.getReg(reg)));
-      cpu.setZeroFlag(cpu.getReg(reg) === 0 ? 1 : 0);
+      const regNr = this.getRegNr(memory);
+      cpu.setZeroFlag(cpu.getReg(regNr) === 0 ? 1 : 0);
+      cpu.setReg(regNr, this.swap(cpu.getReg(regNr)));
       return 8;
     }
   }
