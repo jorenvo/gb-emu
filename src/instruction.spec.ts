@@ -191,42 +191,6 @@ describe("rotations", function() {
     assert.strictEqual(cpu.getReg(0x7), 0b0000_1011);
     assert.strictEqual(cpu.getCarryFlag(), 0);
   });
-
-  it("should correctly rotate left", function() {
-    const cpu = createCPU();
-    const memory = createMemory(new Uint8Array([0xcb, 0x00]));
-    const opRLC = new instruction.OpRLC(0x00);
-    assert.strictEqual(cpu.getCarryFlag(), 0);
-    assert.strictEqual(cpu.getZeroFlag(), 0);
-
-    // 0b1000_0000 rotated is
-    // 0b0000_0001
-    cpu.setReg(0x00, 0b1000_0000);
-    opRLC.exec(cpu, memory);
-    assert.strictEqual(cpu.getReg(0x00), 0b0000_0001);
-    assert.strictEqual(cpu.getCarryFlag(), 1);
-    assert.strictEqual(cpu.getZeroFlag(), 1);
-    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
-    assert.strictEqual(cpu.getSubtractFlag(), 0);
-
-    cpu.setReg(0x00, 0b0000_0000);
-    opRLC.exec(cpu, memory);
-    assert.strictEqual(cpu.getReg(0x00), 0b0000_0000);
-    assert.strictEqual(cpu.getCarryFlag(), 0);
-    assert.strictEqual(cpu.getZeroFlag(), 1);
-    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
-    assert.strictEqual(cpu.getSubtractFlag(), 0);
-
-    // 0b0111_1111 rotated is
-    // 0b1111_1110
-    cpu.setReg(0x00, 0b0111_1111);
-    opRLC.exec(cpu, memory);
-    assert.strictEqual(cpu.getReg(0x00), 0b1111_1110);
-    assert.strictEqual(cpu.getCarryFlag(), 0);
-    assert.strictEqual(cpu.getZeroFlag(), 0);
-    assert.strictEqual(cpu.getHalfCarryFlag(), 0);
-    assert.strictEqual(cpu.getSubtractFlag(), 0);
-  });
 });
 
 describe("shifts", function() {
