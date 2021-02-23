@@ -872,7 +872,9 @@ export class OpRL extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     if (register === 6) {
-      cpu.setHL(this.rotate(cpu, cpu.getHL()));
+      const addr = cpu.getHL();
+      const val = memory.getByte(addr);
+      memory.setByte(addr, this.rotate(cpu, val));
       return 16;
     } else {
       cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
