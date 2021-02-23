@@ -909,8 +909,9 @@ export class OpRLC extends Instruction {
     let tStates;
     let val;
     if (regNr === 6) {
-      val = memory.getByte(cpu.getHL());
-      cpu.setHL(this.rotate(cpu, val));
+      const addr = cpu.getHL();
+      val = memory.getByte(addr);
+      memory.setByte(addr, this.rotate(cpu, val));
       tStates = 16;
     } else {
       val = cpu.getReg(regNr);
