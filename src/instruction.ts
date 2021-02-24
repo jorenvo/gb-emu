@@ -1615,16 +1615,19 @@ export class OpBit extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     const bit = this.getBit(memory);
+    let res, tStates;
     if (register === 0x6) {
-      // (HL)
-      throw new Error("Unimplemented BIT instruction");
+      const val = memory.getByte(cpu.getHL());
+      res = utils.getBits(val, bit, bit);
+      tStates = 12;
     } else {
-      const res = utils.getBits(cpu.getReg(register), bit, bit);
-      cpu.setSubtractFlag(0);
-      cpu.setHalfCarryFlagDirect(1);
-      cpu.setZeroFlag(res === 0 ? 1 : 0);
-      return 8;
+      res = utils.getBits(cpu.getReg(register), bit, bit);
+      tStates = 8;
     }
+    cpu.setSubtractFlag(0);
+    cpu.setHalfCarryFlagDirect(1);
+    cpu.setZeroFlag(res === 0 ? 1 : 0);
+    return tStates;
   }
 
   disassemble(memory: Memory) {
