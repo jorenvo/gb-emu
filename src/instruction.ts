@@ -1615,15 +1615,17 @@ export class OpBit extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const register = this.getReg(memory);
     const bit = this.getBit(memory);
-    let res, tStates;
+    let val, tStates;
+
     if (register === 0x6) {
-      const val = memory.getByte(cpu.getHL());
-      res = utils.getBits(val, bit, bit);
+      val = memory.getByte(cpu.getHL());
       tStates = 12;
     } else {
-      res = utils.getBits(cpu.getReg(register), bit, bit);
+      val = cpu.getReg(register);
       tStates = 8;
     }
+
+    const res = utils.getBits(val, bit, bit);
     cpu.setSubtractFlag(0);
     cpu.setHalfCarryFlagDirect(1);
     cpu.setZeroFlag(res === 0 ? 1 : 0);
