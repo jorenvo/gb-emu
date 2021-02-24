@@ -2371,8 +2371,9 @@ export class OpSLA extends Instruction {
 
   exec(cpu: CPU, memory: Memory): number {
     if (this.isHL(memory)) {
-      const shifted = this.shift(cpu, cpu.getHL());
-      cpu.setHL(shifted);
+      const addr = cpu.getHL();
+      const val = memory.getByte(addr);
+      memory.setByte(addr, this.shift(cpu, val));
       return 16;
     } else {
       const regNr = this.getRegNr(memory);
