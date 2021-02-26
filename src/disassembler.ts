@@ -294,6 +294,7 @@ export class Disassembler {
     bytes: Uint8Array
   ): instruction.Instruction {
     const byte = bytes[address];
+    if (byte === undefined) debugger;
     switch (byte) {
       case 0x00:
         return new instruction.OpNop(address);

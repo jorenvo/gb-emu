@@ -254,9 +254,12 @@ export class CPU {
     this.handleInterrupts(memory);
 
     let currentInstruction = memory.getInstruction(this.PC);
+
     if (currentInstruction === undefined) {
       // Probably RAM, attempt to JIT
-      currentInstruction = Disassembler.buildInstruction(this.PC, memory.ram);
+      const bankOffset = memory.getByteOffsetBasedOnAddr(this.PC);
+      const bank = memory.getBankBasedOnAddr(this.PC);
+      currentInstruction = Disassembler.buildInstruction(bankOffset, bank);
     }
 
     this.tickCounter++;

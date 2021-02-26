@@ -359,7 +359,7 @@ export class ControllerReal implements Controller {
     bank?: number
   ): MemoryView | undefined {
     if (bank === undefined) {
-      bank = this.emu!.memory.getBankBasedOnAddress(address);
+      bank = this.emu!.memory.getBankNrBasedOnAddress(address);
     }
 
     return this.memoryViews!.get(this.createMemoryViewKey(bank, address));

@@ -192,7 +192,7 @@ export class Memory {
     }
   }
 
-  getBankBasedOnAddress(address: number): number {
+  getBankNrBasedOnAddress(address: number): number {
     if (this.bank === -1) {
       if (address < 0x100) {
         return -1;
@@ -201,20 +201,44 @@ export class Memory {
       }
     } else if (address < Memory.BANKSIZE) {
       return 0;
-    } else if (
-      address >= Memory.WORKRAMSTART &&
-      address < Memory.WORKRAMSTART + Memory.WORKRAMSIZE
-    ) {
+    } else if (address >= Memory.RAMSTART) {
       return -2;
     } else {
       return this.bank;
     }
   }
 
+  getBankBasedOnNr(bankNr: number): Uint8Array {
+    switch (bankNr) {
+      case -2:
+        return this.ram;
+      case -1:
+        return this.bootROM;
+      default:
+        return this.romBanks[bankNr];
+    }
+  }
+
+  getBankBasedOnAddr(addr: number): Uint8Array {
+    return this.getBankBasedOnNr(this.getBankNrBasedOnAddress(addr));
+  }
+
+  // This takes into account the offset to read the actual byte in memory, e.g. 0x4000 is this.romBank[0][0].
+  getByteOffsetBasedOnAddr(addr: number): number {
+    switch (this.getBankNrBasedOnAddress(addr)) {
+      case -2: // the ramBank has padding in the beginning at the moment
+      case 0:
+        return addr;
+      default:
+        // romBanks > 0
+        return addr - Memory.BANKSIZE;
+    }
+  }
+
   // specify bank to force a bank instead of taking the current one
   getInstruction(address: number, bank?: number): Instruction | undefined {
     if (bank === undefined) {
-      bank = this.getBankBasedOnAddress(address);
+      bank = this.getBankNrBasedOnAddress(address);
     }
 
     const addressToInstruction = this.bankToAddressToInstruction.get(bank);
@@ -253,7 +277,7 @@ export class Memory {
       return this.ram[address];
     }
 
-    const bank = this.getBankBasedOnAddress(address);
+    const bank = this.getBankNrBasedOnAddress(address);
     if (bank >= 1) {
       address -= Memory.BANKSIZE;
     }
