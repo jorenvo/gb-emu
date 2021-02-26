@@ -228,7 +228,31 @@ export class CPU {
     this.IME = false;
   }
 
+  private pushPC(memory: Memory) {
+    memory.setByte(--this.SP, this.PC >> 8);
+    memory.setByte(--this.SP, this.PC & 0xff);
+  }
+
+  private handleInterrupts(memory: Memory) {
+    // TODO: priorities in case multiple interrupts are requested
+    if (this.IME) {
+      if (
+        memory.interruptVBlankRequested() &&
+        memory.interruptVBlankEnabled()
+      ) {
+        console.log("Executing VBlank interrupt");
+        this.IME = false;
+        memory.interruptVBlankClear();
+
+        this.pushPC(memory);
+        this.PC = 0x40;
+      }
+    }
+  }
+
   tick(memory: Memory) {
+    this.handleInterrupts(memory);
+
     let currentInstruction = memory.getInstruction(this.PC);
     if (currentInstruction === undefined) {
       // Probably RAM, attempt to JIT

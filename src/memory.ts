@@ -235,6 +235,19 @@ export class Memory {
     this.setByte(Memory.IF, interruptFlag | 1);
   }
 
+  interruptVBlankClear() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag & 0b1111_1110);
+  }
+
+  interruptVBlankRequested() {
+    return this.getByte(Memory.IF) & 1;
+  }
+
+  interruptVBlankEnabled() {
+    return this.getByte(Memory.IE) & 1;
+  }
+
   getByte(address: number): number {
     if (address >= Memory.RAMSTART) {
       return this.ram[address];
