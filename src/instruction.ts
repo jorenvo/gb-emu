@@ -2290,9 +2290,9 @@ export class OpRST extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    // TODO: this could also be cpu.PC + this.size()?
-    memory.setByte(--cpu.SP, cpu.PC >> 8);
-    memory.setByte(--cpu.SP, cpu.PC & 0xff);
+    const nextPC = cpu.PC + this.size();
+    memory.setByte(--cpu.SP, nextPC >> 8);
+    memory.setByte(--cpu.SP, nextPC & 0xff);
     cpu.PC = this.getAddr(memory);
     return 16;
   }
