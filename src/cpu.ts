@@ -16,7 +16,7 @@ export class CPU {
 
   // Interrupt Master Enable
   private IME: boolean;
-  private instructionsUntilIMEEnable: number | undefined;
+  private enableIMETick: number;
 
   private _SP: number;
   private _PC: number;
@@ -30,6 +30,7 @@ export class CPU {
   constructor() {
     this._SP = 0xfffe;
     this.IME = false;
+    this.enableIMETick = -1;
     this._PC = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
@@ -219,7 +220,7 @@ export class CPU {
   }
 
   enableIME() {
-    this.instructionsUntilIMEEnable = 1;
+    this.enableIMETick = this.tickCounter + 1;
   }
 
   disableIME() {
@@ -236,13 +237,8 @@ export class CPU {
     this.tickCounter++;
     const cycles = currentInstruction.execAndIncrementPC(this, memory);
 
-    if (this.instructionsUntilIMEEnable !== undefined) {
-      if (this.instructionsUntilIMEEnable === 0) {
-        this.IME = true;
-        this.instructionsUntilIMEEnable = undefined;
-      } else {
-        this.instructionsUntilIMEEnable--;
-      }
+    if (this.enableIMETick === this.tickCounter) {
+      this.IME = true;
     }
 
     return cycles;
