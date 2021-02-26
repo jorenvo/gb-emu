@@ -2322,7 +2322,7 @@ abstract class OpShift extends Instruction {
     if (this.isHL(memory)) {
       const [carry, val] = this.shift(memory.getByte(cpu.getHL()));
       cpu.setCarryFlagDirect(carry);
-      cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
+      cpu.setZeroFlag(val === 0 ? 1 : 0);
       memory.setByte(cpu.getHL(), val);
       return 16;
     } else {
