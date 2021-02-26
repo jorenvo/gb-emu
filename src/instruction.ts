@@ -2582,7 +2582,9 @@ abstract class OpBitManip extends Instruction {
   exec(cpu: CPU, memory: Memory): number {
     const bit = this.getBit(memory);
     if (this.isHL(memory)) {
-      cpu.setHL(this.manipulateBit(bit, cpu.getHL()));
+      const addr = cpu.getHL();
+      const val = memory.getByte(addr);
+      memory.setByte(addr, this.manipulateBit(bit, val));
       return 16;
     } else {
       const reg = this.getRegNr(memory);
