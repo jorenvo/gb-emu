@@ -2217,8 +2217,10 @@ export class OpSwap extends Instruction {
     cpu.clearAllFlags();
 
     if (this.isHL(memory)) {
-      cpu.setZeroFlag(cpu.getHL() === 0 ? 1 : 0);
-      cpu.setHL(this.swap(cpu.getHL()));
+      const addr = cpu.getHL();
+      const val = memory.getByte(addr);
+      cpu.setZeroFlag(val === 0 ? 1 : 0);
+      memory.setByte(addr, this.swap(val));
       return 16;
     } else {
       const regNr = this.getRegNr(memory);
