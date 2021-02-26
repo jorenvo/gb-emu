@@ -2250,7 +2250,7 @@ export class OpDI extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    cpu.IME = false;
+    cpu.disableIME();
     return 4;
   }
 
@@ -2265,7 +2265,7 @@ export class OpEI extends Instruction {
   }
 
   exec(cpu: CPU, _memory: Memory): number {
-    cpu.IME = false;
+    cpu.enableIME();
     return 4;
   }
 
