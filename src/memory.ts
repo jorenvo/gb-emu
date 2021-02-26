@@ -18,6 +18,8 @@ export class Memory {
   static LYC = 0xff45;
   static WY = 0xff4a;
   static WX = 0xff4b;
+  static IF = 0xff0f;
+  static IE = 0xffff;
 
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
@@ -226,6 +228,11 @@ export class Memory {
   setBank(bank: number) {
     this.controller.changedBank();
     this.bank = bank;
+  }
+
+  interruptVBlank() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag | 1);
   }
 
   getByte(address: number): number {

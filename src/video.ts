@@ -46,7 +46,12 @@ export class Video {
       if (ly > 153) {
         this.memory.setLY(0);
       } else {
-        this.memory.setLY(ly + 1);
+        const newLY = ly + 1;
+        this.memory.setLY(newLY);
+
+        if (newLY === 144) {
+          this.memory.interruptVBlank();
+        }
       }
 
       this.nextVLineStartMs = timeMs + this.vLineRenderMs;
