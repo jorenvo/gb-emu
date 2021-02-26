@@ -224,6 +224,7 @@ export class CPU {
   }
 
   disableIME() {
+    this.enableIMETick = -1;
     this.IME = false;
   }
 
