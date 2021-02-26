@@ -545,8 +545,9 @@ export class Disassembler {
       case 0xc8:
         return new instruction.OpRetZero(address);
       case 0xc9:
-      case 0xd9:
         return new instruction.OpRet(address);
+      case 0xd9:
+        return new instruction.OpReti(address);
       case 0xca:
         return new instruction.OpJC(address);
       case 0xcb:

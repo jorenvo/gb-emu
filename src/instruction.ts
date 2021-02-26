@@ -1455,6 +1455,18 @@ export class OpRet extends Instruction {
   }
 }
 
+export class OpReti extends OpRet {
+  exec(cpu: CPU, memory: Memory): number {
+    const cycles = super.exec(cpu, memory);
+    cpu.enableIME();
+    return cycles;
+  }
+
+  disassemble(_memory: Memory) {
+    return "RETI";
+  }
+}
+
 export class OpRetZero extends OpRet {
   exec(cpu: CPU, memory: Memory): number {
     if (cpu.getZeroFlag()) {
