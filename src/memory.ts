@@ -25,6 +25,7 @@ export class Memory {
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
   static WORKRAMSTART = 0xc000;
   static WORKRAMSIZE = 0x1fff;
+  static OAMSTART = 0xfe00;
 
   controller: Controller;
   bank: number; // -1 means bootROM
@@ -306,13 +307,19 @@ export class Memory {
       value >= 0 && value <= 255,
       `${value} written to ${utils.hexString(address, 16)} is out of range`
     );
-    switch (address) {
-      case 0xff46:
-        const sourceStart = value * 0x100;
-        utils.log(
-          value,
-          `starting DMA transfer of ${sourceStart}-${sourceStart + 0x9f}`
-        );
+
+    // DMA transfer
+    if (address === 0xff46) {
+      const sourceStart = value * 0x100;
+      // utils.log(
+      //   value,
+      //   `starting DMA transfer of ${sourceStart}-${sourceStart + 0x9f}`
+      // );
+
+      for (let i = 0; i < 0xa0; i++) {
+        this.setByte(Memory.OAMSTART + i, this.getByte(sourceStart + i));
+      }
+      return;
     }
 
     if (value === undefined) debugger;
