@@ -255,6 +255,15 @@ export class CPU {
 
         this.pushPC(memory);
         this.PC = 0x48;
+      } else if (
+        memory.interruptOAMRequested() &&
+        memory.interruptOAMEnabled()
+      ) {
+        console.log("Executing OAM interrupt");
+        memory.interruptOAMClear();
+
+        this.pushPC(memory);
+        this.PC = 0x48;
       }
     }
   }

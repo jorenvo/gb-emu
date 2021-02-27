@@ -30,6 +30,8 @@ export class Memory {
 
   static INT_COINCIDENCE_MASK = 0b100;
   static INT_COINCIDENCE_ENABLED_MASK = 0b0100_0000;
+  static INT_OAM_MASK = 0b0000_0011;
+  static INT_OAM_ENABLED_MASK = 0b0010_0000;
 
   controller: Controller;
   bank: number; // -1 means bootROM
@@ -400,11 +402,8 @@ export class Memory {
   }
 
   interruptCoincidenceClear() {
-    const interruptFlag = this.getByte(Memory.STAT);
-    this.setByte(
-      Memory.STAT,
-      interruptFlag & (Memory.INT_COINCIDENCE_MASK ^ 0xff)
-    );
+    const stat = this.getByte(Memory.STAT);
+    this.setByte(Memory.STAT, stat & (Memory.INT_COINCIDENCE_MASK ^ 0xff));
   }
 
   interruptCoincidenceRequested() {
@@ -415,5 +414,24 @@ export class Memory {
     return Boolean(
       this.getByte(Memory.STAT) & Memory.INT_COINCIDENCE_ENABLED_MASK
     );
+  }
+
+  // OAM interrupt
+  interruptOAM() {
+    let stat = this.getByte(Memory.STAT) & (Memory.INT_OAM_MASK ^ 0xff);
+    this.setByte(Memory.STAT, stat | 2);
+  }
+
+  interruptOAMClear() {
+    const stat = this.getByte(Memory.STAT);
+    this.setByte(Memory.STAT, stat & (Memory.INT_OAM_MASK ^ 0xff));
+  }
+
+  interruptOAMRequested() {
+    return Boolean((this.getByte(Memory.STAT) & Memory.INT_OAM_MASK) === 2);
+  }
+
+  interruptOAMEnabled() {
+    return Boolean(this.getByte(Memory.STAT) & Memory.INT_OAM_ENABLED_MASK);
   }
 }
