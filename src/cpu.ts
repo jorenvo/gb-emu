@@ -246,6 +246,15 @@ export class CPU {
 
         this.pushPC(memory);
         this.PC = 0x40;
+      } else if (
+        memory.interruptCoincidenceRequested() &&
+        memory.interruptCoincidenceEnabled()
+      ) {
+        console.log("Executing coincidence interrupt");
+        memory.interruptCoincidenceClear();
+
+        this.pushPC(memory);
+        this.PC = 0x48;
       }
     }
   }

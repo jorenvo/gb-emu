@@ -43,17 +43,24 @@ export class Video {
   handleLY(timeMs: number) {
     if (timeMs >= this.nextVLineStartMs) {
       let ly = this.memory.getLY();
+      let newLY;
       if (ly > 153) {
-        this.memory.setLY(0);
+        newLY = 0;
       } else {
-        const newLY = ly + 1;
-        this.memory.setLY(newLY);
-
-        if (newLY === 144) {
-          this.memory.interruptVBlank();
-        }
+        newLY = ly + 1;
       }
 
+      if (newLY === this.memory.getLYC()) {
+        this.memory.interruptCoincidenceRequested();
+      } else {
+        this.memory.interruptCoincidenceClear();
+      }
+
+      if (newLY === 144) {
+        this.memory.interruptVBlank();
+      }
+
+      this.memory.setLY(newLY);
       this.nextVLineStartMs = timeMs + this.vLineRenderMs;
     }
   }

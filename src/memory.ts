@@ -12,6 +12,7 @@ import { Controller } from "./controller.js";
 export class Memory {
   // Memory register addresses
   static LCDC = 0xff40;
+  static STAT = 0xff41;
   static SCY = 0xff42;
   static SCX = 0xff43;
   static LY = 0xff44;
@@ -26,6 +27,9 @@ export class Memory {
   static WORKRAMSTART = 0xc000;
   static WORKRAMSIZE = 0x1fff;
   static OAMSTART = 0xfe00;
+
+  static INT_COINCIDENCE_MASK = 0b100;
+  static INT_COINCIDENCE_ENABLED_MASK = 0b0100_0000;
 
   controller: Controller;
   bank: number; // -1 means bootROM
@@ -255,24 +259,6 @@ export class Memory {
     this.bank = bank;
   }
 
-  interruptVBlank() {
-    const interruptFlag = this.getByte(Memory.IF);
-    this.setByte(Memory.IF, interruptFlag | 1);
-  }
-
-  interruptVBlankClear() {
-    const interruptFlag = this.getByte(Memory.IF);
-    this.setByte(Memory.IF, interruptFlag & 0b1111_1110);
-  }
-
-  interruptVBlankRequested() {
-    return this.getByte(Memory.IF) & 1;
-  }
-
-  interruptVBlankEnabled() {
-    return this.getByte(Memory.IE) & 1;
-  }
-
   getByte(address: number): number {
     if (address >= Memory.RAMSTART) {
       return this.ram[address];
@@ -386,5 +372,48 @@ export class Memory {
 
   getLCDC() {
     return this.getByte(Memory.LCDC);
+  }
+
+  // VBlank interrupt
+  interruptVBlank() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag | 1);
+  }
+
+  interruptVBlankClear() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag & 0b1111_1110);
+  }
+
+  interruptVBlankRequested() {
+    return Boolean(this.getByte(Memory.IF) & 1);
+  }
+
+  interruptVBlankEnabled() {
+    return Boolean(this.getByte(Memory.IE) & 1);
+  }
+
+  // LYC=LY coincidence interrupt
+  interruptCoincidence() {
+    const stat = this.getByte(Memory.STAT);
+    this.setByte(Memory.STAT, stat | Memory.INT_COINCIDENCE_MASK);
+  }
+
+  interruptCoincidenceClear() {
+    const interruptFlag = this.getByte(Memory.STAT);
+    this.setByte(
+      Memory.STAT,
+      interruptFlag & (Memory.INT_COINCIDENCE_MASK ^ 0xff)
+    );
+  }
+
+  interruptCoincidenceRequested() {
+    return Boolean(this.getByte(Memory.STAT) & Memory.INT_COINCIDENCE_MASK);
+  }
+
+  interruptCoincidenceEnabled() {
+    return Boolean(
+      this.getByte(Memory.STAT) & Memory.INT_COINCIDENCE_ENABLED_MASK
+    );
   }
 }
