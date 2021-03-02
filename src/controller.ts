@@ -485,32 +485,38 @@ export class ControllerReal implements Controller {
       return;
     }
 
-    while (
-      this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS
-    ) {
-      const oldInstruction = this.recentInstructions.shift()!;
+    // This test avoids short loops from taking over the entire recentInstructions list.
+    if (!this.recentInstructions.includes(instruction)) {
+      while (
+        this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS
+      ) {
+        const oldInstruction = this.recentInstructions.shift()!;
 
-      const currentCounter = this.recentInstructionsCounter.get(oldInstruction);
-      if (currentCounter === undefined) {
-        throw new Error("Old instruction not in list!");
-      }
-
-      const timesInList = currentCounter - 1;
-      if (timesInList < 0) {
-        throw new Error("Counter < 0");
-      } else if (timesInList === 0) {
-        oldInstruction.recentlyExecuted = false;
-        const view = this.instructionToMemoryView!.get(oldInstruction);
-        if (!view) {
-          throw new Error("No view");
+        const currentCounter = this.recentInstructionsCounter.get(
+          oldInstruction
+        );
+        if (currentCounter === undefined) {
+          throw new Error("Old instruction not in list!");
         }
-        this.toUpdate.add(view);
+
+        const timesInList = currentCounter - 1;
+        if (timesInList < 0) {
+          throw new Error("Counter < 0");
+        } else if (timesInList === 0) {
+          oldInstruction.recentlyExecuted = false;
+          const view = this.instructionToMemoryView!.get(oldInstruction);
+          if (!view) {
+            throw new Error("No view");
+          }
+          this.toUpdate.add(view);
+        }
+
+        this.recentInstructionsCounter.set(oldInstruction, timesInList);
       }
 
-      this.recentInstructionsCounter.set(oldInstruction, timesInList);
+      this.recentInstructions.push(instruction);
     }
 
-    this.recentInstructions.push(instruction);
     this.incrementRecentInstructionCounter(instruction);
     instruction.recentlyExecuted = true;
 
