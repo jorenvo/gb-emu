@@ -22,7 +22,9 @@ import {
   StepNextButton,
   CopyButton,
   BreakpointSetter,
+  PCFileButton,
 } from "./views.js";
+import { FileLogger } from "./logger.js";
 
 declare global {
   interface Window {
@@ -50,6 +52,7 @@ export abstract class Controller {
   public abstract movedPC(newAddr: number): void;
   public abstract changedBank(): void;
   public abstract getRecentInstructions(): Instruction[];
+  public abstract downloadPCLog(): void;
 }
 
 export class ControllerMock {
@@ -76,6 +79,7 @@ export class ControllerMock {
   public getRecentInstructions(): Instruction[] {
     return [];
   }
+  public downloadPCLog(): void {}
 }
 
 export class ControllerReal implements Controller {
@@ -114,6 +118,7 @@ export class ControllerReal implements Controller {
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
   private copyButton: CopyButton;
+  private pcDownloadButton: PCFileButton;
 
   // input
   private breakpointSetter: BreakpointSetter;
@@ -124,6 +129,8 @@ export class ControllerReal implements Controller {
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
+
+  private pcLogger: FileLogger;
 
   constructor() {
     this.loader = new Loader();
@@ -136,7 +143,10 @@ export class ControllerReal implements Controller {
     this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
     this.copyButton = new CopyButton("copy", this);
+    this.pcDownloadButton = new PCFileButton("downloadPCFile", this);
     this.breakpointSetter = new BreakpointSetter("breakpoint", this);
+
+    this.pcLogger = new FileLogger();
   }
 
   private boot(bytes: Uint8Array) {
@@ -471,6 +481,9 @@ export class ControllerReal implements Controller {
   }
 
   public movedPC(newAddr: number) {
+    if (this.emu!.memory.bank !== -1) {
+      this.pcLogger.log(newAddr); // TODO only if not in interrupt
+    }
     this.toUpdate.add(this.PCView!);
 
     // TODO: Emulator should do this
@@ -533,5 +546,9 @@ export class ControllerReal implements Controller {
 
   public getRecentInstructions() {
     return this.recentInstructions;
+  }
+
+  public downloadPCLog() {
+    this.pcLogger.download();
   }
 }

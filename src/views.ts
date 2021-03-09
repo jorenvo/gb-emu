@@ -377,7 +377,7 @@ export class MemoryView extends View {
     if (
       this.cpu.PC === this.address &&
       ((this.bankView.bank === 0 && this.memory.bank !== -1) ||
-        this.bankView.bank === -2 || // RAMBank
+      this.bankView.bank === -2 || // RAMBank
         this.bankView.bank === this.memory.bank)
     ) {
       this.centerInBankView(false);
@@ -546,5 +546,11 @@ export class CopyButton extends Button {
   click(_e: MouseEvent): void {
     this.selectElementText(this.controller.getActiveBankView()!.element);
     document.execCommand("copy");
+  }
+}
+
+export class PCFileButton extends Button {
+  click(_e: MouseEvent): void {
+    this.controller.downloadPCLog();
   }
 }
