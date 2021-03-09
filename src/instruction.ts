@@ -1188,16 +1188,16 @@ export class OpJC extends Instruction {
     let condition = false;
     switch (this.getByte(memory)) {
       case 0xc2:
-        condition = cpu.getZeroFlag() === 0;
-        break;
-      case 0xd2:
-        condition = cpu.getCarryFlag() === 0;
-        break;
-      case 0xca:
         condition = cpu.getZeroFlag() !== 0;
         break;
-      case 0xda:
+      case 0xd2:
         condition = cpu.getCarryFlag() !== 0;
+        break;
+      case 0xca:
+        condition = cpu.getZeroFlag() === 0;
+        break;
+      case 0xda:
+        condition = cpu.getCarryFlag() === 0;
         break;
     }
 
