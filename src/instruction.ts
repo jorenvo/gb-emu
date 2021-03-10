@@ -1133,10 +1133,10 @@ export class OpJRC extends Instruction {
         condition = cpu.getCarryFlag() === 0;
         break;
       case 0x28:
-        condition = cpu.getZeroFlag() !== 0;
+        condition = cpu.getZeroFlag() === 1;
         break;
       case 0x38:
-        condition = cpu.getCarryFlag() !== 0;
+        condition = cpu.getCarryFlag() === 1;
         break;
       default:
         utils.log(this.getByte(memory), "JRC condition not implement");
@@ -1194,10 +1194,10 @@ export class OpJC extends Instruction {
         condition = cpu.getCarryFlag() === 0;
         break;
       case 0xca:
-        condition = cpu.getZeroFlag() !== 0;
+        condition = cpu.getZeroFlag() === 1;
         break;
       case 0xda:
-        condition = cpu.getCarryFlag() !== 0;
+        condition = cpu.getCarryFlag() === 1;
         break;
     }
 
