@@ -11,6 +11,7 @@ import { Controller } from "./controller.js";
  */
 export class Memory {
   // Memory register addresses
+  static IO = 0xff00;
   static LCDC = 0xff40;
   static STAT = 0xff41;
   static SCY = 0xff42;
@@ -262,6 +263,11 @@ export class Memory {
   }
 
   getByte(address: number): number {
+    // TODO always returning no buttons are pressed, this also pretends no buttons were selected which is probably bad
+    if (address === Memory.IO) {
+      return 0b0011_1111;
+    }
+
     if (address >= Memory.RAMSTART) {
       return this.ram[address];
     }
@@ -291,6 +297,11 @@ export class Memory {
   }
 
   setByte(address: number, value: number) {
+    // TODO ignoring writes to IO registers for now
+    if (address === Memory.IO) {
+      return;
+    }
+
     utils.assert(
       value >= 0 && value <= 255,
       `${value} written to ${utils.hexString(address, 16)} is out of range`
