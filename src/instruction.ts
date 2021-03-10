@@ -1665,7 +1665,7 @@ export abstract class OpCP extends Instruction {
     cpu.setSubtractFlag(1);
     cpu.setHalfCarryFlagSubtract(cpu.getReg(CPU.A), d8);
     cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), d8);
-    cpu.setZeroFlag(cpu.getReg(CPU.A) - d8 === 0 ? 1 : 0);
+    cpu.setZeroFlag(cpu.getReg(CPU.A) === d8 ? 1 : 0);
     return this.tStates();
   }
 }
