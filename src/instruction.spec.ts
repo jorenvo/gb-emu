@@ -275,3 +275,45 @@ describe("bit extractions", function() {
     assert.strictEqual(cpu.getZeroFlag(), 1);
   });
 });
+
+describe("comparison", function() {
+  it("should correctly check the zero flag", function() {
+    // prettier-ignore
+    const memory = createMemory(new Uint8Array([
+      0xe6, 0x0f,       // AND $0x0f
+      0xfe, 0x0f,       // CP $0x0f
+      0xca, 0xad, 0xde, // JP Z, 0xdead
+    ]));
+
+    const and = new instruction.OpAndD8(0x00);
+    const cp = new instruction.OpCPD8(0x02);
+    const jp = new instruction.OpJC(0x04);
+
+    const cpu = createCPU();
+
+    cpu.setReg(CPU.A, 0);
+
+    and.exec(cpu, memory);
+    assert.strictEqual(cpu.getReg(CPU.A), 0, "0x00 & 0x0f should be zero");
+    assert.strictEqual(
+      cpu.getZeroFlag(),
+      1,
+      "0x00 & 0x0f is zero so it should set the zero flag"
+    );
+
+    cp.exec(cpu, memory);
+    assert.strictEqual(
+      cpu.getZeroFlag(),
+      0,
+      "0x00 is not equal to 0x0f so the zero flag should not be set"
+    );
+
+    assert.strictEqual(cpu.PC, 0, "PC should still be at 0");
+    jp.exec(cpu, memory);
+    assert.strictEqual(
+      cpu.PC,
+      0,
+      "Shouldn't have jumped because the zero flag is not set"
+    );
+  });
+});
