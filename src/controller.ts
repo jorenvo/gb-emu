@@ -3,7 +3,6 @@ import { Memory } from "./memory.js";
 import { Loader } from "./loader.js";
 import { Emulator } from "./emu.js";
 import { Instruction } from "./instruction.js";
-import { Disassembler } from "./disassembler.js";
 import {
   View,
   RegisterView,
