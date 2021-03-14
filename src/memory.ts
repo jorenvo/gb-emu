@@ -43,6 +43,12 @@ export class Memory {
   ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
+  private ioDirectionKeys: boolean;
+  private ioKeyB: boolean;
+  private ioKeyA: boolean;
+  private ioKeyStart: boolean;
+  private ioKeySelect: boolean;
+
   constructor(rom: Uint8Array, controller: Controller) {
     this.controller = controller;
     this.bank = -1;
@@ -61,6 +67,12 @@ export class Memory {
 
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
+
+    this.ioDirectionKeys = false;
+    this.ioKeyB = false;
+    this.ioKeyA = false;
+    this.ioKeyStart = false;
+    this.ioKeySelect = false;
   }
 
   private mockNintendoCartLogo() {
@@ -263,9 +275,8 @@ export class Memory {
   }
 
   getByte(address: number): number {
-    // TODO always returning no buttons are pressed, this also pretends no buttons were selected which is probably bad
     if (address === Memory.IO) {
-      return 0b0011_1111;
+      return this.getIORegister();
     }
 
     if (address >= Memory.RAMSTART) {
@@ -297,8 +308,20 @@ export class Memory {
   }
 
   setByte(address: number, value: number) {
-    // TODO ignoring writes to IO registers for now
     if (address === Memory.IO) {
+      const selectDirectionKeys = value & 0b0001_0000;
+      const selectButtonKeys = value & 0b0010_0000;
+      if (selectDirectionKeys && selectButtonKeys) {
+        // console.warn("Direction keys and button keys are both selected");
+      }
+
+      if (selectButtonKeys) {
+        this.ioDirectionKeys = false;
+      }
+
+      if (selectDirectionKeys) {
+        this.ioDirectionKeys = true;
+      }
       return;
     }
 
@@ -385,6 +408,41 @@ export class Memory {
 
   getLCDC() {
     return this.getByte(Memory.LCDC);
+  }
+
+  private getIORegister() {
+    let selector = 0;
+    let io = 0;
+    if (this.ioDirectionKeys) {
+      selector = 0b10;
+    } else {
+      selector = 0b01;
+      io =
+        (Number(this.ioKeyStart) << 3) |
+        (Number(this.ioKeySelect) << 2) |
+        (Number(this.ioKeyB) << 1) |
+        Number(this.ioKeyA);
+    }
+
+    const res = (selector << 4) | (io ^ 0b1111);
+    // console.log(`IO register: ${utils.binString(res)}`);
+    return res;
+  }
+
+  setIOKeyB(down: boolean) {
+    this.ioKeyB = down;
+  }
+
+  setIOKeyA(down: boolean) {
+    this.ioKeyA = down;
+  }
+
+  setIOKeyStart(down: boolean) {
+    this.ioKeyStart = down;
+  }
+
+  setIOKeySelect(down: boolean) {
+    this.ioKeySelect = down;
   }
 
   // VBlank interrupt

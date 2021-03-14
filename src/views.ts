@@ -494,6 +494,41 @@ export class BreakpointSetter extends View {
   }
 }
 
+export class KeyboardInputView extends View {
+  private controller: Controller;
+
+  constructor(elementID: string, controller: Controller) {
+    super(elementID);
+    this.controller = controller;
+    this.setupHandlers();
+  }
+
+  private setupHandlers() {
+    this.element.addEventListener("keydown", this.handleKey.bind(this));
+    this.element.addEventListener("keyup", this.handleKey.bind(this));
+  }
+
+  private handleKey(e: KeyboardEvent) {
+    const keydown = e.type === "keydown";
+    switch (e.code) {
+      case "KeyZ":
+        this.controller.keyPressB(keydown);
+        break;
+      case "KeyX":
+        this.controller.keyPressA(keydown);
+        break;
+      case "Enter":
+        this.controller.keyPressStart(keydown);
+        break;
+      case "Backslash":
+        this.controller.keyPressSelect(keydown);
+        break;
+    }
+  }
+
+  update() {}
+}
+
 export abstract class Button {
   element: HTMLElement;
   controller: Controller;

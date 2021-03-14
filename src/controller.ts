@@ -22,6 +22,7 @@ import {
   CopyButton,
   BreakpointSetter,
   PCFileButton,
+  KeyboardInputView,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 
@@ -52,6 +53,10 @@ export abstract class Controller {
   public abstract changedBank(): void;
   public abstract getRecentInstructions(): Instruction[];
   public abstract downloadPCLog(): void;
+  public abstract keyPressB(down: boolean): void;
+  public abstract keyPressA(down: boolean): void;
+  public abstract keyPressStart(down: boolean): void;
+  public abstract keyPressSelect(down: boolean): void;
 }
 
 export class ControllerMock {
@@ -79,6 +84,10 @@ export class ControllerMock {
     return [];
   }
   public downloadPCLog(): void {}
+  public keyPressB(_down: boolean): void {}
+  public keyPressA(_down: boolean): void {}
+  public keyPressStart(_down: boolean): void {}
+  public keyPressSelect(_down: boolean): void {}
 }
 
 export class ControllerReal implements Controller {
@@ -111,6 +120,7 @@ export class ControllerReal implements Controller {
   private prevPCMemoryView: MemoryView | undefined;
   private tileMapView: TileMapView | undefined;
   private tileDataView: TileDataView | undefined;
+  private keyboardInputView: KeyboardInputView | undefined;
 
   // buttons
   private pauseButton: PauseButton;
@@ -169,6 +179,8 @@ export class ControllerReal implements Controller {
     this.executionThreadView = new ExecutionThreadView("thread", this);
     this.tileMapView = new TileMapView("bgTileMap", this, this.emu.video);
     this.tileDataView = new TileDataView("tileData", this.emu.video);
+
+    this.keyboardInputView = new KeyboardInputView("video", this);
 
     this.toUpdate = new Set();
     this.markAllUpdated();
@@ -549,5 +561,25 @@ export class ControllerReal implements Controller {
 
   public downloadPCLog() {
     this.pcLogger.download();
+  }
+
+  public keyPressB(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} B`);
+    this.emu!.memory.setIOKeyB(down);
+  }
+
+  public keyPressA(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} A`);
+    this.emu!.memory.setIOKeyA(down);
+  }
+
+  public keyPressStart(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} start`);
+    this.emu!.memory.setIOKeyStart(down);
+  }
+
+  public keyPressSelect(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} select`);
+    this.emu!.memory.setIOKeySelect(down);
   }
 }
