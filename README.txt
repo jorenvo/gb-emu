@@ -16,7 +16,6 @@ Good games to test (don't use memory banking)
 
 Todo
 ====
-- Check if Tetris uses joypad interrupts (check if flag is enabled)
 - Fix joypad input in Tetris
 - Implement objects (LCDC.2 & LCDC.1, ff48, ff49, VRAM Sprite Attribute Table)
 - Optimize video rendering (cache rendered tiles, maybe selectively update screen)
