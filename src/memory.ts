@@ -415,17 +415,21 @@ export class Memory {
     let io = 0;
     if (this.ioDirectionKeys) {
       selector = 0b10;
+      if (this.ioKeyStart) {
+        io = 0b1000;
+      }
     } else {
       selector = 0b01;
       io =
+        // (1 << 3) | // TODO: start is always pressed
         (Number(this.ioKeyStart) << 3) |
         (Number(this.ioKeySelect) << 2) |
         (Number(this.ioKeyB) << 1) |
         Number(this.ioKeyA);
     }
 
-    const res = (selector << 4) | (io ^ 0b1111);
-    // console.log(`IO register: ${utils.binString(res)}`);
+    const res = io ^ 0b1111;
+    console.log(`IO register: ${utils.binString(res)}`);
     return res;
   }
 
