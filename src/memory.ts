@@ -54,6 +54,10 @@ export class Memory {
   private ioKeyA: boolean;
   private ioKeyStart: boolean;
   private ioKeySelect: boolean;
+  private ioKeyRight: boolean;
+  private ioKeyLeft: boolean;
+  private ioKeyUp: boolean;
+  private ioKeyDown: boolean;
 
   constructor(rom: Uint8Array, controller: Controller) {
     this.controller = controller;
@@ -79,6 +83,10 @@ export class Memory {
     this.ioKeyA = false;
     this.ioKeyStart = false;
     this.ioKeySelect = false;
+    this.ioKeyRight = false;
+    this.ioKeyLeft = false;
+    this.ioKeyUp = false;
+    this.ioKeyDown = false;
   }
 
   private mockNintendoCartLogo() {
@@ -418,6 +426,11 @@ export class Memory {
     let io = 0;
     switch (this.ioJoyPadState) {
       case JoyPadState.DIRECTION:
+        io =
+          (Number(this.ioKeyDown) << 3) |
+          (Number(this.ioKeyUp) << 2) |
+          (Number(this.ioKeyLeft) << 1) |
+          Number(this.ioKeyRight);
         break;
       case JoyPadState.ACTION:
         io =
@@ -451,6 +464,22 @@ export class Memory {
 
   setIOKeySelect(down: boolean) {
     this.ioKeySelect = down;
+  }
+
+  setIOKeyRight(right: boolean) {
+    this.ioKeyRight = right;
+  }
+
+  setIOKeyLeft(left: boolean) {
+    this.ioKeyLeft = left;
+  }
+
+  setIOKeyUp(up: boolean) {
+    this.ioKeyUp = up;
+  }
+
+  setIOKeyDown(down: boolean) {
+    this.ioKeyDown = down;
   }
 
   // VBlank interrupt

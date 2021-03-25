@@ -523,6 +523,18 @@ export class KeyboardInputView extends View {
       case "Backslash":
         this.controller.keyPressSelect(keydown);
         break;
+      case "ArrowRight":
+        this.controller.keyPressRight(keydown);
+        break;
+      case "ArrowLeft":
+        this.controller.keyPressLeft(keydown);
+        break;
+      case "ArrowUp":
+        this.controller.keyPressUp(keydown);
+        break;
+      case "ArrowDown":
+        this.controller.keyPressDown(keydown);
+        break;
     }
   }
 

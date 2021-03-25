@@ -57,6 +57,10 @@ export abstract class Controller {
   public abstract keyPressA(down: boolean): void;
   public abstract keyPressStart(down: boolean): void;
   public abstract keyPressSelect(down: boolean): void;
+  public abstract keyPressRight(down: boolean): void;
+  public abstract keyPressLeft(down: boolean): void;
+  public abstract keyPressUp(down: boolean): void;
+  public abstract keyPressDown(down: boolean): void;
 }
 
 export class ControllerMock {
@@ -88,6 +92,10 @@ export class ControllerMock {
   public keyPressA(_down: boolean): void {}
   public keyPressStart(_down: boolean): void {}
   public keyPressSelect(_down: boolean): void {}
+  public keyPressRight(_down: boolean): void {}
+  public keyPressLeft(_down: boolean): void {}
+  public keyPressUp(_down: boolean): void {}
+  public keyPressDown(_down: boolean): void {}
 }
 
 export class ControllerReal implements Controller {
@@ -581,5 +589,25 @@ export class ControllerReal implements Controller {
   public keyPressSelect(down: boolean) {
     console.log(`${down ? "Pressing" : "Releasing"} select`);
     this.emu!.memory.setIOKeySelect(down);
+  }
+
+  public keyPressRight(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} right`);
+    this.emu!.memory.setIOKeyRight(down);
+  }
+
+  public keyPressLeft(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} left`);
+    this.emu!.memory.setIOKeyLeft(down);
+  }
+
+  public keyPressUp(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} up`);
+    this.emu!.memory.setIOKeyUp(down);
+  }
+
+  public keyPressDown(down: boolean) {
+    console.log(`${down ? "Pressing" : "Releasing"} down`);
+    this.emu!.memory.setIOKeyDown(down);
   }
 }
