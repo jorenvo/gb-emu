@@ -4,6 +4,12 @@ import { Instruction } from "./instruction.js";
 import { Disassembler } from "./disassembler.js";
 import { Controller } from "./controller.js";
 
+enum JoyPadState {
+  INACTIVE,
+  DIRECTION,
+  ACTION,
+}
+
 /*
  * 0x8000-0x8fff: sprite pattern table
  * 0x8000-0x97ff: ??? VRAM tile data
@@ -43,7 +49,7 @@ export class Memory {
   ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
-  private ioDirectionKeys: boolean;
+  private ioJoyPadState: JoyPadState;
   private ioKeyB: boolean;
   private ioKeyA: boolean;
   private ioKeyStart: boolean;
@@ -68,7 +74,7 @@ export class Memory {
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
 
-    this.ioDirectionKeys = false;
+    this.ioJoyPadState = JoyPadState.INACTIVE;
     this.ioKeyB = false;
     this.ioKeyA = false;
     this.ioKeyStart = false;
@@ -309,18 +315,16 @@ export class Memory {
 
   setByte(address: number, value: number) {
     if (address === Memory.IO) {
-      const selectDirectionKeys = value & 0b0001_0000;
-      const selectButtonKeys = value & 0b0010_0000;
-      if (selectDirectionKeys && selectButtonKeys) {
-        // console.warn("Direction keys and button keys are both selected");
-      }
-
-      if (selectButtonKeys) {
-        this.ioDirectionKeys = false;
-      }
-
-      if (selectDirectionKeys) {
-        this.ioDirectionKeys = true;
+      // Use the inverted value because to select a mode a bit is set to 0.
+      const invertedValue = value ^ 0xff;
+      const selectDirectionKeys = invertedValue & 0b0001_0000;
+      const selectActionKeys = invertedValue & 0b0010_0000;
+      if (selectDirectionKeys && selectActionKeys) {
+        this.ioJoyPadState = JoyPadState.INACTIVE;
+      } else if (selectActionKeys) {
+        this.ioJoyPadState = JoyPadState.ACTION;
+      } else if (selectDirectionKeys) {
+        this.ioJoyPadState = JoyPadState.DIRECTION;
       }
       return;
     }
@@ -411,25 +415,25 @@ export class Memory {
   }
 
   private getIORegister() {
-    let selector = 0;
     let io = 0;
-    if (this.ioDirectionKeys) {
-      selector = 0b10;
-      if (this.ioKeyStart) {
-        io = 0b1000;
-      }
-    } else {
-      selector = 0b01;
-      io =
-        // (1 << 3) | // TODO: start is always pressed
-        (Number(this.ioKeyStart) << 3) |
-        (Number(this.ioKeySelect) << 2) |
-        (Number(this.ioKeyB) << 1) |
-        Number(this.ioKeyA);
+    switch (this.ioJoyPadState) {
+      case JoyPadState.DIRECTION:
+        break;
+      case JoyPadState.ACTION:
+        io =
+          (Number(this.ioKeyStart) << 3) |
+          (Number(this.ioKeySelect) << 2) |
+          (Number(this.ioKeyB) << 1) |
+          Number(this.ioKeyA);
+        break;
+      case JoyPadState.INACTIVE:
+        break;
     }
 
-    const res = io ^ 0b1111;
-    console.log(`IO register: ${utils.binString(res)}`);
+    // Apparently when reading this register the 2 most significant bits are set.
+    // TODO: what is the value of bit 4 and 5
+    const res = 0b1100_0000 | (io ^ 0b1111);
+    // console.log(`IO register: ${utils.binString(res)}`);
     return res;
   }
 
