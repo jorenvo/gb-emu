@@ -166,6 +166,34 @@ export class Video {
     }
   }
 
+  private renderObjects(image: ImageData) {
+    for (
+      let spriteAddress = 0xfe00;
+      spriteAddress < 0xfe9f;
+      spriteAddress += 4
+    ) {
+      const y = this.wrapToScreenCoords(
+        this.memory.getByte(spriteAddress) - 16
+      );
+      const x = this.wrapToScreenCoords(
+        this.memory.getByte(spriteAddress + 1) - 8
+      );
+      const tileIndex = this.memory.getByte(spriteAddress + 2);
+      const attrs = this.memory.getByte(spriteAddress + 3); // TODO use this
+
+      // TODO support 8x16 tiles
+      this.renderTile(
+        image,
+        this.colorMap,
+        0x8000 + tileIndex * 16,
+        x,
+        y,
+        0,
+        0
+      );
+    }
+  }
+
   private getBorderColor(): RGBA {
     const rgbString = window
       .getComputedStyle(document.body)
@@ -219,6 +247,7 @@ export class Video {
   render() {
     const image = this.ctx.createImageData(256, 256);
     this.renderNormalBackground(image);
+    this.renderObjects(image);
     this.renderPhysicalScreenBorder(image);
 
     if (utils.getBit(this.memory.getLCDC(), 5)) {
