@@ -51,7 +51,7 @@ export class Video {
       }
 
       if (newLY === this.memory.getLYC()) {
-        this.memory.interruptCoincidenceRequested();
+        this.memory.interruptCoincidence();
       } else {
         this.memory.interruptCoincidenceClear();
       }
