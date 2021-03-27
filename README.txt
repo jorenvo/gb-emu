@@ -17,7 +17,6 @@ Good games to test (don't use memory banking)
 Todo
 ====
 - When clicking on an address (left column), show all ways to get to it (calls and abs/rel jumps)
-- Implement objects (LCDC.2 & LCDC.1, ff48, ff49, VRAM Sprite Attribute Table)
 - Optimize video rendering (cache rendered tiles, maybe selectively update screen)
 - Sound
 
