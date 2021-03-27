@@ -253,6 +253,10 @@ export class ControllerReal implements Controller {
       new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, displayBits, memory)
     );
     views.set(
+      Memory.STAT,
+      new MemRegView("memRegSTAT", "STAT", Memory.STAT, displayBits, memory)
+    );
+    views.set(
       Memory.LY,
       new MemRegView("memRegLY", "LY", Memory.LY, displayHex, memory)
     );

@@ -1,57 +1,61 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>gb-emu</title>
-    <link rel="stylesheet" href="emu.css" />
-    <link rel="icon" href="favicon.png" type="image/x-icon" />
-  </head>
-  <body>
-    <label for="rom">Upload ROM</label>
-    <input type="file" id="rom" name="rom" />
-    <script src="smoothscroll.min.js"></script>
-    <script type="module" src="js/main.js"></script>
-    <div id="debugger">
-      <button id="loadBootrom">Run bootrom</button>
-      <button id="next">Next</button>
-      <button id="pause">Pause</button>
-      <button id="copy">Copy</button>
-      <button id="downloadPCFile">PC log</button>
-      <input type="text" id="breakpoint" placeholder="bank,breakpoint (e.g. 1,0x10)"/>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>gb-emu</title>
+  <link rel="stylesheet" href="emu.css" />
+  <link rel="icon" href="favicon.png" type="image/x-icon" />
+</head>
+
+<body>
+  <label for="rom">Upload ROM</label>
+  <input type="file" id="rom" name="rom" />
+  <script src="smoothscroll.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <div id="debugger">
+    <button id="loadBootrom">Run bootrom</button>
+    <button id="next">Next</button>
+    <button id="pause">Pause</button>
+    <button id="copy">Copy</button>
+    <button id="downloadPCFile">PC log</button>
+    <input type="text" id="breakpoint" placeholder="bank,breakpoint (e.g. 1,0x10)" />
+  </div>
+  <registers>
+    <register id="regB"></register>
+    <register id="regC"></register>
+    <register id="regD"></register>
+    <register id="regE"></register>
+    <register id="regH"></register>
+    <register id="regL"></register>
+    <register id="regF"></register>
+    <register id="regA"></register>
+    <PC id="PC"></PC>
+    <SP id="SP"></SP>
+  </registers>
+  <registers>
+    <banknr id="bankNr"></banknr>
+    <memregister id="memRegLCDC"></memregister>
+    <memregister id="memRegSTAT"></memregister>
+    <memregister id="memRegLY"></memregister>
+    <memregister id="memRegSCX"></memregister>
+    <memregister id="memRegSCY"></memregister>
+    <memregister id="memRegLYC"></memregister>
+    <memregister id="memRegWY"></memregister>
+    <memregister id="memRegWX"></memregister>
+  </registers>
+  <thread id="thread"></thread>
+  <div class="debugColumns">
+    <div id="memoryBanks"></div>
+    <bankview id="memoryBankRAM"></bankview>
+    <div class="stackAndVideo">
+      <stack id="stack"></stack>
+      <tilemap id="bgTileMap"></tilemap>
+      <tiledata id="tileData"></tiledata>
+      <canvas tabindex="1" id="video"></canvas>
     </div>
-    <registers>
-      <register id="regB"></register>
-      <register id="regC"></register>
-      <register id="regD"></register>
-      <register id="regE"></register>
-      <register id="regH"></register>
-      <register id="regL"></register>
-      <register id="regF"></register>
-      <register id="regA"></register>
-      <PC id="PC"></PC>
-      <SP id="SP"></SP>
-    </registers>
-    <registers>
-      <banknr id="bankNr"></banknr>
-      <memregister id="memRegLCDC"></memregister>
-      <memregister id="memRegLY"></memregister>
-      <memregister id="memRegSCX"></memregister>
-      <memregister id="memRegSCY"></memregister>
-      <memregister id="memRegLYC"></memregister>
-      <memregister id="memRegWY"></memregister>
-      <memregister id="memRegWX"></memregister>
-    </registers>
-    <thread id="thread"></thread>
-    <div class="debugColumns">
-      <div id="memoryBanks"></div>
-      <bankview id="memoryBankRAM"></bankview>
-      <div class="stackAndVideo">
-        <stack id="stack"></stack>
-        <tilemap id="bgTileMap"></tilemap>
-        <tiledata id="tileData"></tiledata>
-        <canvas tabindex="1" id="video"></canvas>
-      </div>
-    </div>
-  </body>
+  </div>
+</body>
+
 </html>
