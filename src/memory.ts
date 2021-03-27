@@ -482,6 +482,12 @@ export class Memory {
     this.ioKeyDown = down;
   }
 
+  // Interrupt function convention
+  // interruptFoo         : interrupt occured and the CPU needs to handle it
+  // interruptFooClear    : interrupt no longer needs to be handled
+  // interruptFooRequested: does interrupt needs to be handled by the CPU (initiated with interruptFoo)
+  // interruptFooEnabled  : has this interrupt been enabled (if disabled these interrupts occur but are not handled by the CPU)
+
   // VBlank interrupt
   interruptVBlank() {
     const interruptFlag = this.getByte(Memory.IF);
