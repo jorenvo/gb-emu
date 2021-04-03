@@ -19,6 +19,9 @@ export class Memory {
   // Memory register addresses
   static IO = 0xff00;
   static DIV = 0xff04;
+  static TIMA = 0xff05;
+  static TMA = 0xff06;
+  static TAC = 0xff07;
   static LCDC = 0xff40;
   static STAT = 0xff41;
   static SCY = 0xff42;
@@ -40,6 +43,9 @@ export class Memory {
   static INT_COINCIDENCE_ENABLED_MASK = 0b0100_0000;
   static INT_OAM_MASK = 0b0000_0011;
   static INT_OAM_ENABLED_MASK = 0b0010_0000;
+
+  static DIVIDER_FREQ_HZ = 16_384;
+  static DIVIDER_MS = 100 / Memory.DIVIDER_FREQ_HZ;
 
   controller: Controller;
   bank: number; // -1 means bootROM
@@ -428,7 +434,8 @@ export class Memory {
     return this.getByte(Memory.LCDC);
   }
 
-  incDivider(inc: number) {
+  incDivider(ms: number) {
+    const inc = Math.floor(ms / Memory.DIVIDER_MS);
     this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], inc);
   }
 
