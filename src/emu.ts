@@ -17,6 +17,9 @@ export class Emulator {
   breakpoint: number | undefined;
   breakpointBank: number | undefined;
 
+  static DIVIDER_FREQ_HZ = 16_384;
+  static DIVIDER_MS = 100 / Emulator.DIVIDER_FREQ_HZ;
+
   constructor(controller: Controller, bytes: Uint8Array) {
     this.memory = new Memory(bytes, controller);
     this.cpu = new CPU();
@@ -54,6 +57,10 @@ export class Emulator {
     }
   }
 
+  private incDivider(ms: number) {
+    this.memory.incDivider(Math.floor(ms / Emulator.DIVIDER_MS));
+  }
+
   run() {
     const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
@@ -62,7 +69,9 @@ export class Emulator {
 
     let i = 0;
     while (startMs + elapsedMs < endMs) {
-      elapsedMs += utils.tCyclesToMs(this.cpu.tick(this.memory));
+      const tickMs = utils.tCyclesToMs(this.cpu.tick(this.memory));
+      elapsedMs += tickMs;
+      this.incDivider(tickMs);
       this.video.handleLY(startMs + elapsedMs);
 
       // if paused it means we're stepping over single instructions

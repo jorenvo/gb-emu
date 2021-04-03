@@ -18,6 +18,7 @@ enum JoyPadState {
 export class Memory {
   // Memory register addresses
   static IO = 0xff00;
+  static DIV = 0xff04;
   static LCDC = 0xff40;
   static STAT = 0xff41;
   static SCY = 0xff42;
@@ -322,6 +323,11 @@ export class Memory {
   }
 
   setByte(address: number, value: number) {
+    utils.assert(
+      value >= 0 && value <= 255,
+      `${value} written to ${utils.hexString(address, 16)} is out of range`
+    );
+
     if (address === Memory.IO) {
       // Use the inverted value because to select a mode a bit is set to 0.
       const invertedValue = value ^ 0xff;
@@ -337,10 +343,10 @@ export class Memory {
       return;
     }
 
-    utils.assert(
-      value >= 0 && value <= 255,
-      `${value} written to ${utils.hexString(address, 16)} is out of range`
-    );
+    if (address === Memory.DIV) {
+      this.ram[Memory.DIV] = 0;
+      return;
+    }
 
     // DMA transfer
     if (address === 0xff46) {
@@ -420,6 +426,10 @@ export class Memory {
 
   getLCDC() {
     return this.getByte(Memory.LCDC);
+  }
+
+  incDivider(inc: number) {
+    this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], inc);
   }
 
   private getIORegister() {
