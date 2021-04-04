@@ -56,6 +56,7 @@ export class Emulator {
 
   private incTimers(ms: number) {
     this.memory.incDivider(ms);
+    this.memory.incTIMA(ms);
   }
 
   run() {

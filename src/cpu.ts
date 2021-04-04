@@ -240,7 +240,7 @@ export class CPU {
         memory.interruptVBlankRequested() &&
         memory.interruptVBlankEnabled()
       ) {
-        console.log("Executing VBlank interrupt");
+        // console.log("Executing VBlank interrupt");
         this.IME = false;
         memory.interruptVBlankClear();
 
@@ -264,6 +264,15 @@ export class CPU {
 
         this.pushPC(memory);
         this.PC = 0x48;
+      } else if (
+        memory.interruptTimerRequested() &&
+        memory.interruptTimerEnabled()
+      ) {
+        console.log("Executing timer interrupt");
+        memory.interruptTimerClear();
+
+        this.pushPC(memory);
+        this.PC = 0x50;
       }
     }
   }

@@ -349,6 +349,8 @@ export class Memory {
       return;
     }
 
+    if (address === Memory.IE && value & 0b100) debugger;
+
     if (address === Memory.DIV) {
       this.ram[Memory.DIV] = 0;
       return;
@@ -439,6 +441,35 @@ export class Memory {
     this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], inc);
   }
 
+  incTIMA(ms: number) {
+    const tac = this.getByte(Memory.TAC);
+    if (tac >> 2) {
+      let hz = 0;
+      switch (tac & 0b11) {
+        case 0b00:
+          hz = 4_096;
+          break;
+        case 0b01:
+          hz = 262_144;
+          break;
+        case 0b10:
+          hz = 65_536;
+          break;
+        case 0b11:
+          hz = 16_384;
+          break;
+      }
+
+      const inc = Math.floor(ms / (100 / hz));
+      const tima = this.getByte(Memory.TIMA);
+
+      if ((inc + tima) >> 8) {
+        this.setByte(Memory.TIMA, this.getByte(Memory.TMA));
+        this.interruptTimer();
+      }
+    }
+  }
+
   private getIORegister() {
     let io = 0;
     switch (this.ioJoyPadState) {
@@ -502,7 +533,7 @@ export class Memory {
   // Interrupt function convention
   // interruptFoo         : interrupt occured and the CPU needs to handle it
   // interruptFooClear    : interrupt no longer needs to be handled
-  // interruptFooRequested: does interrupt needs to be handled by the CPU (initiated with interruptFoo)
+  // interruptFooRequested: does interrupt need to be handled by the CPU (initiated with interruptFoo)
   // interruptFooEnabled  : has this interrupt been enabled (if disabled these interrupts occur but are not handled by the CPU)
 
   // VBlank interrupt
@@ -562,5 +593,26 @@ export class Memory {
 
   interruptOAMEnabled() {
     return Boolean(this.getByte(Memory.STAT) & Memory.INT_OAM_ENABLED_MASK);
+  }
+
+  // Timer interrupt
+  interruptTimer() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag | 0b100);
+  }
+
+  interruptTimerClear() {
+    const interruptFlag = this.getByte(Memory.IF);
+    this.setByte(Memory.IF, interruptFlag & 0b1111_1011);
+  }
+
+  interruptTimerRequested() {
+    const interruptFlag = this.getByte(Memory.IF);
+    return Boolean(interruptFlag & 0b100);
+  }
+
+  interruptTimerEnabled() {
+    const interruptEnabled = this.getByte(Memory.IE);
+    return Boolean(interruptEnabled & 0b100);
   }
 }
