@@ -455,7 +455,7 @@ export class ControllerReal implements Controller {
 
     for (
       let addr = startAddress;
-      addr < startAddress + Memory.WORKRAMSIZE;
+      addr < startAddress + Memory.WORKRAMSIZE && addr <= 0xffff;
       addr++
     ) {
       if (memory.getInstruction(addr, ramBank) !== undefined) {

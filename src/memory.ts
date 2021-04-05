@@ -36,7 +36,7 @@ export class Memory {
   static BANKSIZE = 16_384; // 16 KiB
   static RAMSTART = 0x8000; // TODO this should really be 0xa000
   static WORKRAMSTART = 0xc000;
-  static WORKRAMSIZE = 0x1fff;
+  static WORKRAMSIZE = 0x1fff; // This is the maximum number of bytes that will be disassembled
   static OAMSTART = 0xfe00;
 
   static INT_COINCIDENCE_MASK = 0b100;
@@ -226,7 +226,7 @@ export class Memory {
     this.clearDisassembledRam();
 
     let addr = startAddress;
-    while (addr < startAddress + Memory.WORKRAMSIZE) {
+    while (addr < startAddress + Memory.WORKRAMSIZE && addr <= 0xffff) {
       let instruction = Disassembler.buildInstruction(addr, this.ram);
       this.bankToAddressToInstruction.get(-2)!.set(addr, instruction);
       addr += instruction.size();
