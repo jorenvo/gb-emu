@@ -254,6 +254,10 @@ export class Video {
       utils.log(this.memory.getLCDC(), "render window");
     }
 
+    if (utils.getBit(this.memory.getLCDC(), 2)) {
+      console.error("8x16 sprites are currently unsupported!");
+    }
+
     this.ctx.putImageData(image, 0, 0);
   }
 }
