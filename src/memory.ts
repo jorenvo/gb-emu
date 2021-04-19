@@ -349,7 +349,17 @@ export class Memory {
       return;
     }
 
-    if (address === Memory.IE && value & 0b100) debugger;
+    if (address === Memory.IE) {
+      const bitToIntStr = ["vblank", "lcd stat", "timer", "serial", "joypad"];
+
+      let valCopy = value;
+      for (const intStr of bitToIntStr) {
+        if (valCopy & 1) {
+          console.log(`enabling ${intStr} interrupt`);
+        }
+        valCopy >>= 1;
+      }
+    }
 
     if (address === Memory.DIV) {
       this.ram[Memory.DIV] = 0;
