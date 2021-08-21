@@ -24,6 +24,7 @@ export class CPU {
   private _regs: Uint8Array;
 
   tickCounter: number;
+  private cycleCounter: number;
 
   private _controller: Controller | undefined;
 
@@ -39,6 +40,7 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this._regs = new Uint8Array(new Array(8));
     this.tickCounter = 0;
+    this.cycleCounter = 0;
   }
 
   setController(controller: Controller) {
@@ -291,6 +293,14 @@ export class CPU {
 
     this.tickCounter++;
     const cycles = currentInstruction.execAndIncrementPC(this, memory);
+    this.cycleCounter += cycles;
+
+    // DIV increments at 16_384/s, the CPU runs at 4_194_304 cycles/s.
+    // (4_194_304 cycles/s) / (16_384/s) = 256 cycles
+    if (this.cycleCounter >= 256) {
+      memory.incDivider();
+      this.cycleCounter %= 256;
+    }
 
     if (this.enableIMETick === this.tickCounter) {
       this.IME = true;

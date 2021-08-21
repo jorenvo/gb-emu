@@ -446,9 +446,10 @@ export class Memory {
     return this.getByte(Memory.LCDC);
   }
 
-  incDivider(ms: number) {
-    const inc = Math.floor(ms / Memory.DIVIDER_MS);
-    this.setByte(Memory.DIV, utils.wrapping8BitAdd(this.getByte(Memory.DIV), inc));
+  incDivider() {
+    // Cannot use setByte because when a program writes to DIV it will be reset to 0.
+    this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], 1);
+    this.controller.updatedMemReg(Memory.DIV);
   }
 
   incTIMA(ms: number) {
