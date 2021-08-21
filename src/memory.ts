@@ -56,6 +56,8 @@ export class Memory {
   ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
+  private warnedTIMA: boolean;
+
   private ioJoyPadState: JoyPadState;
   private ioKeyB: boolean;
   private ioKeyA: boolean;
@@ -84,6 +86,8 @@ export class Memory {
 
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
+
+    this.warnedTIMA = false;
 
     this.ioJoyPadState = JoyPadState.INACTIVE;
     this.ioKeyB = false;
@@ -296,6 +300,11 @@ export class Memory {
   }
 
   getByte(address: number): number {
+    if (!this.warnedTIMA && address === Memory.TIMA) {
+      console.warn("TIMA accessed but not implemented.");
+      this.warnedTIMA = true;
+    }
+
     if (address === Memory.IO) {
       return this.getIORegister();
     }
