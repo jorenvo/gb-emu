@@ -45,7 +45,7 @@ export class Memory {
   static INT_OAM_ENABLED_MASK = 0b0010_0000;
 
   static DIVIDER_FREQ_HZ = 16_384;
-  static DIVIDER_MS = 100 / Memory.DIVIDER_FREQ_HZ;
+  static DIVIDER_MS = 1_000 / Memory.DIVIDER_FREQ_HZ;
 
   controller: Controller;
   bank: number; // -1 means bootROM
