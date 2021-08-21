@@ -54,10 +54,6 @@ export class Emulator {
     }
   }
 
-  private incTimers(ms: number) {
-    this.memory.incTIMA(ms);
-  }
-
   run() {
     const endMs = performance.now() + this.runBudgetMs;
     let elapsedMs = 0;
@@ -68,7 +64,11 @@ export class Emulator {
     while (startMs + elapsedMs < endMs) {
       const tickMs = utils.tCyclesToMs(this.cpu.tick(this.memory));
       elapsedMs += tickMs;
-      this.incTimers(tickMs);
+
+      // TODO: incrementing the TIMA timer should be done by the CPU. Implement
+      // similar to DIV.
+      // this.memory.incTIMA(tickMs);
+
       this.video.handleLY(startMs + elapsedMs);
 
       // if paused it means we're stepping over single instructions
