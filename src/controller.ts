@@ -280,6 +280,10 @@ export class ControllerReal implements Controller {
       Memory.WX,
       new MemRegView("memRegWX", "WX", Memory.WX, displayHex, memory)
     );
+    views.set(
+      Memory.DIV,
+      new MemRegView("memRegDIV", "DIV", Memory.DIV, displayHex, memory)
+    );
 
     return views;
   }
