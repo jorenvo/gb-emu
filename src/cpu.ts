@@ -23,7 +23,7 @@ export class CPU {
 
   private _regs: Uint8Array;
 
-  tickCounter: number;
+  private tickCounter: number;
   private cycleCounter: number;
 
   private _controller: Controller | undefined;
