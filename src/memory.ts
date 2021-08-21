@@ -371,7 +371,9 @@ export class Memory {
       const sourceStart = value * 0x100;
       // utils.log(
       //   value,
-      //   `starting DMA transfer of ${sourceStart}-${sourceStart + 0x9f}`
+      //   `starting DMA transfer of ${sourceStart}-${sourceStart + 0x9f} to ${
+      //     Memory.OAMSTART
+      //   }-${Memory.OAMSTART + 0x9f}`
       // );
 
       for (let i = 0; i < 0xa0; i++) {
