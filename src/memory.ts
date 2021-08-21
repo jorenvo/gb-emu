@@ -448,7 +448,7 @@ export class Memory {
 
   incDivider(ms: number) {
     const inc = Math.floor(ms / Memory.DIVIDER_MS);
-    this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], inc);
+    this.setByte(Memory.DIV, utils.wrapping8BitAdd(this.getByte(Memory.DIV), inc));
   }
 
   incTIMA(ms: number) {
