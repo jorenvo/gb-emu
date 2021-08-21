@@ -1065,12 +1065,22 @@ export class OpStop extends Instruction {
 }
 
 export class OpHalt extends Instruction {
+  private warned: boolean;
+
+  constructor(address: number) {
+    super(address);
+    this.warned = false;
+  }
+
   size() {
     return 1;
   }
 
   exec(_cpu: CPU, memory: Memory): number {
-    utils.log(this.getByte(memory), "Should wait for interrupt");
+    if (!this.warned) {
+      utils.log(this.getByte(memory), "Should wait for interrupt");
+      this.warned = true;
+    }
     return 4;
   }
 
