@@ -143,10 +143,6 @@ export class OpNop extends Instruction {
 }
 
 export class OpNone extends Instruction {
-  constructor(address: number) {
-    super(address);
-  }
-
   size() {
     return 1;
   }
