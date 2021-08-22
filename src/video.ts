@@ -109,7 +109,8 @@ export class Video {
       return tileDataStart + address * 16;
     } else {
       // 0x8800 addressing
-      return tileDataStart + utils.twosComplementToNumber(address) * 16;
+      // return tileDataStart + utils.twosComplementToNumber(address) * 16;
+      return tileDataStart + (address + 128) * 16;
     }
   }
 
