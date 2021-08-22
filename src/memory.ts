@@ -414,6 +414,10 @@ export class Memory {
       this.controller.updatedTileMapPointers();
     } else if (address >= 0xff00 && address <= 0xff70) {
       this.controller.updatedMemReg(address);
+      if (address === Memory.LCDC) {
+        // This can change how tiles are rendered
+        this.controller.updatedTileData();
+      }
     } else if (
       address >= Memory.WORKRAMSTART &&
       address <= Memory.WORKRAMSTART + Memory.WORKRAMSIZE
