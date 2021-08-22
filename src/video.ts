@@ -17,6 +17,9 @@ export class Video {
   // private vBlankDurationMs: number;
   private vLineRenderMs: number;
 
+  private warnedWideTiles: boolean;
+  private warnedAttrs: boolean;
+
   constructor(memory: Memory, canvas: HTMLCanvasElement) {
     this.memory = memory;
 
@@ -38,6 +41,9 @@ export class Video {
     this.nextVLineStartMs = 0; // immediately start rendering
 
     this.vLineRenderMs = utils.mCyclesToMs(114);
+
+    this.warnedWideTiles = false;
+    this.warnedAttrs = false;
   }
 
   handleLY(timeMs: number) {
@@ -92,6 +98,12 @@ export class Video {
   private getTile(address: number) {
     const lcdc = this.memory.getLCDC();
     const tileDataStart = this.getTileDataStart();
+
+    if (!this.warnedWideTiles && utils.getBit(lcdc, 2)) {
+      console.warn("This uses wide tiles which are not implemented.");
+      this.warnedWideTiles = true;
+    }
+
     if (utils.getBit(lcdc, 4)) {
       return tileDataStart + address * 16;
     } else {
@@ -180,6 +192,10 @@ export class Video {
       );
       const tileIndex = this.memory.getByte(spriteAddress + 2);
       const attrs = this.memory.getByte(spriteAddress + 3); // TODO use this
+      if (!this.warnedAttrs && attrs & 0b1111_0000) {
+        console.warn("Object attributes are set but not implemented.");
+        this.warnedAttrs = true;
+      }
 
       // TODO support 8x16 tiles
       this.renderTile(
