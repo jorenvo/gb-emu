@@ -184,11 +184,13 @@ export class TileDataView extends View {
   }
 
   update() {
-    const tileDataStart = this.video.getTileDataStart();
+    // Always render all tiles, regardless of the addressing mode (LCDC bit 4)
+    const tileDataStart = 0x8000;
     this.element.innerHTML = "";
 
-    // 256 tiles total, show as 16x16 tiles
-    for (let row = 0; row < 16; row++) {
+    // Tile data is in 0x8000-0x97ff = 0x1800 bytes. 16 bytes per tile, so
+    // 384 tiles. Fits in 24x16.
+    for (let row = 0; row < 24; row++) {
       const rowEl = document.createElement("tiledatarow");
       for (let col = 0; col < 16; col++) {
         const tileEl = document.createElement("canvas");
