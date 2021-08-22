@@ -1,4 +1,5 @@
 import { Memory } from "./memory.js";
+import ThrottledLogger from "./throttledlogger.js";
 import * as utils from "./utils.js";
 
 type RGBA = [number, number, number, number];
@@ -128,6 +129,13 @@ export class Video {
     scx: number,
     scy: number
   ) {
+    // is 0x8bf0
+    ThrottledLogger.log(
+      `starting render from ${utils.hexString(
+        tileStart,
+        16
+      )} with lcdc ${utils.binString(this.memory.getLCDC())}`
+    );
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
