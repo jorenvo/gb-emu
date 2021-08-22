@@ -54,19 +54,11 @@ MVC
     - MemoryView
   - RegisterView
 
-Debugging random piece generation bug in Tetris
-===============================================
-[Log] Rendering 0xfe20 at (128, 112) (video.js, line 124)
-[Log] Rendering 0xfe24 at (136, 112) (video.js, line 124)
-[Log] Rendering 0xfe28 at (128, 120) (video.js, line 124)
-[Log] Rendering 0xfe2c at (136, 120) (video.js, line 124)
-
-0x83 is tile that builds tetris pieces
-
-0xfe20 is the attr for the top right block of the next tetris piece
-
-0xfe20 is written to by 0xffb8, which is a routine copied in high RAM. There should be a loop that copies from one part of memory to 0xfe20.
-
-0xc0: starting DMA transfer of 0xc000-0xc09f to 0xfe00-0xfe9f
-
-0xc020 is the place in memory that's DMA transferred to 0xfe20
+Debugging Dr. Mario tile rendering
+==================================
+                                                D
+                                                A M
+                                                T A
+                                                A P
+When debug tiledata is rendered LCDC is 0b1 0 0 0 0 0 1 1.
+                                          7 6 5 4 3 2 1 0
