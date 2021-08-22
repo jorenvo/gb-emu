@@ -192,6 +192,7 @@ export class TileDataView extends View {
       const rowEl = document.createElement("tiledatarow");
       for (let col = 0; col < 16; col++) {
         const tileEl = document.createElement("canvas");
+        tileEl.setAttribute("id", `tiledata-${col},${row}`);
         tileEl.setAttribute("width", "8");
         tileEl.setAttribute("height", "8");
 
