@@ -81,7 +81,8 @@ export class Video {
     if (utils.getBit(lcdc, 4)) {
       return 0x8000;
     } else {
-      return 0x8800;
+      // 0x8800 addressing uses 0x9000 as its base
+      return 0x9000;
     }
   }
 
@@ -109,8 +110,7 @@ export class Video {
       return tileDataStart + address * 16;
     } else {
       // 0x8800 addressing
-      // return tileDataStart + utils.twosComplementToNumber(address) * 16;
-      return tileDataStart + (address + 128) * 16;
+      return tileDataStart + utils.twosComplementToNumber(address) * 16;
     }
   }
 
