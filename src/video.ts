@@ -89,7 +89,12 @@ export class Video {
   getTileColRow(address: number): [number, number] {
     const lcdc = this.memory.getLCDC();
     if (!utils.getBit(lcdc, 4)) {
-      address += 128; // smallest 8-bit 2s complement: -128
+      // In 0x8800 addressing mode, the tile pointer is 2s complement. It's
+      // also centered around 0x9000 instead of the default 0x8000. So
+      // offset the tile pointer by the tiles that need to be skipped:
+      // the first 0x1000 bytes with 16 bytes per tile.
+      address = utils.twosComplementToNumber(address);
+      address += 0x1000 / 16;
     }
 
     let row = Math.floor(address / 16);
