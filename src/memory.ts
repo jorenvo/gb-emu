@@ -404,10 +404,7 @@ export class Memory {
 
     if (address >= 0x8000 && address <= 0x97ff) {
       this.controller.updatedTileData();
-    } else if (
-      (address >= 0x9800 && address <= 0x9bff) ||
-      (address >= 0x9c00 && address <= 0x9fff)
-    ) {
+    } else if (address >= 0x9800 && address <= 0x9fff) {
       this.controller.updatedTileMapPointers();
     } else if (address >= 0xff00 && address <= 0xff70) {
       this.controller.updatedMemReg(address);
