@@ -165,7 +165,7 @@ export class Video {
     scy: number,
     attrFlipX: boolean,
     attrFlipY: boolean,
-    overlapBGAndWindow: boolean
+    objectOverlapped: boolean
   ) {
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
@@ -175,20 +175,6 @@ export class Video {
       for (let bit = 7; bit >= 0; bit--) {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
         const color = colorMap[colorGB];
-        if (
-          overlapBGAndWindow &&
-          !(
-            color[0] === colorMap[1][0] ||
-            color[0] === colorMap[2][0] ||
-            color[0] === colorMap[3][0]
-          )
-        ) {
-          ThrottledLogger.log(
-            `!UNTESTED! Overlapping at ${utils.hexString(tileStart, 16)}`
-          );
-          continue;
-        }
-
         let tileX = Math.abs(bit - 7);
         if (attrFlipX) {
           tileX = 7 - tileX;
@@ -201,6 +187,20 @@ export class Video {
         let colorCoordX = this.wrapToScreenCoords(x - scx + tileX);
         let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
+
+        // The object is overlapped by all background colors except the first one.
+        if (objectOverlapped) {
+          const bgColor = image.data.slice(dataOffset, dataOffset + 4);
+          const bgFirstColor = this.getColorMapBgOrWindow()[0];
+          if (
+            !(
+              bgColor[0] == bgFirstColor[0] &&
+              bgColor[1] == bgFirstColor[1] &&
+              bgColor[2] == bgFirstColor[2]
+            )
+          )
+            continue;
+        }
 
         for (let i = 0; i < 4; i++) {
           image.data[dataOffset + i] = color[i];
@@ -261,7 +261,7 @@ export class Video {
       const paletteOBP0 = !Boolean(utils.getBit(attrs, 4));
       const flipX = Boolean(utils.getBit(attrs, 5));
       const flipY = Boolean(utils.getBit(attrs, 6));
-      const overlapBGAndWindow = Boolean(utils.getBit(attrs, 7));
+      const objectOverlapped = Boolean(utils.getBit(attrs, 7));
 
       // TODO support 8x16 tiles
       this.renderTile(
@@ -274,7 +274,7 @@ export class Video {
         0,
         flipX,
         flipY,
-        overlapBGAndWindow
+        objectOverlapped
       );
     }
   }
