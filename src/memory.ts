@@ -29,6 +29,8 @@ export class Memory {
   static LY = 0xff44;
   static LYC = 0xff45;
   static BGP = 0xff47;
+  static OBP0 = 0xff48;
+  static OBP1 = 0xff49;
   static WY = 0xff4a;
   static WX = 0xff4b;
   static IF = 0xff0f;
@@ -458,6 +460,14 @@ export class Memory {
 
   getBGP() {
     return this.getByte(Memory.BGP);
+  }
+
+  getOBP0() {
+    return this.getByte(Memory.OBP0);
+  }
+
+  getOBP1() {
+    return this.getByte(Memory.OBP1);
   }
 
   incDivider() {

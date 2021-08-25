@@ -24,7 +24,6 @@ export class Video {
   private vLineRenderMs: number;
 
   private warnedWideTiles: boolean;
-  private warnedAttrs: boolean;
 
   constructor(memory: Memory, canvas: HTMLCanvasElement) {
     this.memory = memory;
@@ -53,7 +52,6 @@ export class Video {
     this.vLineRenderMs = utils.mCyclesToMs(114);
 
     this.warnedWideTiles = false;
-    this.warnedAttrs = false;
   }
 
   handleLY(timeMs: number) {
@@ -81,8 +79,22 @@ export class Video {
     }
   }
 
-  getColorMap(): ColorMap {
-    let paletteByte = this.memory.getBGP();
+  getColorMapBgOrWindow() {
+    return this.getColorMap(this.memory.getBGP());
+  }
+
+  getColorMapObject(obp0: boolean) {
+    const colorMap = this.getColorMap(
+      obp0 ? this.memory.getOBP0() : this.memory.getOBP1()
+    );
+
+    // Index 0 is transparent for objects
+    colorMap[0][3] = 0;
+
+    return colorMap;
+  }
+
+  private getColorMap(paletteByte: number): ColorMap {
     const palette: ColorMap = [
       this.colorMap[(paletteByte >> 0) & 0b11],
       this.colorMap[(paletteByte >> 2) & 0b11],
@@ -218,7 +230,7 @@ export class Video {
         let tilePointer = this.getTilePointer(row, col);
         this.renderTile(
           image,
-          this.getColorMap(),
+          this.getColorMapBgOrWindow(),
           this.getTile(tilePointer),
           col * 8,
           row * 8,
@@ -248,30 +260,21 @@ export class Video {
       const tileIndex = this.memory.getByte(spriteAddress + 2);
 
       const attrs = this.memory.getByte(spriteAddress + 3);
-      const paletteOBP1 = Boolean(utils.getBit(attrs, 4));
+      const paletteOBP0 = !Boolean(utils.getBit(attrs, 4));
       const flipX = Boolean(utils.getBit(attrs, 5));
       const flipY = Boolean(utils.getBit(attrs, 6));
       const overlapBGAndWindow = Boolean(utils.getBit(attrs, 7));
 
-      if (!this.warnedAttrs && (paletteOBP1 || overlapBGAndWindow)) {
-        console.warn(
-          `Object attributes paletteNumber or color overlapping were used but are not implemented: ${utils.binString(
-            attrs
-          )}`
-        );
-        this.warnedAttrs = true;
-      }
-
       // TODO support 8x16 tiles
       this.renderTile(
         image,
-        this.getColorMap(),
+        this.getColorMapObject(paletteOBP0),
         0x8000 + tileIndex * 16,
         x,
         y,
         0,
         0,
-        paletteOBP1,
+        paletteOBP0,
         flipX,
         flipY,
         overlapBGAndWindow

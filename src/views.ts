@@ -198,7 +198,7 @@ export class TileDataView extends View {
         tileEl.setAttribute("width", "8");
         tileEl.setAttribute("height", "8");
 
-        let colorMap = this.video.getColorMap();
+        let colorMap = this.video.getColorMapBgOrWindow();
         if (row === this.highlightedRow && col === this.highlightedCol) {
           colorMap = [
             [255, 255, 255, 255],
