@@ -28,6 +28,7 @@ export class Memory {
   static SCX = 0xff43;
   static LY = 0xff44;
   static LYC = 0xff45;
+  static BGP = 0xff47;
   static WY = 0xff4a;
   static WX = 0xff4b;
   static IF = 0xff0f;
@@ -453,6 +454,10 @@ export class Memory {
 
   getLCDC() {
     return this.getByte(Memory.LCDC);
+  }
+
+  getBGP() {
+    return this.getByte(Memory.BGP);
   }
 
   incDivider() {

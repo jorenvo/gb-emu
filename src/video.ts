@@ -81,8 +81,16 @@ export class Video {
     }
   }
 
-  getColorMap() {
-    return this.colorMap;
+  getColorMap(): ColorMap {
+    let paletteByte = this.memory.getBGP();
+    const palette: ColorMap = [
+      this.colorMap[(paletteByte >> 0) & 0b11],
+      this.colorMap[(paletteByte >> 2) & 0b11],
+      this.colorMap[(paletteByte >> 4) & 0b11],
+      this.colorMap[(paletteByte >> 6) & 0b11],
+    ];
+
+    return palette;
   }
 
   getTileDataStart(): number {
@@ -210,7 +218,7 @@ export class Video {
         let tilePointer = this.getTilePointer(row, col);
         this.renderTile(
           image,
-          this.colorMap,
+          this.getColorMap(),
           this.getTile(tilePointer),
           col * 8,
           row * 8,
@@ -257,7 +265,7 @@ export class Video {
       // TODO support 8x16 tiles
       this.renderTile(
         image,
-        this.colorMap,
+        this.getColorMap(),
         0x8000 + tileIndex * 16,
         x,
         y,
