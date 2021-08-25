@@ -163,7 +163,6 @@ export class Video {
     y: number,
     scx: number,
     scy: number,
-    attrPaletteOBP1: boolean,
     attrFlipX: boolean,
     attrFlipY: boolean,
     overlapBGAndWindow: boolean
@@ -238,7 +237,6 @@ export class Video {
           this.memory.getSCY(),
           false,
           false,
-          false,
           false
         );
       }
@@ -274,7 +272,6 @@ export class Video {
         y,
         0,
         0,
-        paletteOBP0,
         flipX,
         flipY,
         overlapBGAndWindow

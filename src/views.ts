@@ -221,7 +221,6 @@ export class TileDataView extends View {
           0,
           false,
           false,
-          false,
           false
         );
         ctx.putImageData(imgData, 0, 0);
