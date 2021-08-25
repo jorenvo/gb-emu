@@ -9,6 +9,11 @@ export class Video {
   private memory: Memory;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+
+  private colorWhite: RGBA;
+  private colorLightGray: RGBA;
+  private colorDarkGray: RGBA;
+  private colorBlack: RGBA;
   private colorMap: ColorMap;
 
   private nextVLineStartMs: number;
@@ -30,11 +35,15 @@ export class Video {
 
     this.ctx = this.canvas.getContext("2d")!;
 
+    this.colorWhite = [255, 255, 255, 255]; // 0b00
+    this.colorLightGray = [170, 170, 170, 255]; // 0b01
+    this.colorDarkGray = [85, 85, 85, 255]; // 0b10
+    this.colorBlack = [0, 0, 0, 255]; // 0b11
     this.colorMap = [
-      [255, 255, 255, 255], // 0b00
-      [170, 170, 170, 255], // 0b01
-      [85, 85, 85, 255], // 0b10
-      [0, 0, 0, 255], // 0b11
+      this.colorWhite,
+      this.colorLightGray,
+      this.colorDarkGray,
+      this.colorBlack,
     ];
 
     // this.frameDurationMs = 1_000 / 59.73; // 59.73 Hz
@@ -133,15 +142,12 @@ export class Video {
     x: number,
     y: number,
     scx: number,
-    scy: number
+    scy: number,
+    attrPaletteOBP1: boolean,
+    attrFlipX: boolean,
+    attrFlipY: boolean,
+    overlapBGAndWindow: boolean
   ) {
-    // is 0x8bf0
-    ThrottledLogger.log(
-      `starting render from ${utils.hexString(
-        tileStart,
-        16
-      )} with lcdc ${utils.binString(this.memory.getLCDC())}`
-    );
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
       const lsb = this.memory.getByte(tileStart + byte);
@@ -150,8 +156,31 @@ export class Video {
       for (let bit = 7; bit >= 0; bit--) {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
         const color = colorMap[colorGB];
-        let colorCoordX = this.wrapToScreenCoords(x - scx + Math.abs(bit - 7));
-        let colorCoordY = this.wrapToScreenCoords(y - scy + byte / 2);
+        if (
+          overlapBGAndWindow &&
+          !(
+            color[0] === colorMap[1][0] ||
+            color[0] === colorMap[2][0] ||
+            color[0] === colorMap[3][0]
+          )
+        ) {
+          ThrottledLogger.log(
+            `!UNTESTED! Overlapping at ${utils.hexString(tileStart, 16)}`
+          );
+          continue;
+        }
+
+        let tileX = Math.abs(bit - 7);
+        if (attrFlipX) {
+          tileX = 7 - tileX;
+        }
+        let tileY = byte / 2;
+        if (attrFlipY) {
+          tileY = 7 - tileY;
+        }
+
+        let colorCoordX = this.wrapToScreenCoords(x - scx + tileX);
+        let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
         for (let i = 0; i < 4; i++) {
@@ -186,7 +215,11 @@ export class Video {
           col * 8,
           row * 8,
           this.memory.getSCX(),
-          this.memory.getSCY()
+          this.memory.getSCY(),
+          false,
+          false,
+          false,
+          false
         );
       }
     }
@@ -205,9 +238,19 @@ export class Video {
         this.memory.getByte(spriteAddress + 1) - 8
       );
       const tileIndex = this.memory.getByte(spriteAddress + 2);
-      const attrs = this.memory.getByte(spriteAddress + 3); // TODO use this
-      if (!this.warnedAttrs && attrs & 0b1111_0000) {
-        console.warn("Object attributes are set but not implemented.");
+
+      const attrs = this.memory.getByte(spriteAddress + 3);
+      const paletteOBP1 = Boolean(utils.getBit(attrs, 4));
+      const flipX = Boolean(utils.getBit(attrs, 5));
+      const flipY = Boolean(utils.getBit(attrs, 6));
+      const overlapBGAndWindow = Boolean(utils.getBit(attrs, 7));
+
+      if (!this.warnedAttrs && (paletteOBP1 || overlapBGAndWindow)) {
+        console.warn(
+          `Object attributes paletteNumber or color overlapping were used but are not implemented: ${utils.binString(
+            attrs
+          )}`
+        );
         this.warnedAttrs = true;
       }
 
@@ -219,7 +262,11 @@ export class Video {
         x,
         y,
         0,
-        0
+        0,
+        paletteOBP1,
+        flipX,
+        flipY,
+        overlapBGAndWindow
       );
     }
   }

@@ -211,7 +211,19 @@ export class TileDataView extends View {
         const ctx = tileEl.getContext("2d")!;
         const imgData = ctx.createImageData(8, 8);
         const ptr = tileDataStart + (row * 16 + col) * 16;
-        this.video.renderTile(imgData, colorMap, ptr, 0, 0, 0, 0);
+        this.video.renderTile(
+          imgData,
+          colorMap,
+          ptr,
+          0,
+          0,
+          0,
+          0,
+          false,
+          false,
+          false,
+          false
+        );
         ctx.putImageData(imgData, 0, 0);
         rowEl.appendChild(tileEl);
       }

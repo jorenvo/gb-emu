@@ -62,3 +62,5 @@ Debugging Dr. Mario tile rendering
                                                 A P
 When debug tiledata is rendered LCDC is 0b1 0 0 0 0 0 1 1.
                                           7 6 5 4 3 2 1 0
+
+0b01000000
