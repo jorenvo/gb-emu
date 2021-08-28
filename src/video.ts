@@ -175,6 +175,15 @@ export class Video {
       for (let bit = 7; bit >= 0; bit--) {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
         const color = colorMap[colorGB];
+
+        // Skip if the color is transparent.
+        // The 2d rendering context uses the standard source-over compositing mode,
+        // so drawing a transparent (alpha 0) pixel doesn't maintain the existing color
+        // it instead turns the pixel white.
+        if (color[3] === 0) {
+          continue;
+        }
+
         let tileX = Math.abs(bit - 7);
         if (attrFlipX) {
           tileX = 7 - tileX;
