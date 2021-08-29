@@ -24,7 +24,8 @@ export class CPU {
   private _regs: Uint8Array;
 
   private tickCounter: number;
-  private cycleCounter: number;
+  private dividerCycleCounter: number;
+  private timerCycleCounter: number;
 
   private _controller: Controller | undefined;
 
@@ -40,7 +41,8 @@ export class CPU {
     // F (flags, 0x6)   A (accumulator, 0x7)
     this._regs = new Uint8Array(new Array(8));
     this.tickCounter = 0;
-    this.cycleCounter = 0;
+    this.dividerCycleCounter = 0;
+    this.timerCycleCounter = 0;
   }
 
   setController(controller: Controller) {
@@ -279,6 +281,34 @@ export class CPU {
     }
   }
 
+  private handleDivider(memory: Memory, cycles: number) {
+    this.dividerCycleCounter += cycles;
+
+    // DIV increments at 16_384/s, the CPU runs at 4_194_304 cycles/s.
+    // (4_194_304 cycles/s) / (16_384/s) = 256 cycles
+    if (this.dividerCycleCounter >= 256) {
+      memory.incDivider();
+      this.dividerCycleCounter %= 256; // TODO = 0
+    }
+  }
+
+  private handleTimer(memory: Memory, cycles: number) {
+    if (!memory.timerEnabled()) {
+      return;
+    }
+
+    this.timerCycleCounter += cycles;
+
+    const incrementFreq = memory.getTimerFreq();
+    if (this.timerCycleCounter >= incrementFreq) {
+      const overflowed = memory.incTimer();
+      if (overflowed) {
+        memory.interruptTimer();
+      }
+      this.timerCycleCounter = 0;
+    }
+  }
+
   tick(memory: Memory) {
     this.handleInterrupts(memory);
 
@@ -293,14 +323,8 @@ export class CPU {
 
     this.tickCounter++;
     const cycles = currentInstruction.execAndIncrementPC(this, memory);
-    this.cycleCounter += cycles;
-
-    // DIV increments at 16_384/s, the CPU runs at 4_194_304 cycles/s.
-    // (4_194_304 cycles/s) / (16_384/s) = 256 cycles
-    if (this.cycleCounter >= 256) {
-      memory.incDivider();
-      this.cycleCounter %= 256;
-    }
+    this.handleDivider(memory, cycles);
+    this.handleTimer(memory, cycles);
 
     if (this.enableIMETick === this.tickCounter) {
       this.IME = true;

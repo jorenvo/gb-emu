@@ -59,8 +59,6 @@ export class Memory {
   ram: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
-  private warnedTIMA: boolean;
-
   private ioJoyPadState: JoyPadState;
   private ioKeyB: boolean;
   private ioKeyA: boolean;
@@ -89,8 +87,6 @@ export class Memory {
 
     this.bankToAddressToInstruction = this.disassemble();
     this.nrBanks = this.romBanks.length;
-
-    this.warnedTIMA = false;
 
     this.ioJoyPadState = JoyPadState.INACTIVE;
     this.ioKeyB = false;
@@ -303,11 +299,6 @@ export class Memory {
   }
 
   getByte(address: number): number {
-    if (!this.warnedTIMA && address === Memory.TIMA) {
-      console.warn("TIMA accessed but not implemented.");
-      this.warnedTIMA = true;
-    }
-
     if (address === Memory.IO) {
       return this.getIORegister();
     }
@@ -476,33 +467,37 @@ export class Memory {
     this.controller.updatedMemReg(Memory.DIV);
   }
 
-  incTIMA(ms: number) {
-    const tac = this.getByte(Memory.TAC);
-    if (tac >> 2) {
-      let hz = 0;
-      switch (tac & 0b11) {
-        case 0b00:
-          hz = 4_096;
-          break;
-        case 0b01:
-          hz = 262_144;
-          break;
-        case 0b10:
-          hz = 65_536;
-          break;
-        case 0b11:
-          hz = 16_384;
-          break;
-      }
+  timerEnabled() {
+    return Boolean(this.getByte(Memory.TAC) & 0b100);
+  }
 
-      const inc = Math.floor(ms / (100 / hz));
-      const tima = this.getByte(Memory.TIMA);
-
-      if ((inc + tima) >> 8) {
-        this.setByte(Memory.TIMA, this.getByte(Memory.TMA));
-        this.interruptTimer();
-      }
+  getTimerFreq() {
+    // In Hz
+    switch (this.getByte(Memory.TAC) & 0b11) {
+      case 0b00:
+        return 4_096;
+      case 0b01:
+        return 262_144;
+      case 0b10:
+        return 65_536;
+      default:
+        return 16_384;
     }
+  }
+
+  incTimer(): boolean {
+    // Returns if overflowed
+    let overflowed = false;
+    const tima = this.getByte(Memory.TIMA);
+
+    if (tima === 0xff) {
+      overflowed = true;
+      this.setByte(Memory.TIMA, this.getByte(Memory.TMA));
+    } else {
+      this.setByte(Memory.TIMA, tima + 1);
+    }
+
+    return overflowed;
   }
 
   private getIORegister() {
