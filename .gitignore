@@ -3,3 +3,4 @@ dist
 *.pem
 /src/roms.ts
 /compare_bootrom/mine.txt
+.DS_Store
