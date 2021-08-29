@@ -471,17 +471,17 @@ export class Memory {
     return Boolean(this.getByte(Memory.TAC) & 0b100);
   }
 
-  getTimerFreq() {
+  cyclesPerInc() {
     // In Hz
     switch (this.getByte(Memory.TAC) & 0b11) {
       case 0b00:
-        return 4_096;
+        return 1_024; // 4_096 Hz
       case 0b01:
-        return 262_144;
+        return 16; // 262_144 Hz
       case 0b10:
-        return 65_536;
+        return 64; // 65_536 Hz
       default:
-        return 16_384;
+        return 256; // 16_384 Hz
     }
   }
 

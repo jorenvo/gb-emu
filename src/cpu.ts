@@ -288,7 +288,10 @@ export class CPU {
     // (4_194_304 cycles/s) / (16_384/s) = 256 cycles
     if (this.dividerCycleCounter >= 256) {
       memory.incDivider();
-      this.dividerCycleCounter %= 256; // TODO = 0
+      // Cannot set equal to zero because added instruction count cycles
+      // won't exactly match 256, keep the remainder to avoid subtle timing
+      // issues.
+      this.dividerCycleCounter %= 256;
     }
   }
 
@@ -299,8 +302,8 @@ export class CPU {
 
     this.timerCycleCounter += cycles;
 
-    const incrementFreq = memory.getTimerFreq();
-    if (this.timerCycleCounter >= incrementFreq) {
+    const cyclesPerInc = memory.cyclesPerInc();
+    if (this.timerCycleCounter >= cyclesPerInc) {
       const overflowed = memory.incTimer();
       if (overflowed) {
         memory.interruptTimer();
