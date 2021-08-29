@@ -572,6 +572,12 @@ export abstract class Button {
   }
 }
 
+export class DebugToggleButton extends Button {
+  click(_e: MouseEvent): void {
+    this.controller.toggleDebugging();
+  }
+}
+
 export class PauseButton extends Button {
   click(_e: MouseEvent): void {
     this.controller.togglePause();

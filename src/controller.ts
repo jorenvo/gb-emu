@@ -23,6 +23,7 @@ import {
   BreakpointSetter,
   PCFileButton,
   KeyboardInputView,
+  DebugToggleButton,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 
@@ -35,6 +36,7 @@ declare global {
 export abstract class Controller {
   public abstract runBootRom(): void;
   public abstract togglePause(): void;
+  public abstract toggleDebugging(): void;
   public abstract stepNext(): void;
   public abstract setBreakpoint(address: number): void;
   public abstract setBreakpointBank(bank: number): void;
@@ -66,6 +68,7 @@ export abstract class Controller {
 export class ControllerMock {
   public runBootRom(): void {}
   public togglePause(): void {}
+  public toggleDebugging(): void {}
   public stepNext(): void {}
   public setBreakpoint(_address: number): void {}
   public setBreakpointBank(_bank: number): void {}
@@ -131,6 +134,7 @@ export class ControllerReal implements Controller {
   private keyboardInputView: KeyboardInputView | undefined;
 
   // buttons
+  private debugToggleButton: DebugToggleButton;
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
@@ -138,6 +142,7 @@ export class ControllerReal implements Controller {
   private pcDownloadButton: PCFileButton;
 
   // input
+  private debuggingEnabled: boolean;
   private breakpointSetter: BreakpointSetter;
 
   // necessary in case emu is not yet running
@@ -155,7 +160,9 @@ export class ControllerReal implements Controller {
     this.toUpdate = new Set();
     this.recentInstructions = [];
     this.recentInstructionsCounter = new Map();
+    this.debuggingEnabled = true;
 
+    this.debugToggleButton = new DebugToggleButton("debugToggle", this);
     this.pauseButton = new PauseButton("pause", this);
     this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
@@ -341,6 +348,10 @@ export class ControllerReal implements Controller {
     this.boot(new Uint8Array());
   }
 
+  public toggleDebugging() {
+    this.debuggingEnabled = !this.debuggingEnabled;
+  }
+
   public togglePause() {
     this.emu!.togglePause();
   }
@@ -366,6 +377,10 @@ export class ControllerReal implements Controller {
   }
 
   private updatePending() {
+    if (!this.debuggingEnabled) {
+      return;
+    }
+
     this.toUpdate.forEach((view) => {
       view.update();
     });
@@ -508,6 +523,10 @@ export class ControllerReal implements Controller {
   }
 
   public movedPC(newAddr: number) {
+    if (!this.debuggingEnabled) {
+      return;
+    }
+
     if (this.emu!.memory.bank !== -1) {
       this.pcLogger.log(newAddr); // TODO only if not in interrupt
     }
