@@ -410,6 +410,8 @@ export class Memory {
       address >= Memory.WORKRAMSTART &&
       address <= Memory.WORKRAMSTART + Memory.WORKRAMSIZE
     ) {
+      // Clear RAM that has been disassembled for debug purposes
+      this.clearDisassembledRam();
       // this.controller.updatedWorkRam(); // TODO: this is way too expensive
     }
 
