@@ -26,6 +26,7 @@ import {
   DebugToggleButton,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
+import * as utils from "./utils.js";
 
 declare global {
   interface Window {
@@ -477,7 +478,8 @@ export class ControllerReal implements Controller {
       addr < startAddress + Memory.WORKRAMSIZE && addr <= 0xffff;
       addr++
     ) {
-      if (memory.getInstruction(addr, ramBank) !== undefined) {
+      const instruction = memory.getInstruction(addr, ramBank);
+      if (instruction !== undefined) {
         const view = new MemoryView(
           bankView,
           addr,
@@ -486,6 +488,7 @@ export class ControllerReal implements Controller {
           this
         );
         this.memoryViews!.set(this.createMemoryViewKey(ramBank, addr), view);
+        this.instructionToMemoryView!.set(instruction, view);
         this.toUpdate.add(view);
       }
     }
@@ -565,7 +568,11 @@ export class ControllerReal implements Controller {
           oldInstruction.recentlyExecuted = false;
           const view = this.instructionToMemoryView!.get(oldInstruction);
           if (!view) {
-            throw new Error("No view");
+            throw new Error(
+              `No view for instruction ${oldInstruction.disassemble(
+                this.emu!.memory
+              )} at ${utils.hexString(oldInstruction.getAddress())}`
+            );
           }
           this.toUpdate.add(view);
         }
