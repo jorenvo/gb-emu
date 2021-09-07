@@ -26,6 +26,7 @@ export class CPU {
   private tickCounter: number;
   private dividerCycleCounter: number;
   private timerCycleCounter: number;
+  private isHalted: boolean;
 
   private _controller: Controller | undefined;
 
@@ -43,6 +44,7 @@ export class CPU {
     this.tickCounter = 0;
     this.dividerCycleCounter = 0;
     this.timerCycleCounter = 0;
+    this.isHalted = false;
   }
 
   setController(controller: Controller) {
@@ -98,6 +100,10 @@ export class CPU {
 
   get PC() {
     return this._PC;
+  }
+
+  halt() {
+    this.isHalted = true;
   }
 
   // Fake 16 bit registers
@@ -279,6 +285,8 @@ export class CPU {
         this.PC = 0x50;
       }
     }
+
+    this.isHalted = false; // wake up from low power state
   }
 
   private handleDivider(memory: Memory, cycles: number) {
@@ -325,7 +333,14 @@ export class CPU {
     }
 
     this.tickCounter++;
-    const cycles = currentInstruction.execAndIncrementPC(this, memory);
+
+    let cycles;
+    if (this.isHalted) {
+      cycles = 4;
+    } else {
+      cycles = currentInstruction.execAndIncrementPC(this, memory);
+    }
+
     this.handleDivider(memory, cycles);
     this.handleTimer(memory, cycles);
 
