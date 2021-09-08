@@ -244,40 +244,49 @@ export class CPU {
   }
 
   private handleInterrupts(memory: Memory) {
+    let vblank = false;
+    let coincidence = false;
+    let oam = false;
+    let timer = false;
+
+    if (memory.interruptVBlankRequested() && memory.interruptVBlankEnabled()) {
+      vblank = true;
+    } else if (
+      memory.interruptCoincidenceRequested() &&
+      memory.interruptCoincidenceEnabled()
+    ) {
+      coincidence = true;
+    } else if (memory.interruptOAMRequested() && memory.interruptOAMEnabled()) {
+      oam = true;
+    } else if (
+      memory.interruptTimerRequested() &&
+      memory.interruptTimerEnabled()
+    ) {
+      timer = true;
+    }
+
     // TODO: priorities in case multiple interrupts are requested
     if (this.IME) {
-      if (
-        memory.interruptVBlankRequested() &&
-        memory.interruptVBlankEnabled()
-      ) {
+      if (vblank) {
         // console.log("Executing VBlank interrupt");
-        this.IME = false;
+        this.disableIME();
         memory.interruptVBlankClear();
 
         this.pushPC(memory);
         this.PC = 0x40;
-      } else if (
-        memory.interruptCoincidenceRequested() &&
-        memory.interruptCoincidenceEnabled()
-      ) {
+      } else if (coincidence) {
         console.log("Executing coincidence interrupt");
         memory.interruptCoincidenceClear();
 
         this.pushPC(memory);
         this.PC = 0x48;
-      } else if (
-        memory.interruptOAMRequested() &&
-        memory.interruptOAMEnabled()
-      ) {
+      } else if (oam) {
         console.log("Executing OAM interrupt");
         memory.interruptOAMClear();
 
         this.pushPC(memory);
         this.PC = 0x48;
-      } else if (
-        memory.interruptTimerRequested() &&
-        memory.interruptTimerEnabled()
-      ) {
+      } else if (timer) {
         console.log("Executing timer interrupt");
         memory.interruptTimerClear();
 
@@ -286,7 +295,9 @@ export class CPU {
       }
     }
 
-    this.isHalted = false; // wake up from low power state
+    if (vblank || coincidence || oam || timer) {
+      this.isHalted = false; // wake up from low power state
+    }
   }
 
   private handleDivider(memory: Memory, cycles: number) {
