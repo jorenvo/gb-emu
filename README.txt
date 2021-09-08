@@ -1,4 +1,4 @@
-I won't accept contributions at this time. The fun is figuring things out myself!
+I won't accept contributions at this time.
 
 Useful links
 ============
@@ -19,14 +19,6 @@ Todo
 - When clicking on an address (left column), show all ways to get to it (calls and abs/rel jumps)
 - Optimize video rendering (cache rendered tiles, maybe selectively update screen)
 - Sound
-
-- Interrupts
-  - Timer and divider register and corresponding interrupt
-  - List:
-    - Bit 1: LCD STAT Interrupt Enable  (INT 48h)  (1=Enable) (Remaining: HBlank and VBlank)
-    - Bit 2: Timer    Interrupt Enable  (INT 50h)  (1=Enable)
-    - Bit 3: Serial   Interrupt Enable  (INT 58h)  (1=Enable)
-    - Bit 4: Joypad   Interrupt Enable  (INT 60h)  (1=Enable)
 
 MVC
 ===
@@ -54,19 +46,6 @@ MVC
     - MemoryView
   - RegisterView
 
-Debugging Dr. Mario tile rendering
-==================================
-                                                D
-                                                A M
-                                                T A
-                                                A P
-When debug tiledata is rendered LCDC is 0b1 0 0 0 0 0 1 1.
-                                          7 6 5 4 3 2 1 0
-
-0b01000000
-
-
-0x0210
-0x433d
-0xc33d
-0xc350
+Tile transparency bug
+=====================
+fc5032bd05f595e8d5fd30b213474c47dc69c742 broke Tetris. All tiles are transparent.
