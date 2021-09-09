@@ -197,16 +197,14 @@ export class Video {
         let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
-        // The object is overlapped by all background colors except the first one.
+        // The object is overlapped by the first background color.
         if (objectOverlapped) {
           const bgColor = image.data.slice(dataOffset, dataOffset + 4);
           const bgFirstColor = this.getColorMapBgOrWindow()[0];
           if (
-            !(
-              bgColor[0] == bgFirstColor[0] &&
-              bgColor[1] == bgFirstColor[1] &&
-              bgColor[2] == bgFirstColor[2]
-            )
+            bgColor[0] == bgFirstColor[0] &&
+            bgColor[1] == bgFirstColor[1] &&
+            bgColor[2] == bgFirstColor[2]
           )
             continue;
         }

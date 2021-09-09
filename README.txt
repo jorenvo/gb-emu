@@ -45,7 +45,3 @@ MVC
   - StackView
     - MemoryView
   - RegisterView
-
-Tile transparency bug
-=====================
-fc5032bd05f595e8d5fd30b213474c47dc69c742 broke Tetris. All tiles are transparent.
