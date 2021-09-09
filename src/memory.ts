@@ -393,7 +393,9 @@ export class Memory {
     }
 
     if (address < Memory.RAMSTART) {
-      throw new Error(`Can't write to rom @${utils.hexString(address, 16)}`);
+      console.debug(
+        `Writing before ram start @${utils.hexString(address, 16)}`
+      );
     }
 
     if (address >= 0x8000 && address <= 0x97ff) {
