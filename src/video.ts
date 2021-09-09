@@ -1,5 +1,4 @@
 import { Memory } from "./memory.js";
-import ThrottledLogger from "./throttledlogger.js";
 import * as utils from "./utils.js";
 
 type RGBA = [number, number, number, number];
