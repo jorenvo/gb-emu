@@ -45,3 +45,8 @@ MVC
   - StackView
     - MemoryView
   - RegisterView
+
+Dr. Mario crashes when clearing pills
+=====================================
+On 0x8613: "LD ($0x141c), A" (OpLdAToA16 {address: 34323, executions: 0, recentlyExecuted: false})
+Error: Can't write to rom @0x141c
