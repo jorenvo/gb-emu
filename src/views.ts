@@ -231,6 +231,24 @@ export class TileDataView extends View {
   }
 }
 
+export class BankSelectionView extends View {
+  memory: Memory;
+
+  constructor(elementID: string, memory: Memory) {
+    super(elementID, undefined, "bankSelectionView");
+    this.memory = memory;
+  }
+
+  update() {
+    for (let bank = 0; bank < this.memory.nrBanks; bank++) {
+      let option = document.createElement("option");
+      option.setAttribute("value", `${bank}`);
+      option.innerText = `Bank ${bank}`;
+      this.element.appendChild(option);
+    }
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   bank: number;

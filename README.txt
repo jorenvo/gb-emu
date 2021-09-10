@@ -45,3 +45,7 @@ MVC
   - StackView
     - MemoryView
   - RegisterView
+
+Limit debug instruction memory views
+====================================
+Warioworld ends up with 387,044 memoryview elements.

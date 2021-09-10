@@ -24,6 +24,7 @@ import {
   PCFileButton,
   KeyboardInputView,
   DebugToggleButton,
+  BankSelectionView,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -136,6 +137,7 @@ export class ControllerReal implements Controller {
 
   // buttons
   private debugToggleButton: DebugToggleButton;
+  private bankSelection: BankSelectionView | undefined;
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
@@ -179,6 +181,10 @@ export class ControllerReal implements Controller {
     this.emu = new Emulator(this, bytes);
     window.controller = this;
 
+    this.bankSelection = new BankSelectionView(
+      "bankSelection",
+      this.emu.memory
+    );
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankNrView = new BankNrView("bankNr", this.emu.memory);
     this.addrToMemRegView = this.createMemRegisterViews(this.emu.memory);
@@ -227,6 +233,7 @@ export class ControllerReal implements Controller {
       this.toUpdate.add(view);
     }
 
+    this.toUpdate.add(this.bankSelection!);
     this.toUpdate.add(this.stackView!);
     this.toUpdate.add(this.tileMapView!);
     this.toUpdate.add(this.tileDataView!);
