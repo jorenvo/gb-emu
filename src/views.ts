@@ -83,7 +83,7 @@ export class BankNrView extends View {
   }
 
   update() {
-    this.element.innerHTML = `BNK: ${this.memory.bank}`;
+    this.element.innerHTML = `BNK: ${utils.decString(this.memory.bank, 2)}`;
   }
 }
 
