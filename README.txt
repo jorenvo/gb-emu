@@ -45,3 +45,7 @@ MVC
   - StackView
     - MemoryView
   - RegisterView
+
+Dr. Mario resets when clearing pills
+====================================
+a3a57fa9c1ec2ef5ccb1696baf1a92a249453c22 is the first bad commit.
