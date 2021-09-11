@@ -162,8 +162,10 @@ export class ControllerReal implements Controller {
   private breakpoint: number | undefined;
   private breakpointBank: number | undefined;
 
-  private toUpdate: Set<View>;
-  private nextUpdate: number | undefined;
+  private toUpdateFast: Set<View>;
+  private toUpdateSlow: Set<View>;
+  private nextUpdateFast: number | undefined;
+  private nextUpdateSlow: number | undefined;
 
   private shownBank: number;
 
@@ -172,7 +174,8 @@ export class ControllerReal implements Controller {
   constructor() {
     this.loader = new Loader();
     this.loader.readFile.then((rom) => this.boot(new Uint8Array(rom)));
-    this.toUpdate = new Set();
+    this.toUpdateFast = new Set();
+    this.toUpdateSlow = new Set();
     this.recentInstructions = [];
     this.recentInstructionsCounter = new Map();
     this.debuggingEnabled = true;
@@ -220,9 +223,10 @@ export class ControllerReal implements Controller {
 
     this.keyboardInputView = new KeyboardInputView("video", this);
 
-    this.toUpdate = new Set();
+    this.toUpdateFast = new Set();
     this.markAllUpdated();
-    this.updateLoop();
+    this.updateLoopFast();
+    this.updateLoopSlow();
 
     this.emu.setBreakpoint(this.breakpoint);
     this.breakpoint = undefined;
@@ -234,30 +238,30 @@ export class ControllerReal implements Controller {
 
   private markAllUpdated() {
     for (const view of this.registerViews!.values()) {
-      this.toUpdate.add(view);
+      this.toUpdateFast.add(view);
     }
 
-    this.toUpdate.add(this.bankNrView!);
+    this.toUpdateFast.add(this.bankNrView!);
 
     for (const view of this.addrToMemRegView!.values()) {
-      this.toUpdate.add(view);
+      this.toUpdateFast.add(view);
     }
 
-    this.toUpdate.add(this.SPView!);
+    this.toUpdateFast.add(this.SPView!);
 
     for (const view of this.bankViews!.values()) {
-      this.toUpdate.add(view);
+      this.toUpdateFast.add(view);
     }
 
-    this.toUpdate.add(this.bankSelection!);
-    this.toUpdate.add(this.stackView!);
-    this.toUpdate.add(this.tileMapView!);
-    this.toUpdate.add(this.tileDataView!);
+    this.toUpdateFast.add(this.bankSelection!);
+    this.toUpdateFast.add(this.stackView!);
+    this.toUpdateFast.add(this.tileMapView!);
+    this.toUpdateFast.add(this.tileDataView!);
 
     // Updates happen in insertion order, keep this last in case of
     // disassemble errors.
     for (const view of this.memoryViews!.values()) {
-      this.toUpdate.add(view);
+      this.toUpdateFast.add(view);
     }
   }
 
@@ -400,20 +404,28 @@ export class ControllerReal implements Controller {
     }
   }
 
-  private updatePending() {
+  private updatePending(views: Set<View>) {
     if (!this.debuggingEnabled) {
       return;
     }
-
-    this.toUpdate.forEach((view) => {
-      view.update();
-    });
-    this.toUpdate.clear();
+    views.forEach((view) => view.update());
+    views.clear();
   }
 
-  private updateLoop() {
-    this.updatePending();
-    this.nextUpdate = window.setTimeout(this.updateLoop.bind(this), 1_000 / 60);
+  private updateLoopFast() {
+    this.updatePending(this.toUpdateFast);
+    this.nextUpdateFast = window.setTimeout(
+      this.updateLoopFast.bind(this),
+      1_000 / 60
+    );
+  }
+
+  private updateLoopSlow() {
+    this.updatePending(this.toUpdateSlow);
+    this.nextUpdateSlow = window.setTimeout(
+      this.updateLoopSlow.bind(this),
+      1_000 / 5
+    );
   }
 
   // Updated functions
@@ -423,11 +435,11 @@ export class ControllerReal implements Controller {
       throw new Error(`Unknown reg ${reg}`);
     }
 
-    this.toUpdate.add(view);
+    this.toUpdateFast.add(view);
   }
 
   public updatedSP() {
-    this.toUpdate.add(this.SPView!);
+    this.toUpdateFast.add(this.SPView!);
   }
 
   private getMemoryView(
@@ -442,39 +454,39 @@ export class ControllerReal implements Controller {
   }
 
   public updatedStack() {
-    this.toUpdate.add(this.stackView!);
+    this.toUpdateFast.add(this.stackView!);
   }
 
   public updatedMemReg(address: number) {
     const view = this.addrToMemRegView!.get(address);
     if (view) {
-      this.toUpdate.add(view);
+      this.toUpdateFast.add(view);
     }
   }
 
   public updatedTileMapPointers() {
-    this.toUpdate.add(this.tileMapView!);
+    this.toUpdateFast.add(this.tileMapView!);
   }
 
   public updatedAllTileData() {
-    this.toUpdate.add(this.tileDataView!);
+    this.toUpdateFast.add(this.tileDataView!);
   }
 
   public updatedTileData(address: number) {
     const tileData = this.addrToTileDataView!.get(address)!;
     if (!tileData) debugger;
-    this.toUpdate.add(tileData);
+    this.toUpdateFast.add(tileData);
   }
 
   public highlightTile(pointer: number) {
     let [col, row] = this.emu!.video.getTileColRow(pointer);
     this.tileDataView!.highlight(col, row);
-    this.toUpdate.add(this.tileDataView!);
+    this.toUpdateFast.add(this.tileDataView!);
   }
 
   public clearHighlightTile() {
     this.tileDataView!.clearHighlight();
-    this.toUpdate.add(this.tileDataView!);
+    this.toUpdateFast.add(this.tileDataView!);
   }
 
   public updatedWorkRam() {
@@ -518,7 +530,7 @@ export class ControllerReal implements Controller {
         );
         this.memoryViews!.set(this.createMemoryViewKey(ramBank, addr), view);
         this.instructionToMemoryView!.set(instruction, view);
-        this.toUpdate.add(view);
+        this.toUpdateFast.add(view);
       }
     }
   }
@@ -542,8 +554,8 @@ export class ControllerReal implements Controller {
 
   public showBank(bank: number) {
     this.shownBank = bank;
-    this.bankViews!.forEach((bankView) => this.toUpdate.add(bankView));
-    this.toUpdate.add(this.bankSelection!);
+    this.bankViews!.forEach((bankView) => this.toUpdateFast.add(bankView));
+    this.toUpdateFast.add(this.bankSelection!);
   }
 
   public getShownBank(): number {
@@ -562,7 +574,7 @@ export class ControllerReal implements Controller {
   public changedBank(bankNr: number): void {
     // TODO: this is called a lot when initially disassembling by the
     // MemoryView views.
-    this.toUpdate.add(this.bankNrView!);
+    this.toUpdateFast.add(this.bankNrView!);
   }
 
   public movedPC(newAddr: number) {
@@ -578,7 +590,7 @@ export class ControllerReal implements Controller {
     if (this.emu!.memory.bank !== -1) {
       this.pcLogger.log(newAddr); // TODO only if not in interrupt
     }
-    this.toUpdate.add(this.PCView!);
+    this.toUpdateFast.add(this.PCView!);
 
     // TODO: Emulator should do this
     if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
@@ -619,7 +631,7 @@ export class ControllerReal implements Controller {
               )} at ${utils.hexString(oldInstruction.getAddress())}`
             );
           }
-          this.toUpdate.add(view);
+          this.toUpdateSlow.add(view);
         }
 
         this.recentInstructionsCounter.set(oldInstruction, timesInList);
@@ -632,14 +644,14 @@ export class ControllerReal implements Controller {
     instruction.recentlyExecuted = true;
 
     if (this.prevPCMemoryView) {
-      this.toUpdate.add(this.prevPCMemoryView);
+      this.toUpdateSlow.add(this.prevPCMemoryView);
     }
 
     const newView = this.getMemoryView(newAddr)!;
-    this.toUpdate.add(newView);
+    this.toUpdateSlow.add(newView);
     this.prevPCMemoryView = newView;
 
-    this.toUpdate.add(this.executionThreadView!);
+    this.toUpdateFast.add(this.executionThreadView!);
   }
 
   public getRecentInstructions() {
