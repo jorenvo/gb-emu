@@ -24,7 +24,7 @@ import {
   PCFileButton,
   KeyboardInputView,
   DebugToggleButton,
-  BankSelectionView,
+  BankSelector,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -53,8 +53,10 @@ export abstract class Controller {
   public abstract updatedWorkRam(): void;
   public abstract viewAddress(address: number, bank: number): void;
   public abstract getActiveBankView(): BankView | undefined;
+  public abstract showBank(bank: number): void;
+  public abstract getShownBank(): number;
   public abstract movedPC(newAddr: number): void;
-  public abstract changedBank(): void;
+  public abstract changedBank(bankNr: number): void;
   public abstract getRecentInstructions(): Instruction[];
   public abstract downloadPCLog(): void;
   public abstract keyPressB(down: boolean): void;
@@ -87,8 +89,12 @@ export class ControllerMock {
   public getActiveBankView(): BankView | undefined {
     return undefined;
   }
+  public showBank(bank: number): void {}
+  public getShownBank(): number {
+    return -1;
+  }
   public movedPC(_newAddr: number): void {}
-  public changedBank(): void {}
+  public changedBank(bankNr: number): void {}
   public getRecentInstructions(): Instruction[] {
     return [];
   }
@@ -137,7 +143,7 @@ export class ControllerReal implements Controller {
 
   // buttons
   private debugToggleButton: DebugToggleButton;
-  private bankSelection: BankSelectionView | undefined;
+  private bankSelection: BankSelector | undefined;
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
   private stepNextButton: StepNextButton;
@@ -154,6 +160,8 @@ export class ControllerReal implements Controller {
 
   private toUpdate: Set<View>;
   private nextUpdate: number | undefined;
+
+  private shownBank: number;
 
   private pcLogger: FileLogger;
 
@@ -174,6 +182,7 @@ export class ControllerReal implements Controller {
     this.breakpointSetter = new BreakpointSetter("breakpoint", this);
 
     this.pcLogger = new FileLogger();
+    this.shownBank = -1;
   }
 
   private boot(bytes: Uint8Array) {
@@ -181,9 +190,10 @@ export class ControllerReal implements Controller {
     this.emu = new Emulator(this, bytes);
     window.controller = this;
 
-    this.bankSelection = new BankSelectionView(
+    this.bankSelection = new BankSelector(
       "bankSelection",
-      this.emu.memory
+      this.emu.memory,
+      this
     );
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankNrView = new BankNrView("bankNr", this.emu.memory);
@@ -308,10 +318,10 @@ export class ControllerReal implements Controller {
     const views = new Map();
 
     for (let bank = -1; bank < memory.nrBanks; ++bank) {
-      views.set(bank, new BankView(bank, memory, parent));
+      views.set(bank, new BankView(bank, memory, parent, this));
     }
 
-    views.set(-2, new BankView(-2, memory, parent)); // TODO: -2 is RAM, do something less hacky
+    views.set(-2, new BankView(-2, memory, parent, this)); // TODO: -2 is RAM, do something less hacky
 
     return views;
   }
@@ -503,6 +513,7 @@ export class ControllerReal implements Controller {
 
   public viewAddress(address: number, bank: number) {
     const view = this.getMemoryView(address, bank);
+    this.showBank(bank);
     if (view) {
       // ROM
       view.centerInBankView(true);
@@ -517,6 +528,16 @@ export class ControllerReal implements Controller {
     return this.bankViews!.get(this.emu!.memory.bank);
   }
 
+  public showBank(bank: number) {
+    this.shownBank = bank;
+    this.bankViews!.forEach((bankView) => this.toUpdate.add(bankView));
+    this.toUpdate.add(this.bankSelection!);
+  }
+
+  public getShownBank(): number {
+    return this.shownBank;
+  }
+
   private incrementRecentInstructionCounter(instruction: Instruction) {
     if (!this.recentInstructionsCounter.has(instruction)) {
       this.recentInstructionsCounter.set(instruction, 0);
@@ -526,7 +547,7 @@ export class ControllerReal implements Controller {
     this.recentInstructionsCounter.set(instruction, prev + 1);
   }
 
-  public changedBank(): void {
+  public changedBank(bankNr: number): void {
     // TODO: this is called a lot when initially disassembling by the
     // MemoryView views.
     this.toUpdate.add(this.bankNrView!);
@@ -535,6 +556,11 @@ export class ControllerReal implements Controller {
   public movedPC(newAddr: number) {
     if (!this.debuggingEnabled) {
       return;
+    }
+
+    const activeBank = this.emu!.memory.getBankNrBasedOnAddress(newAddr);
+    if (this.shownBank !== activeBank) {
+      this.showBank(activeBank);
     }
 
     if (this.emu!.memory.bank !== -1) {

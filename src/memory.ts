@@ -294,7 +294,7 @@ export class Memory {
   }
 
   setBank(bank: number) {
-    this.controller.changedBank();
+    this.controller.changedBank(bank);
     this.bank = bank;
   }
 

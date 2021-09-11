@@ -1,9 +1,9 @@
 /* color palette: https://colorhunt.co/palette/220258 */
 :root {
-    --color-green: rgb(138, 203, 174);
-    --color-yellow: rgb(240, 230, 181);
-    --color-orange: rgb(234, 161, 77);
-    --color-red: rgb(228, 58, 59);
+  --color-green: rgb(138, 203, 174);
+  --color-yellow: rgb(240, 230, 181);
+  --color-orange: rgb(234, 161, 77);
+  --color-red: rgb(228, 58, 59);
 }
 
 * {
@@ -13,108 +13,114 @@
 }
 
 .debugColumns {
-    width: 1000px;
+  width: 1000px;
 }
 
 .debugColumns > div {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 #memoryBanks {
-    display: flex;
+  display: flex;
 }
 
 #memoryBanks > span {
-    width: 200px;
+  width: 200px;
 }
 
 #memoryBanks .activeBank {
-    /* background-color: lightgreen; */
+  /* background-color: lightgreen; */
 }
 
 #memoryBanks .inactiveBank {
-    /* background-color: grey; */
+  /* background-color: grey; */
 }
 
 #memoryBanks .ramBank {
-    border: 3px solid var(--color-yellow);
+  border: 3px solid var(--color-yellow);
+}
+
+#memoryBanks .hiddenBank {
+  display: none;
 }
 
 #video {
-    width: 256px;
-    height: 256px;
+  width: 256px;
+  height: 256px;
 }
 
 registers {
-    display: block;
+  display: block;
 }
 
-register, memregister {
+register,
+memregister {
   margin-right: 5px;
 }
 
 thread {
-    display: block;
+  display: block;
 }
 
 bankview {
-    max-height: 400px;
-    overflow-y: scroll;
-    padding-right: 1em;
+  max-height: 400px;
+  overflow-y: scroll;
+  padding-right: 1em;
 }
 
 memoryview {
-    display: block;
-    white-space: nowrap;
+  display: block;
+  white-space: nowrap;
 }
 
 memoryview.highlightedInstruction {
-    background-color: var(--color-red) !important;
+  background-color: var(--color-red) !important;
 }
 
 memoryview.recentlyExecuted {
-    background-color: var(--color-yellow);
+  background-color: var(--color-yellow);
 }
 
-thread > span, memoryview.jumpToAddr {
-    cursor: pointer;
+thread > span,
+memoryview.jumpToAddr {
+  cursor: pointer;
 }
 
 .stackAndVideo {
-    display: flex;
-    margin-top: 20px;
+  display: flex;
+  margin-top: 20px;
 }
 
 stack {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 stackbyte {
-    display: block;
+  display: block;
 }
 
 stackbyte.stackBottom {
-    background-color: var(--color-red);
+  background-color: var(--color-red);
 }
 
 tilemaprow {
-    display: block;
-    font-size: 6px;
+  display: block;
+  font-size: 6px;
 }
 
 tilemappointer {
-    margin-right: 1px;
+  margin-right: 1px;
 }
 
 tilemappointer.setTilePointer {
-    background-color: var(--color-green);
+  background-color: var(--color-green);
 }
 
 tiledatarow {
-    display: block;
-    height: 8px;
+  display: block;
+  height: 8px;
 }
 
 tiledatarow > canvas {
-    display: inline;
+  display: inline;
 }

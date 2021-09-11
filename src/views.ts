@@ -231,30 +231,57 @@ export class TileDataView extends View {
   }
 }
 
-export class BankSelectionView extends View {
+export class BankSelector extends View {
   memory: Memory;
+  controller: Controller;
 
-  constructor(elementID: string, memory: Memory) {
+  constructor(elementID: string, memory: Memory, controller: Controller) {
     super(elementID, undefined, "bankSelectionView");
     this.memory = memory;
+    this.controller = controller;
+    this.element.addEventListener("change", this.onChange.bind(this));
+  }
+
+  private addOption(bankNr: number, name: string) {
+    const option = document.createElement("option");
+    option.setAttribute("value", `${bankNr}`);
+    option.innerText = name;
+    if (this.controller.getShownBank() === bankNr) {
+      option.setAttribute("selected", "1");
+    }
+
+    this.element.appendChild(option);
   }
 
   update() {
+    this.element.innerHTML = "";
+
+    this.addOption(-1, "Boot");
+    this.addOption(-2, "RAM");
+
     for (let bank = 0; bank < this.memory.nrBanks; bank++) {
-      let option = document.createElement("option");
-      option.setAttribute("value", `${bank}`);
-      option.innerText = `Bank ${bank}`;
-      this.element.appendChild(option);
+      this.addOption(bank, `Bank ${bank}`);
     }
+  }
+
+  private onChange(event: Event) {
+    const newBank = (event.target as HTMLOptionElement).value;
+    this.controller.showBank(Number(newBank));
   }
 }
 
 export class BankView extends View {
   memory: Memory;
+  controller: Controller;
   bank: number;
   centeredMemory: MemoryView | undefined;
 
-  constructor(bank: number, memory: Memory, parent: HTMLElement) {
+  constructor(
+    bank: number,
+    memory: Memory,
+    parent: HTMLElement,
+    controller: Controller
+  ) {
     let elementID = "bank";
     if (bank === -1) {
       elementID += "Boot";
@@ -264,6 +291,7 @@ export class BankView extends View {
     super(elementID, parent, "bankview");
     this.memory = memory;
     this.bank = bank;
+    this.controller = controller;
 
     this.element.classList.add("inactiveBank");
   }
@@ -284,9 +312,19 @@ export class BankView extends View {
       this.element.classList.remove("activeBank");
       this.element.classList.add("inactiveBank");
     }
+
+    if (this.controller.getShownBank() === this.bank) {
+      this.element.classList.remove("hiddenBank");
+    } else {
+      this.element.classList.add("hiddenBank");
+    }
   }
 
   center(memory: MemoryView, smooth: boolean) {
+    // if (this.controller.getShownBank() !== this.bank) {
+    //   return;
+    // }
+
     if (this.centeredMemory) {
       this.centeredMemory.element.classList.remove("highlightedInstruction");
     }
@@ -372,8 +410,8 @@ export class MemoryView extends View {
     this.originalBank = undefined;
   }
 
-  centerInBankView(center: boolean) {
-    this.bankView.center(this, center);
+  centerInBankView(smooth: boolean) {
+    this.bankView.center(this, smooth);
   }
 
   update() {
