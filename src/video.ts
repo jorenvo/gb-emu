@@ -1,4 +1,5 @@
 import { Memory } from "./memory.js";
+import ThrottledLogger from "./throttledlogger.js";
 import * as utils from "./utils.js";
 
 type RGBA = [number, number, number, number];
@@ -215,32 +216,48 @@ export class Video {
     }
   }
 
-  private getTileMapStart(): number {
+  private getTileMapStart(background: boolean): number {
     const lcdc = this.memory.getLCDC();
-    if (utils.getBit(lcdc, 3)) {
+    if (
+      (background && utils.getBit(lcdc, 3)) ||
+      (!background && utils.getBit(lcdc, 6))
+    ) {
       return 0x9c00;
     } else {
       return 0x9800;
     }
   }
 
-  getTilePointer(row: number, col: number): number {
-    const tileMapStart = this.getTileMapStart();
+  getTilePointer(row: number, col: number, background: boolean): number {
+    const tileMapStart = this.getTileMapStart(background);
     return this.memory.getByte(tileMapStart + row * 32 + col);
   }
 
-  private renderNormalBackground(image: ImageData) {
+  private renderBackgroundOrWindow(image: ImageData, background: boolean) {
+    if (!background && !utils.getBit(this.memory.getLCDC(), 5)) {
+      return;
+    }
+
     for (let row = 0; row < 32; row++) {
       for (let col = 0; col < 32; col++) {
-        let tilePointer = this.getTilePointer(row, col);
+        let scrollX, scrollY;
+        if (background) {
+          scrollX = this.memory.getSCX();
+          scrollY = this.memory.getSCY();
+        } else {
+          scrollX = this.memory.getWX() - 7;
+          scrollY = this.memory.getWY();
+        }
+
+        let tilePointer = this.getTilePointer(row, col, background);
         this.renderTile(
           image,
           this.getColorMapBgOrWindow(),
           this.getTile(tilePointer),
           col * 8,
           row * 8,
-          this.memory.getSCX(),
-          this.memory.getSCY(),
+          scrollX,
+          scrollY,
           false,
           false,
           false
@@ -337,12 +354,13 @@ export class Video {
 
   render() {
     const image = this.ctx.createImageData(256, 256);
-    this.renderNormalBackground(image);
+    this.renderBackgroundOrWindow(image, !!"background");
+    this.renderBackgroundOrWindow(image, !"window");
     this.renderObjects(image);
     this.renderPhysicalScreenBorder(image);
 
-    if (utils.getBit(this.memory.getLCDC(), 5)) {
-      utils.log(this.memory.getLCDC(), "render window");
+    if (utils.getBit(this.memory.getLCDC(), 0)) {
+      ThrottledLogger.log("Should hide the background and window");
     }
 
     if (utils.getBit(this.memory.getLCDC(), 2)) {
