@@ -12,12 +12,13 @@
   font-family: monospace;
 }
 
-.debugColumns {
-  width: 1000px;
+.columns {
+  display: flex;
 }
 
-.debugColumns > div {
-  margin-right: 10px;
+.columns > * {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 #memoryBanks {
