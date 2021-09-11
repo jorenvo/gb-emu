@@ -394,8 +394,9 @@ export class Memory {
 
     if (address < Memory.RAMSTART) {
       console.debug(
-        `Writing before ram start @${utils.hexString(address, 16)}`
+        `Writing to non-writeable @${utils.hexString(address, 16)}`
       );
+      return;
     }
 
     if (address >= 0x8000 && address <= 0x97ff) {
