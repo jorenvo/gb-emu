@@ -287,7 +287,7 @@ export class CPU {
         this.pushPC(memory);
         this.PC = 0x48;
       } else if (timer) {
-        console.log("Executing timer interrupt");
+        // console.log("Executing timer interrupt");
         memory.interruptTimerClear();
 
         this.pushPC(memory);
