@@ -15,7 +15,7 @@ import {
   StackView,
   ExecutionThreadView,
   TileMapView,
-  TileDataView,
+  IndividualTileDataView,
   PauseButton,
   RunBootRomButton,
   StepNextButton,
@@ -25,6 +25,7 @@ import {
   KeyboardInputView,
   DebugToggleButton,
   BankSelector,
+  TileDataView,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -47,7 +48,8 @@ export abstract class Controller {
   public abstract updatedStack(): void;
   public abstract updatedMemReg(address: number): void;
   public abstract updatedTileMapPointers(): void;
-  public abstract updatedTileData(): void;
+  public abstract updatedAllTileData(): void;
+  public abstract updatedTileData(address: number): void;
   public abstract highlightTile(pointer: number): void;
   public abstract clearHighlightTile(): void;
   public abstract updatedWorkRam(): void;
@@ -81,7 +83,8 @@ export class ControllerMock {
   public updatedStack(): void {}
   public updatedMemReg(_address: number): void {}
   public updatedTileMapPointers(): void {}
-  public updatedTileData(): void {}
+  public updatedAllTileData(): void {}
+  public updatedTileData(address: number): void {}
   public highlightTile(_pointer: number): void {}
   public clearHighlightTile(): void {}
   public updatedWorkRam(): void {}
@@ -139,6 +142,7 @@ export class ControllerReal implements Controller {
   private prevPCMemoryView: MemoryView | undefined;
   private tileMapView: TileMapView | undefined;
   private tileDataView: TileDataView | undefined;
+  private addrToTileDataView: Map<number, IndividualTileDataView> | undefined;
   private keyboardInputView: KeyboardInputView | undefined;
 
   // buttons
@@ -210,7 +214,9 @@ export class ControllerReal implements Controller {
     this.PCView = new PCView("PC", this.emu.cpu);
     this.executionThreadView = new ExecutionThreadView("thread", this);
     this.tileMapView = new TileMapView("bgTileMap", this, this.emu.video);
+
     this.tileDataView = new TileDataView("tileData", this.emu.video);
+    this.addrToTileDataView = this.tileDataView.getTileViews();
 
     this.keyboardInputView = new KeyboardInputView("video", this);
 
@@ -450,8 +456,14 @@ export class ControllerReal implements Controller {
     this.toUpdate.add(this.tileMapView!);
   }
 
-  public updatedTileData() {
+  public updatedAllTileData() {
     this.toUpdate.add(this.tileDataView!);
+  }
+
+  public updatedTileData(address: number) {
+    const tileData = this.addrToTileDataView!.get(address)!;
+    if (!tileData) debugger;
+    this.toUpdate.add(tileData);
   }
 
   public highlightTile(pointer: number) {

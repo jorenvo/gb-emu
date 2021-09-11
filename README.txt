@@ -49,3 +49,6 @@ MVC
 Limit debug instruction memory views
 ====================================
 Warioworld ends up with 387,044 memoryview elements.
+
+Last tile addr: 38896
+Writes to 32769

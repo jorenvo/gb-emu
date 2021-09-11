@@ -399,14 +399,15 @@ export class Memory {
     }
 
     if (address >= 0x8000 && address <= 0x97ff) {
-      this.controller.updatedTileData();
+      const startOfTile = Math.floor(address / 16) * 16;
+      this.controller.updatedTileData(startOfTile);
     } else if (address >= 0x9800 && address <= 0x9fff) {
       this.controller.updatedTileMapPointers();
     } else if (address >= 0xff00 && address <= 0xff70) {
       this.controller.updatedMemReg(address);
       if (address === Memory.LCDC) {
         // This can change how tiles are rendered
-        this.controller.updatedTileData();
+        this.controller.updatedAllTileData();
       }
     } else if (
       address >= Memory.WORKRAMSTART &&

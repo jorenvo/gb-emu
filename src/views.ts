@@ -160,74 +160,129 @@ export class TileMapView extends View {
   }
 }
 
-// TODO: there could be a IndividualTileDataView that is composed by
-// this view. Then we can individually update these tiles when they
-// change.
-export class TileDataView extends View {
+export class IndividualTileDataView extends View {
+  private width: number;
+  private height: number;
   video: Video;
-  highlightedCol: number | undefined;
-  highlightedRow: number | undefined;
+  address: number;
+  highlighted: boolean;
+
+  constructor(video: Video, parent: HTMLElement, address: number) {
+    super(`tiledata-${utils.hexString(address, 16)}`, parent, "canvas");
+    this.width = 8;
+    this.height = 8;
+    this.element.setAttribute("width", `${this.width}`);
+    this.element.setAttribute("height", `${this.height}`);
+    this.video = video;
+    this.address = address;
+    this.highlighted = false;
+  }
+
+  highlight() {
+    this.highlighted = true;
+  }
+
+  clearHighlight() {
+    this.highlighted = false;
+  }
+
+  update() {
+    // Always render all tiles, regardless of the addressing mode (LCDC bit 4)
+    let colorMap = this.video.getColorMapBgOrWindow();
+    if (this.highlighted) {
+      colorMap = [
+        [255, 255, 255, 255],
+        [320, 170, 170, 255],
+        [235, 85, 85, 255],
+        [200, 0, 0, 255],
+      ];
+    }
+
+    const ctx = (this.element as HTMLCanvasElement).getContext("2d")!;
+    const imgData = ctx.createImageData(this.width, this.height);
+    this.video.renderTile(
+      imgData,
+      colorMap,
+      this.address,
+      0,
+      0,
+      0,
+      0,
+      false,
+      false,
+      false
+    );
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+export class TileDataView extends View {
+  private video: Video;
+  private addrToTile: Map<number, IndividualTileDataView>;
+  private highlightedCol: number | undefined;
+  private highlightedRow: number | undefined;
+  private colRowToTile: Map<string, IndividualTileDataView>;
 
   constructor(elementID: string, video: Video) {
     super(elementID);
     this.video = video;
+    this.addrToTile = new Map();
+    this.colRowToTile = new Map();
+    this.createIndividualTiles();
+  }
+
+  private getTile(col: number, row: number) {
+    const tile = this.colRowToTile.get(`${col},${row}`);
+    if (!tile) {
+      throw new Error(`Tile at ${col},${row} not found`);
+    }
+    return tile;
   }
 
   highlight(col: number, row: number) {
+    this.clearHighlight();
+    this.getTile(col, row).highlight();
     this.highlightedCol = col;
     this.highlightedRow = row;
   }
 
   clearHighlight() {
-    this.highlightedCol = undefined;
-    this.highlightedRow = undefined;
+    if (
+      this.highlightedCol !== undefined &&
+      this.highlightedRow !== undefined
+    ) {
+      this.getTile(this.highlightedCol, this.highlightedRow).clearHighlight();
+      this.highlightedCol = undefined;
+      this.highlightedRow = undefined;
+    }
   }
 
-  update() {
+  getTileViews() {
+    return this.addrToTile;
+  }
+
+  private createIndividualTiles() {
     // Always render all tiles, regardless of the addressing mode (LCDC bit 4)
     const tileDataStart = 0x8000;
-    this.element.innerHTML = "";
 
     // Tile data is in 0x8000-0x97ff = 0x1800 bytes. 16 bytes per tile, so
     // 384 tiles. Fits in 24x16.
     for (let row = 0; row < 24; row++) {
       const rowEl = document.createElement("tiledatarow");
       for (let col = 0; col < 16; col++) {
-        const tileEl = document.createElement("canvas");
-        tileEl.setAttribute("id", `tiledata-${col},${row}`);
-        tileEl.setAttribute("width", "8");
-        tileEl.setAttribute("height", "8");
-
-        let colorMap = this.video.getColorMapBgOrWindow();
-        if (row === this.highlightedRow && col === this.highlightedCol) {
-          colorMap = [
-            [255, 255, 255, 255],
-            [320, 170, 170, 255],
-            [235, 85, 85, 255],
-            [200, 0, 0, 255],
-          ];
-        }
-
-        const ctx = tileEl.getContext("2d")!;
-        const imgData = ctx.createImageData(8, 8);
-        const ptr = tileDataStart + (row * 16 + col) * 16;
-        this.video.renderTile(
-          imgData,
-          colorMap,
-          ptr,
-          0,
-          0,
-          0,
-          0,
-          false,
-          false,
-          false
-        );
-        ctx.putImageData(imgData, 0, 0);
-        rowEl.appendChild(tileEl);
+        const addr = tileDataStart + (row * 16 + col) * 16;
+        const tile = new IndividualTileDataView(this.video, this.element, addr);
+        this.addrToTile.set(addr, tile);
+        this.colRowToTile.set(`${col},${row}`, tile);
+        rowEl.appendChild(tile.element);
       }
       this.element.appendChild(rowEl);
     }
+  }
+
+  update() {
+    console.log(`Updating all tiles`);
+    this.addrToTile.forEach((tile) => tile.update());
   }
 }
 
@@ -321,10 +376,6 @@ export class BankView extends View {
   }
 
   center(memory: MemoryView, smooth: boolean) {
-    // if (this.controller.getShownBank() !== this.bank) {
-    //   return;
-    // }
-
     if (this.centeredMemory) {
       this.centeredMemory.element.classList.remove("highlightedInstruction");
     }
