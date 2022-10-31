@@ -113,7 +113,7 @@ export class ControllerMock {
 }
 
 export class ControllerReal implements Controller {
-  static MAX_RECENT_INSTRUCTIONS = 128;
+  static MAX_RECENT_INSTRUCTIONS = 1024;
 
   // loader
   private loader: Loader;

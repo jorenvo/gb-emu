@@ -103,7 +103,9 @@ export abstract class Instruction {
   }
 
   abstract size(): number;
+
   abstract disassemble(memory: Memory): string;
+
   protected abstract exec(cpu: CPU, memory: Memory): number;
 }
 
@@ -1443,6 +1445,7 @@ export class OpRet extends Instruction {
     const low = memory.getByte(cpu.SP++);
     const high = memory.getByte(cpu.SP++);
     cpu.PC = (high << 8) | low;
+    if (cpu.PC === 0x01f0) debugger;
     return 16;
   }
 
@@ -1654,6 +1657,7 @@ export class OpBit extends Instruction {
 
 export abstract class OpCP extends Instruction {
   protected abstract getToCompare(cpu: CPU, memory: Memory): number;
+
   protected abstract tStates(): number;
 
   exec(cpu: CPU, memory: Memory): number {
@@ -2318,6 +2322,7 @@ abstract class OpShift extends Instruction {
   }
 
   abstract shift(val: number): [number, number];
+
   abstract isHL(memory: Memory): boolean;
 
   getRegNr(memory: Memory): number {

@@ -140,6 +140,7 @@ export class Video {
       this.warnedWideTiles = true;
     }
 
+    if (address === 0xec) debugger;
     if (utils.getBit(lcdc, 4)) {
       return tileDataStart + address * 16;
     } else {
