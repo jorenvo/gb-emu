@@ -157,15 +157,13 @@ export class CPU {
   }
 
   setHalfCarryFlagSubtract(...numbers: number[]) {
-    const total = numbers
-      .map((n) => n & 0xf)
-      .reduce((prev, curr) => prev - curr);
+    const total = numbers.map(n => n & 0xf).reduce((prev, curr) => prev - curr);
     this.setHalfCarryFlagDirect(total < 0 ? 1 : 0);
   }
 
   setCarryFlagSubtract(...numbers: number[]) {
     const total = numbers
-      .map((n) => n & 0xff)
+      .map(n => n & 0xff)
       .reduce((prev, curr) => prev - curr);
     this.setCarryFlagDirect(total < 0 ? 1 : 0);
   }
