@@ -25,7 +25,7 @@ import {
   KeyboardInputView,
   DebugToggleButton,
   BankSelector,
-  TileDataView,
+  TileDataView
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -173,7 +173,7 @@ export class ControllerReal implements Controller {
 
   constructor() {
     this.loader = new Loader();
-    this.loader.readFile.then((rom) => this.boot(new Uint8Array(rom)));
+    this.loader.readFile.then(rom => this.boot(new Uint8Array(rom)));
     this.toUpdateFast = new Set();
     this.toUpdateSlow = new Set();
     this.recentInstructions = [];
@@ -408,7 +408,7 @@ export class ControllerReal implements Controller {
     if (!this.debuggingEnabled) {
       return;
     }
-    views.forEach((view) => view.update());
+    views.forEach(view => view.update());
     views.clear();
   }
 
@@ -554,7 +554,7 @@ export class ControllerReal implements Controller {
 
   public showBank(bank: number) {
     this.shownBank = bank;
-    this.bankViews!.forEach((bankView) => this.toUpdateFast.add(bankView));
+    this.bankViews!.forEach(bankView => this.toUpdateFast.add(bankView));
     this.toUpdateFast.add(this.bankSelection!);
   }
 
@@ -577,8 +577,17 @@ export class ControllerReal implements Controller {
     this.toUpdateFast.add(this.bankNrView!);
   }
 
+  private switchOutOfBootROM(newAddr: number) {
+    // TODO: Emulator should do this
+    if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
+      this.emu!.memory.setBank(1);
+      console.log("Switched out boot ROM and switched to bank 1");
+    }
+  }
+
   public movedPC(newAddr: number) {
     if (!this.debuggingEnabled) {
+      this.switchOutOfBootROM(newAddr);
       return;
     }
 
@@ -592,11 +601,7 @@ export class ControllerReal implements Controller {
     }
     this.toUpdateFast.add(this.PCView!);
 
-    // TODO: Emulator should do this
-    if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
-      this.emu!.memory.setBank(1);
-      console.log("Switched out boot ROM and switched to bank 1");
-    }
+    this.switchOutOfBootROM(newAddr);
 
     const instruction = this.emu!.memory.getInstruction(newAddr);
     if (!instruction) {
