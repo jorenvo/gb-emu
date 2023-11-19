@@ -7,7 +7,7 @@ import { Controller } from "./controller.js";
 enum JoyPadState {
   INACTIVE,
   DIRECTION,
-  ACTION,
+  ACTION
 }
 
 /*
@@ -337,6 +337,10 @@ export class Memory {
       `${value} written to ${utils.hexString(address, 16)} is out of range`
     );
 
+    if (address === Memory.TIMA) {
+      return; // 01-read_timing.gb continually writes 0 to TIMA, I assume it should be ignored.
+    }
+
     if (address === Memory.IO) {
       // Use the inverted value because to select a mode a bit is set to 0.
       const invertedValue = value ^ 0xff;
@@ -492,15 +496,14 @@ export class Memory {
   }
 
   incTimer(): boolean {
-    // Returns if overflowed
     let overflowed = false;
     const tima = this.getByte(Memory.TIMA);
 
     if (tima === 0xff) {
       overflowed = true;
-      this.setByte(Memory.TIMA, this.getByte(Memory.TMA));
+      this.ram[Memory.TIMA] = this.getByte(Memory.TMA);
     } else {
-      this.setByte(Memory.TIMA, tima + 1);
+      this.ram[Memory.TIMA] = tima + 1;
     }
 
     return overflowed;
