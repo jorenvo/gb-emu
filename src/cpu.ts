@@ -294,6 +294,7 @@ export class CPU {
     }
 
     if (vblank || coincidence || oam || timer) {
+      this.IME = false;
       this.isHalted = false; // wake up from low power state
     }
   }
