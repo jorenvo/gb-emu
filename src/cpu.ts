@@ -326,7 +326,7 @@ export class CPU {
       if (overflowed) {
         memory.interruptTimer();
       }
-      this.timerCycleCounter = 0;
+      this.timerCycleCounter -= cyclesPerInc;
     }
   }
 
