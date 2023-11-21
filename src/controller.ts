@@ -29,10 +29,14 @@ import {
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
+import {Disassembler} from "./disassembler.js";
 
 declare global {
   interface Window {
     controller: Controller;
+    cpu: CPU;
+    memory: Memory;
+    diss: Disassembler;
   }
 }
 
@@ -196,6 +200,9 @@ export class ControllerReal implements Controller {
     console.log("Booting...");
     this.emu = new Emulator(this, bytes);
     window.controller = this;
+    window.cpu = this.emu.cpu;
+    window.memory = this.emu.memory;
+    window.diss = Disassembler;
 
     this.bankSelection = new BankSelector(
       "bankSelection",
