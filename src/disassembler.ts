@@ -290,19 +290,20 @@ export class Disassembler {
   }
 
   static buildInstruction(
-    address: number,
+    absolute_address: number,
+    bank_address: number,
     bytes: Uint8Array
   ): instruction.Instruction {
-    const byte = bytes[address];
+    const byte = bytes[bank_address];
     if (byte === undefined) debugger;
     switch (byte) {
       case 0x00:
-        return new instruction.OpNop(address);
+        return new instruction.OpNop(absolute_address);
       case 0x01:
       case 0x11:
       case 0x21:
       case 0x31:
-        return new instruction.OpLdD16ToR16(address);
+        return new instruction.OpLdD16ToR16(absolute_address);
       case 0x02:
       case 0x12:
       case 0x22:
@@ -314,84 +315,84 @@ export class Disassembler {
       case 0x74:
       case 0x75:
       case 0x77:
-        return new instruction.OpLdR8ToA16(address);
+        return new instruction.OpLdR8ToA16(absolute_address);
       case 0x03:
       case 0x13:
       case 0x23:
       case 0x33:
-        return new instruction.OpInc16(address);
+        return new instruction.OpInc16(absolute_address);
       case 0x04:
       case 0x14:
       case 0x24:
       case 0x34:
-        return new instruction.OpInc8(address);
+        return new instruction.OpInc8(absolute_address);
       case 0x05:
       case 0x15:
       case 0x25:
       case 0x35:
-        return new instruction.OpDec8(address);
+        return new instruction.OpDec8(absolute_address);
       case 0x06:
       case 0x16:
       case 0x26:
       case 0x36:
-        return new instruction.OpLdD8ToR8(address);
+        return new instruction.OpLdD8ToR8(absolute_address);
       case 0x07:
-        return new instruction.OpRLCA(address);
+        return new instruction.OpRLCA(absolute_address);
       case 0x08:
-        return new instruction.OpLdSPToA16(address);
+        return new instruction.OpLdSPToA16(absolute_address);
       case 0x09:
       case 0x19:
       case 0x29:
       case 0x39:
-        return new instruction.OpAddR16ToHL(address);
+        return new instruction.OpAddR16ToHL(absolute_address);
       case 0x0a:
       case 0x1a:
       case 0x2a:
       case 0x3a:
-        return new instruction.OpLdA16InRegToA(address);
+        return new instruction.OpLdA16InRegToA(absolute_address);
       case 0x0b:
       case 0x1b:
       case 0x2b:
       case 0x3b:
-        return new instruction.OpDec16(address);
+        return new instruction.OpDec16(absolute_address);
       case 0x0c:
       case 0x1c:
       case 0x2c:
       case 0x3c:
-        return new instruction.OpInc8(address);
+        return new instruction.OpInc8(absolute_address);
       case 0x0d:
       case 0x1d:
       case 0x2d:
       case 0x3d:
-        return new instruction.OpDec8(address);
+        return new instruction.OpDec8(absolute_address);
       case 0x0e:
       case 0x1e:
       case 0x2e:
       case 0x3e:
-        return new instruction.OpLdD8ToR8(address);
+        return new instruction.OpLdD8ToR8(absolute_address);
       case 0x0f:
-        return new instruction.OpRRCA(address);
+        return new instruction.OpRRCA(absolute_address);
       case 0x10:
-        return new instruction.OpStop(address);
+        return new instruction.OpStop(absolute_address);
       case 0x17:
-        return new instruction.OpRLA(address);
+        return new instruction.OpRLA(absolute_address);
       case 0x18:
-        return new instruction.OpJR(address);
+        return new instruction.OpJR(absolute_address);
       case 0x1f:
-        return new instruction.OpRRA(address);
+        return new instruction.OpRRA(absolute_address);
       case 0x20:
       case 0x28:
       case 0x30:
       case 0x38:
-        return new instruction.OpJRC(address);
+        return new instruction.OpJRC(absolute_address);
       case 0x27:
-        return new instruction.OpDAA(address);
+        return new instruction.OpDAA(absolute_address);
       case 0x2f:
-        return new instruction.OpCPL(address);
+        return new instruction.OpCPL(absolute_address);
       case 0x37:
-        return new instruction.OpSCF(address);
+        return new instruction.OpSCF(absolute_address);
       case 0x3f:
-        return new instruction.OpCCF(address);
+        return new instruction.OpCCF(absolute_address);
       case 0x40:
       case 0x41:
       case 0x42:
@@ -448,9 +449,9 @@ export class Disassembler {
       case 0x7d:
       case 0x7e:
       case 0x7f:
-        return new instruction.OpLdR8ToR8(address);
+        return new instruction.OpLdR8ToR8(absolute_address);
       case 0x76:
-        return new instruction.OpHalt(address);
+        return new instruction.OpHalt(absolute_address);
       case 0x80:
       case 0x81:
       case 0x82:
@@ -459,7 +460,7 @@ export class Disassembler {
       case 0x85:
       case 0x86:
       case 0x87:
-        return new instruction.OpAddR8(address);
+        return new instruction.OpAddR8(absolute_address);
       case 0x88:
       case 0x89:
       case 0x8a:
@@ -468,7 +469,7 @@ export class Disassembler {
       case 0x8d:
       case 0x8e:
       case 0x8f:
-        return new instruction.OpAddCarryR8(address);
+        return new instruction.OpAddCarryR8(absolute_address);
       case 0x90:
       case 0x91:
       case 0x92:
@@ -477,7 +478,7 @@ export class Disassembler {
       case 0x95:
       case 0x96:
       case 0x97:
-        return new instruction.OpSubR8(address);
+        return new instruction.OpSubR8(absolute_address);
       case 0x98:
       case 0x99:
       case 0x9a:
@@ -486,7 +487,7 @@ export class Disassembler {
       case 0x9d:
       case 0x9e:
       case 0x9f:
-        return new instruction.OpSubCarryR8(address);
+        return new instruction.OpSubCarryR8(absolute_address);
       case 0xa0:
       case 0xa1:
       case 0xa2:
@@ -495,7 +496,7 @@ export class Disassembler {
       case 0xa5:
       case 0xa6:
       case 0xa7:
-        return new instruction.OpAndR8(address);
+        return new instruction.OpAndR8(absolute_address);
       case 0xa8:
       case 0xa9:
       case 0xaa:
@@ -504,7 +505,7 @@ export class Disassembler {
       case 0xad:
       case 0xae:
       case 0xaf:
-        return new instruction.OpXorR8(address);
+        return new instruction.OpXorR8(absolute_address);
       case 0xb0:
       case 0xb1:
       case 0xb2:
@@ -513,7 +514,7 @@ export class Disassembler {
       case 0xb5:
       case 0xb6:
       case 0xb7:
-        return new instruction.OpOrR8(address);
+        return new instruction.OpOrR8(absolute_address);
       case 0xb8:
       case 0xb9:
       case 0xba:
@@ -522,43 +523,43 @@ export class Disassembler {
       case 0xbd:
       case 0xbe:
       case 0xbf:
-        return new instruction.OpCPR8(address);
+        return new instruction.OpCPR8(absolute_address);
       case 0xc0:
-        return new instruction.OpRetNotZero(address);
+        return new instruction.OpRetNotZero(absolute_address);
       case 0xc1:
       case 0xd1:
       case 0xe1:
       case 0xf1:
-        return new instruction.OpPop(address);
+        return new instruction.OpPop(absolute_address);
       case 0xc2:
-        return new instruction.OpJC(address);
+        return new instruction.OpJC(absolute_address);
       case 0xc3:
-        return new instruction.OpJA16(address);
+        return new instruction.OpJA16(absolute_address);
       case 0xc4:
-        return new instruction.OpCallIfNotZero(address);
+        return new instruction.OpCallIfNotZero(absolute_address);
       case 0xc5:
       case 0xd5:
       case 0xe5:
       case 0xf5:
-        return new instruction.OpPush(address);
+        return new instruction.OpPush(absolute_address);
       case 0xc6:
-        return new instruction.OpAddD8(address);
+        return new instruction.OpAddD8(absolute_address);
       case 0xc8:
-        return new instruction.OpRetZero(address);
+        return new instruction.OpRetZero(absolute_address);
       case 0xc9:
-        return new instruction.OpRet(address);
+        return new instruction.OpRet(absolute_address);
       case 0xd9:
-        return new instruction.OpReti(address);
+        return new instruction.OpReti(absolute_address);
       case 0xca:
-        return new instruction.OpJC(address);
+        return new instruction.OpJC(absolute_address);
       case 0xcb:
-        return this.buildPrefixedInstruction(address, bytes);
+        return this.buildPrefixedInstruction(absolute_address, bytes);
       case 0xcc:
-        return new instruction.OpCallIfZero(address);
+        return new instruction.OpCallIfZero(absolute_address);
       case 0xcd:
-        return new instruction.OpCall(address);
+        return new instruction.OpCall(absolute_address);
       case 0xce:
-        return new instruction.OpAddCarryD8(address);
+        return new instruction.OpAddCarryD8(absolute_address);
       case 0xc7:
       case 0xd7:
       case 0xe7:
@@ -567,21 +568,21 @@ export class Disassembler {
       case 0xdf:
       case 0xef:
       case 0xff:
-        return new instruction.OpRST(address);
+        return new instruction.OpRST(absolute_address);
       case 0xd0:
-        return new instruction.OpRetNoCarry(address);
+        return new instruction.OpRetNoCarry(absolute_address);
       case 0xd2:
-        return new instruction.OpJC(address);
+        return new instruction.OpJC(absolute_address);
       case 0xd4:
-        return new instruction.OpCallIfNotCarry(address);
+        return new instruction.OpCallIfNotCarry(absolute_address);
       case 0xd6:
-        return new instruction.OpSubD8(address);
+        return new instruction.OpSubD8(absolute_address);
       case 0xd8:
-        return new instruction.OpRetCarry(address);
+        return new instruction.OpRetCarry(absolute_address);
       case 0xda:
-        return new instruction.OpJC(address);
+        return new instruction.OpJC(absolute_address);
       case 0xdc:
-        return new instruction.OpCallIfCarry(address);
+        return new instruction.OpCallIfCarry(absolute_address);
       case 0xd3:
       case 0xdb:
       case 0xdd:
@@ -593,44 +594,44 @@ export class Disassembler {
       case 0xf4:
       case 0xfc:
       case 0xfd:
-        return new instruction.OpNone(address);
+        return new instruction.OpNone(absolute_address);
       case 0xde:
-        return new instruction.OpSubCarryD8(address);
+        return new instruction.OpSubCarryD8(absolute_address);
       case 0xe0:
-        return new instruction.OpLdhA8(address);
+        return new instruction.OpLdhA8(absolute_address);
       case 0xe2:
-        return new instruction.OpLdAtoAddrC(address);
+        return new instruction.OpLdAtoAddrC(absolute_address);
       case 0xe6:
-        return new instruction.OpAndD8(address);
+        return new instruction.OpAndD8(absolute_address);
       case 0xe8:
-        return new instruction.OpAddSPR8(address);
+        return new instruction.OpAddSPR8(absolute_address);
       case 0xe9:
-        return new instruction.OpJHL(address);
+        return new instruction.OpJHL(absolute_address);
       case 0xea:
-        return new instruction.OpLdAToA16(address);
+        return new instruction.OpLdAToA16(absolute_address);
       case 0xee:
-        return new instruction.OpXorD8(address);
+        return new instruction.OpXorD8(absolute_address);
       case 0xf0:
-        return new instruction.OpLdhA8toA(address);
+        return new instruction.OpLdhA8toA(absolute_address);
       case 0xf2:
-        return new instruction.OpLdAddrCToA(address);
+        return new instruction.OpLdAddrCToA(absolute_address);
       case 0xf3:
-        return new instruction.OpDI(address);
+        return new instruction.OpDI(absolute_address);
       case 0xf6:
-        return new instruction.OpOrD8(address);
+        return new instruction.OpOrD8(absolute_address);
       case 0xf8:
-        return new instruction.OpLdSPPlusToHL(address);
+        return new instruction.OpLdSPPlusToHL(absolute_address);
       case 0xf9:
-        return new instruction.OpLdHLToSP(address);
+        return new instruction.OpLdHLToSP(absolute_address);
       case 0xfa:
-        return new instruction.OpLdA16ToA(address);
+        return new instruction.OpLdA16ToA(absolute_address);
       case 0xfb:
-        return new instruction.OpEI(address);
+        return new instruction.OpEI(absolute_address);
       case 0xfe:
-        return new instruction.OpCPD8(address);
+        return new instruction.OpCPD8(absolute_address);
       default:
-        Disassembler.logNotImplemented(address, byte, !"prefixed");
-        return new instruction.NotImplemented(address);
+        Disassembler.logNotImplemented(absolute_address, byte, !"prefixed");
+        return new instruction.NotImplemented(absolute_address);
     }
   }
 }

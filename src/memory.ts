@@ -174,7 +174,7 @@ export class Memory {
     bankToAddressToInstruction.set(-1, new Map());
     let i = 0;
     while (i < this.bootROM.length) {
-      const newInstruction = Disassembler.buildInstruction(i, this.bootROM);
+      const newInstruction = Disassembler.buildInstruction(i, i, this.bootROM);
       const size = newInstruction.size();
       if (size === 0) {
         const s = newInstruction.disassemble(
@@ -201,9 +201,8 @@ export class Memory {
         paddedBank.set(bank, addr);
         bank = paddedBank;
       }
-
       while (addr < lastAddr) {
-        const newInstruction = Disassembler.buildInstruction(addr, bank);
+        const newInstruction = Disassembler.buildInstruction(addr, addr, bank);
         const size = newInstruction.size();
         if (size === 0) {
           const s = newInstruction.disassemble(
@@ -230,7 +229,7 @@ export class Memory {
 
     let addr = startAddress;
     while (addr < startAddress + Memory.WORKRAMSIZE && addr <= 0xffff) {
-      let instruction = Disassembler.buildInstruction(addr, this.ram);
+      let instruction = Disassembler.buildInstruction(addr, addr, this.ram);
       this.bankToAddressToInstruction.get(-2)!.set(addr, instruction);
       addr += instruction.size();
     }
@@ -392,7 +391,7 @@ export class Memory {
     if (value === undefined) debugger;
 
     if (address >= 0x2000 && address <= 0x3fff) {
-      this.setBank(value);
+      this.setBank(value & 0b1_1111);
       return;
     }
 

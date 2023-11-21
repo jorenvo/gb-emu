@@ -262,12 +262,11 @@ export class CPU {
     ) {
       timer = true;
     }
+    // TODO: add joypad and serial interrupts
 
     // TODO: priorities in case multiple interrupts are requested
     if (this.IME) {
       if (vblank) {
-        // console.log("Executing VBlank interrupt");
-        this.disableIME();
         memory.interruptVBlankClear();
 
         this.pushPC(memory);
@@ -277,7 +276,7 @@ export class CPU {
         memory.interruptCoincidenceClear();
 
         this.pushPC(memory);
-        this.PC = 0x48;
+        this.PC = 0x48;  // TODO: same interrupt address as OAM?
       } else if (oam) {
         console.log("Executing OAM interrupt");
         memory.interruptOAMClear();
@@ -338,8 +337,8 @@ export class CPU {
     if (currentInstruction === undefined) {
       // Probably RAM, attempt to JIT
       const bankOffset = memory.getByteOffsetBasedOnAddr(this.PC);
-      const bank = memory.getBankBasedOnAddr(this.PC);
-      currentInstruction = Disassembler.buildInstruction(bankOffset, bank);
+      const bank = memory.getBankBasedOnAddr(this.PC); // TODO: maybe this should return a padded bank instead
+      currentInstruction = Disassembler.buildInstruction(this.PC, bankOffset, bank);
     }
 
     this.tickCounter++;
