@@ -101,7 +101,7 @@ export class MemRegView extends View {
 
   update() {
     const value = this.memory.getByte(this.address);
-    let formatted = "";
+    let formatted;
     if (this.asBits) {
       formatted = utils.binString(value);
     } else {
@@ -674,7 +674,7 @@ export class StepNextButton extends Button {
 export class CopyButton extends Button {
   private selectElementText(el: HTMLElement) {
     const win = window;
-    var doc = win.document,
+    let doc = win.document,
       sel,
       range;
 
