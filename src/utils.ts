@@ -54,9 +54,10 @@ export function twosComplementToNumber(x: number): number {
 }
 
 function wrappingAdd(a: number, b: number, bits: number): number {
-  assert(a >= 0 && a < 1 << bits, `${a} cannot be represented in ${bits} bits`);
+  const max = 1 << bits;
+  assert(a >= 0 && a < max, `${a} cannot be represented in ${bits} bits`);
   // allow for one extra to handle +- carry.
-  assert(b >= -1 << bits && b <= 1 << bits, `${b} cannot be represented in ${bits} bits`);
+  assert(b >= -1 << bits && b <= max, `${b} cannot be represented in ${bits} bits`);
   return (a + b) & ((1 << bits) - 1);
 }
 
