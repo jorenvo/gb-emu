@@ -11,10 +11,7 @@ class _ThrottledLogger {
     // Only look at the direct parent e.g.:
     // "log@https://localhost:5000/js/throttledlogger.js:6:28
     //  renderTile@https://localhost:5000/js/video.js:86:34"
-    stack = stack
-      .split("\n")
-      .slice(0, 2)
-      .join("\n");
+    stack = stack.split("\n").slice(0, 2).join("\n");
 
     let counter = this.stackToCounter.get(stack);
     if (counter === undefined) {

@@ -115,9 +115,7 @@ export class NotImplemented extends Instruction {
   exec(_cpu: CPU, memory: Memory): number {
     utils.log(
       this.address,
-      `Executing not implemented instruction with opcode ${memory.getByte(
-        this.address
-      )}`
+      `Executing not implemented instruction with opcode ${memory.getByte(this.address)}`,
     );
 
     return 0;
@@ -324,10 +322,7 @@ export class OpLdR8ToA16 extends Instruction {
         dest = "HL";
         break;
       default:
-        utils.log(
-          byte,
-          `unknown opLdR8ToA16 at ${utils.hexString(this.address, 16)}`
-        );
+        utils.log(byte, `unknown opLdR8ToA16 at ${utils.hexString(this.address, 16)}`);
     }
 
     const src = this.getStringForR8(this.getSourceReg(memory));
@@ -574,11 +569,7 @@ export abstract class OpDecInc16 extends Instruction {
 
 export class OpInc16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(
-      cpu,
-      memory,
-      utils.wrapping16BitAdd(this.getVal(cpu, memory), 1)
-    );
+    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), 1));
     return 8;
   }
 
@@ -589,11 +580,7 @@ export class OpInc16 extends OpDecInc16 {
 
 export class OpDec16 extends OpDecInc16 {
   exec(cpu: CPU, memory: Memory): number {
-    this.setVal(
-      cpu,
-      memory,
-      utils.wrapping16BitAdd(this.getVal(cpu, memory), -1)
-    );
+    this.setVal(cpu, memory, utils.wrapping16BitAdd(this.getVal(cpu, memory), -1));
     return 8;
   }
 
@@ -1165,9 +1152,7 @@ export class OpJRC extends Instruction {
         condition = "UNS";
         break;
     }
-    return `JR ${condition}, $${utils.hexString(
-      this.getRelativeOffset(memory)
-    )}`;
+    return `JR ${condition}, $${utils.hexString(this.getRelativeOffset(memory))}`;
   }
 }
 
@@ -1829,10 +1814,7 @@ export class OpSubCarryR8 extends Instruction {
     cpu.setCarryFlagSubtract(cpu.getReg(CPU.A), carry, toAdd);
     cpu.setReg(
       CPU.A,
-      utils.wrapping8BitAdd(
-        cpu.getReg(CPU.A),
-        -utils.wrapping8BitAdd(toAdd, carry)
-      )
+      utils.wrapping8BitAdd(cpu.getReg(CPU.A), -utils.wrapping8BitAdd(toAdd, carry)),
     );
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(1);
@@ -1988,10 +1970,7 @@ export class OpAddCarryR8 extends Instruction {
     cpu.setCarryFlag8BitAdd(cpu.getReg(CPU.A), carry, toAdd);
     cpu.setReg(
       CPU.A,
-      utils.wrapping8BitAdd(
-        cpu.getReg(CPU.A),
-        utils.wrapping8BitAdd(toAdd, carry)
-      )
+      utils.wrapping8BitAdd(cpu.getReg(CPU.A), utils.wrapping8BitAdd(toAdd, carry)),
     );
     cpu.setZeroFlag(cpu.getReg(CPU.A) === 0 ? 1 : 0);
     cpu.setSubtractFlag(0);

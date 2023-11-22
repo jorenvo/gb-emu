@@ -10,7 +10,7 @@ export class Loader {
         (event: Event) => {
           this.handleChangeEvent(event).then(resolutionFunction);
         },
-        false
+        false,
       );
     });
   }

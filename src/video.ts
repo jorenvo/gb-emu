@@ -38,12 +38,7 @@ export class Video {
     this.colorLightGray = [170, 170, 170, 255]; // 0b01
     this.colorDarkGray = [85, 85, 85, 255]; // 0b10
     this.colorBlack = [0, 0, 0, 255]; // 0b11
-    this.colorMap = [
-      this.colorWhite,
-      this.colorLightGray,
-      this.colorDarkGray,
-      this.colorBlack,
-    ];
+    this.colorMap = [this.colorWhite, this.colorLightGray, this.colorDarkGray, this.colorBlack];
 
     // this.frameDurationMs = 1_000 / 59.73; // 59.73 Hz
     // this.vBlankDurationMs = 1.087; // 1087 us
@@ -84,9 +79,7 @@ export class Video {
   }
 
   getColorMapObject(obp0: boolean) {
-    const colorMap = this.getColorMap(
-      obp0 ? this.memory.getOBP0() : this.memory.getOBP1()
-    );
+    const colorMap = this.getColorMap(obp0 ? this.memory.getOBP0() : this.memory.getOBP1());
 
     // Index 0 is transparent for objects
     colorMap[0][3] = 0;
@@ -165,7 +158,7 @@ export class Video {
     scy: number,
     attrFlipX: boolean,
     attrFlipY: boolean,
-    objectOverlapped: boolean
+    objectOverlapped: boolean,
   ) {
     for (let byte = 0; byte < 16; byte += 2) {
       // lsb is first
@@ -218,10 +211,7 @@ export class Video {
 
   private getTileMapStart(background: boolean): number {
     const lcdc = this.memory.getLCDC();
-    if (
-      (background && utils.getBit(lcdc, 3)) ||
-      (!background && utils.getBit(lcdc, 6))
-    ) {
+    if ((background && utils.getBit(lcdc, 3)) || (!background && utils.getBit(lcdc, 6))) {
       return 0x9c00;
     } else {
       return 0x9800;
@@ -260,24 +250,16 @@ export class Video {
           scrollY,
           false,
           false,
-          false
+          false,
         );
       }
     }
   }
 
   private renderObjects(image: ImageData) {
-    for (
-      let spriteAddress = 0xfe00;
-      spriteAddress < 0xfe9f;
-      spriteAddress += 4
-    ) {
-      const y = this.wrapToScreenCoords(
-        this.memory.getByte(spriteAddress) - 16
-      );
-      const x = this.wrapToScreenCoords(
-        this.memory.getByte(spriteAddress + 1) - 8
-      );
+    for (let spriteAddress = 0xfe00; spriteAddress < 0xfe9f; spriteAddress += 4) {
+      const y = this.wrapToScreenCoords(this.memory.getByte(spriteAddress) - 16);
+      const x = this.wrapToScreenCoords(this.memory.getByte(spriteAddress + 1) - 8);
       const tileIndex = this.memory.getByte(spriteAddress + 2);
 
       const attrs = this.memory.getByte(spriteAddress + 3);
@@ -297,15 +279,13 @@ export class Video {
         0,
         flipX,
         flipY,
-        objectOverlapped
+        objectOverlapped,
       );
     }
   }
 
   private getBorderColor(): RGBA {
-    const rgbString = window
-      .getComputedStyle(document.body)
-      .getPropertyValue("--color-red");
+    const rgbString = window.getComputedStyle(document.body).getPropertyValue("--color-red");
     const rgb = rgbString
       .replace(/[^\d,]/g, "")
       .split(",")

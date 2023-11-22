@@ -22,10 +22,7 @@ export function decString(x: number, length: number): string {
 
 export function formatArrayAsHex(array: Uint8Array): string {
   return array
-    .reduce(
-      (prev: string, current: number) => prev + current.toString(16) + " ",
-      ""
-    )
+    .reduce((prev: string, current: number) => prev + current.toString(16) + " ", "")
     .trimEnd();
 }
 
@@ -59,10 +56,7 @@ export function twosComplementToNumber(x: number): number {
 function wrappingAdd(a: number, b: number, bits: number): number {
   assert(a >= 0 && a < 1 << bits, `${a} cannot be represented in ${bits} bits`);
   // allow for one extra to handle +- carry.
-  assert(
-    b >= -1 << bits && b <= 1 << bits,
-    `${b} cannot be represented in ${bits} bits`
-  );
+  assert(b >= -1 << bits && b <= 1 << bits, `${b} cannot be represented in ${bits} bits`);
   return (a + b) & ((1 << bits) - 1);
 }
 

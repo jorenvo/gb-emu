@@ -42,9 +42,7 @@ export class RegisterView extends View {
   }
 
   update() {
-    this.element.innerHTML = `${this.name}: ${utils.hexString(
-      this.cpu.getReg(this.reg)
-    )}`;
+    this.element.innerHTML = `${this.name}: ${utils.hexString(this.cpu.getReg(this.reg))}`;
   }
 }
 
@@ -93,13 +91,7 @@ export class MemRegView extends View {
   address: number;
   asBits: boolean;
 
-  constructor(
-    elementID: string,
-    name: string,
-    address: number,
-    asBits: boolean,
-    memory: Memory
-  ) {
+  constructor(elementID: string, name: string, address: number, asBits: boolean, memory: Memory) {
     super(elementID);
     this.name = name;
     this.address = address;
@@ -200,18 +192,7 @@ export class IndividualTileDataView extends View {
 
     const ctx = (this.element as HTMLCanvasElement).getContext("2d")!;
     const imgData = ctx.createImageData(this.width, this.height);
-    this.video.renderTile(
-      imgData,
-      colorMap,
-      this.address,
-      0,
-      0,
-      0,
-      0,
-      false,
-      false,
-      false
-    );
+    this.video.renderTile(imgData, colorMap, this.address, 0, 0, 0, 0, false, false, false);
     ctx.putImageData(imgData, 0, 0);
   }
 }
@@ -247,10 +228,7 @@ export class TileDataView extends View {
   }
 
   clearHighlight() {
-    if (
-      this.highlightedCol !== undefined &&
-      this.highlightedRow !== undefined
-    ) {
+    if (this.highlightedCol !== undefined && this.highlightedRow !== undefined) {
       this.getTile(this.highlightedCol, this.highlightedRow).clearHighlight();
       this.highlightedCol = undefined;
       this.highlightedRow = undefined;
@@ -331,12 +309,7 @@ export class BankView extends View {
   bank: number;
   centeredMemory: MemoryView | undefined;
 
-  constructor(
-    bank: number,
-    memory: Memory,
-    parent: HTMLElement,
-    controller: Controller
-  ) {
+  constructor(bank: number, memory: Memory, parent: HTMLElement, controller: Controller) {
     let elementID = "bank";
     if (bank === -1) {
       elementID += "Boot";
@@ -383,8 +356,7 @@ export class BankView extends View {
 
     const halfClientHeight = this.element.clientHeight / 2;
     if (smooth) {
-      const top =
-        memory.element.offsetTop - this.element.offsetTop - halfClientHeight;
+      const top = memory.element.offsetTop - this.element.offsetTop - halfClientHeight;
       this.element.scrollTo({ top: top, behavior: "smooth" });
     } else {
       memory.element.scrollIntoView();
@@ -409,7 +381,7 @@ export class MemoryView extends View {
     address: number,
     memory: Memory,
     cpu: CPU,
-    controller: Controller
+    controller: Controller,
   ) {
     let elementID = "memBank";
 
@@ -437,10 +409,7 @@ export class MemoryView extends View {
 
     this.switchToInstructionBank();
     if (this.instruction.getRelatedAddress(this.memory) !== -1) {
-      this.element.addEventListener(
-        "click",
-        this.clickJumpToRelated.bind(this)
-      );
+      this.element.addEventListener("click", this.clickJumpToRelated.bind(this));
     }
     this.restoreBank();
   }
@@ -472,9 +441,7 @@ export class MemoryView extends View {
     try {
       dis = this.instruction.disassemble(this.memory);
     } catch (error) {
-      console.error(
-        `Failed disassembling ${this.instruction.getBytesHex(this.memory)}`
-      );
+      console.error(`Failed disassembling ${this.instruction.getBytesHex(this.memory)}`);
       console.error(error); // to show the original backtrace
       throw error; // to stop execution
     }
@@ -498,7 +465,7 @@ export class MemoryView extends View {
     if (
       this.cpu.PC === this.address &&
       ((this.bankView.bank === 0 && this.memory.bank !== -1) ||
-      this.bankView.bank === -2 || // RAMBank
+        this.bankView.bank === -2 || // RAMBank
         this.bankView.bank === this.memory.bank)
     ) {
       this.centerInBankView(false);
@@ -511,7 +478,7 @@ export class MemoryView extends View {
     this.switchToInstructionBank();
     this.controller.viewAddress(
       this.instruction.getRelatedAddress(this.memory),
-      this.bankView.bank
+      this.bankView.bank,
     );
     this.restoreBank();
   }
@@ -564,9 +531,7 @@ export class ExecutionThreadView extends View {
 
   update() {
     const recentInstructions = this.controller.getRecentInstructions();
-    const instructions = recentInstructions.slice(
-      recentInstructions.length - 16
-    );
+    const instructions = recentInstructions.slice(recentInstructions.length - 16);
     instructions.reverse();
     this.element.innerHTML = "PCs: ";
     instructions.forEach((i) => {
@@ -574,7 +539,7 @@ export class ExecutionThreadView extends View {
       const addr = i.getAddress();
       instructionElement.innerHTML = utils.hexString(addr, 16) + " ";
       instructionElement.addEventListener("click", (_e: MouseEvent) =>
-        this.clickJumpToRelated(addr)
+        this.clickJumpToRelated(addr),
       );
       this.element.appendChild(instructionElement);
     });

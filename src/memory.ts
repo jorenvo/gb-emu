@@ -7,7 +7,7 @@ import { Controller } from "./controller.js";
 enum JoyPadState {
   INACTIVE,
   DIRECTION,
-  ACTION
+  ACTION,
 }
 
 /*
@@ -166,10 +166,7 @@ export class Memory {
   }
 
   private disassemble(): Map<number, Map<number, Instruction>> {
-    const bankToAddressToInstruction: Map<
-      number,
-      Map<number, Instruction>
-    > = new Map();
+    const bankToAddressToInstruction: Map<number, Map<number, Instruction>> = new Map();
 
     bankToAddressToInstruction.set(-1, new Map());
     let i = 0;
@@ -177,9 +174,7 @@ export class Memory {
       const newInstruction = Disassembler.buildInstruction(i, i, this.bootROM);
       const size = newInstruction.size();
       if (size === 0) {
-        const s = newInstruction.disassemble(
-          new Memory(new Uint8Array(), this.controller)
-        );
+        const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
         throw new Error(`Encountered unimplemented instruction: ${s}`);
       }
 
@@ -205,9 +200,7 @@ export class Memory {
         const newInstruction = Disassembler.buildInstruction(addr, addr, bank);
         const size = newInstruction.size();
         if (size === 0) {
-          const s = newInstruction.disassemble(
-            new Memory(new Uint8Array(), this.controller)
-          );
+          const s = newInstruction.disassemble(new Memory(new Uint8Array(), this.controller));
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 
@@ -319,12 +312,7 @@ export class Memory {
     }
 
     if (byte === undefined) {
-      throw new Error(
-        `Trying to read byte @${utils.hexString(
-          address,
-          16
-        )} which is out of range`
-      );
+      throw new Error(`Trying to read byte @${utils.hexString(address, 16)} which is out of range`);
     }
 
     return byte;
@@ -333,7 +321,7 @@ export class Memory {
   setByte(address: number, value: number) {
     utils.assert(
       value >= 0 && value <= 255,
-      `${value} written to ${utils.hexString(address, 16)} is out of range`
+      `${value} written to ${utils.hexString(address, 16)} is out of range`,
     );
 
     if (address === Memory.TIMA) {
@@ -396,9 +384,7 @@ export class Memory {
     }
 
     if (address < Memory.RAMSTART) {
-      console.debug(
-        `Writing to non-writeable @${utils.hexString(address, 16)}`
-      );
+      console.debug(`Writing to non-writeable @${utils.hexString(address, 16)}`);
       return;
     }
 
@@ -609,9 +595,7 @@ export class Memory {
   }
 
   interruptCoincidenceEnabled() {
-    return Boolean(
-      this.getByte(Memory.STAT) & Memory.INT_COINCIDENCE_ENABLED_MASK
-    );
+    return Boolean(this.getByte(Memory.STAT) & Memory.INT_COINCIDENCE_ENABLED_MASK);
   }
 
   // OAM interrupt

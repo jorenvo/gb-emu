@@ -6,14 +6,11 @@ export class Disassembler {
     throw new Error(
       `${utils.hexString(address)}: unknown ${
         prefixed ? "prefixed " : ""
-      }instruction ${utils.binString(byte)} ${utils.hexString(byte)}`
+      }instruction ${utils.binString(byte)} ${utils.hexString(byte)}`,
     );
   }
 
-  static buildPrefixedInstruction(
-    address: number,
-    bytes: Uint8Array
-  ): instruction.Instruction {
+  static buildPrefixedInstruction(address: number, bytes: Uint8Array): instruction.Instruction {
     const byte = bytes[address + 1];
     switch (byte) {
       case 0x00:
@@ -292,7 +289,7 @@ export class Disassembler {
   static buildInstruction(
     absolute_address: number,
     bank_address: number,
-    bytes: Uint8Array
+    bytes: Uint8Array,
   ): instruction.Instruction {
     const byte = bytes[bank_address];
     if (byte === undefined) debugger;

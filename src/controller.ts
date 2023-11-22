@@ -25,11 +25,11 @@ import {
   KeyboardInputView,
   DebugToggleButton,
   BankSelector,
-  TileDataView
+  TileDataView,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
-import {Disassembler} from "./disassembler.js";
+import { Disassembler } from "./disassembler.js";
 
 declare global {
   interface Window {
@@ -177,7 +177,7 @@ export class ControllerReal implements Controller {
 
   constructor() {
     this.loader = new Loader();
-    this.loader.readFile.then(rom => this.boot(new Uint8Array(rom)));
+    this.loader.readFile.then((rom) => this.boot(new Uint8Array(rom)));
     this.toUpdateFast = new Set();
     this.toUpdateSlow = new Set();
     this.recentInstructions = [];
@@ -204,11 +204,7 @@ export class ControllerReal implements Controller {
     window.memory = this.emu.memory;
     window.diss = Disassembler;
 
-    this.bankSelection = new BankSelector(
-      "bankSelection",
-      this.emu.memory,
-      this
-    );
+    this.bankSelection = new BankSelector("bankSelection", this.emu.memory, this);
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankNrView = new BankNrView("bankNr", this.emu.memory);
     this.addrToMemRegView = this.createMemRegisterViews(this.emu.memory);
@@ -290,42 +286,15 @@ export class ControllerReal implements Controller {
     const displayBits = true;
     const displayHex = false;
     const views = new Map();
-    views.set(
-      Memory.LCDC,
-      new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, displayBits, memory)
-    );
-    views.set(
-      Memory.STAT,
-      new MemRegView("memRegSTAT", "STAT", Memory.STAT, displayBits, memory)
-    );
-    views.set(
-      Memory.LY,
-      new MemRegView("memRegLY", "LY", Memory.LY, displayHex, memory)
-    );
-    views.set(
-      Memory.SCY,
-      new MemRegView("memRegSCY", "SCY", Memory.SCY, displayHex, memory)
-    );
-    views.set(
-      Memory.SCX,
-      new MemRegView("memRegSCX", "SCX", Memory.SCX, displayHex, memory)
-    );
-    views.set(
-      Memory.LYC,
-      new MemRegView("memRegLYC", "LYC", Memory.LYC, displayHex, memory)
-    );
-    views.set(
-      Memory.WY,
-      new MemRegView("memRegWY", "WY", Memory.WY, displayHex, memory)
-    );
-    views.set(
-      Memory.WX,
-      new MemRegView("memRegWX", "WX", Memory.WX, displayHex, memory)
-    );
-    views.set(
-      Memory.DIV,
-      new MemRegView("memRegDIV", "DIV", Memory.DIV, displayHex, memory)
-    );
+    views.set(Memory.LCDC, new MemRegView("memRegLCDC", "LCDC", Memory.LCDC, displayBits, memory));
+    views.set(Memory.STAT, new MemRegView("memRegSTAT", "STAT", Memory.STAT, displayBits, memory));
+    views.set(Memory.LY, new MemRegView("memRegLY", "LY", Memory.LY, displayHex, memory));
+    views.set(Memory.SCY, new MemRegView("memRegSCY", "SCY", Memory.SCY, displayHex, memory));
+    views.set(Memory.SCX, new MemRegView("memRegSCX", "SCX", Memory.SCX, displayHex, memory));
+    views.set(Memory.LYC, new MemRegView("memRegLYC", "LYC", Memory.LYC, displayHex, memory));
+    views.set(Memory.WY, new MemRegView("memRegWY", "WY", Memory.WY, displayHex, memory));
+    views.set(Memory.WX, new MemRegView("memRegWX", "WX", Memory.WX, displayHex, memory));
+    views.set(Memory.DIV, new MemRegView("memRegDIV", "DIV", Memory.DIV, displayHex, memory));
 
     return views;
   }
@@ -347,10 +316,7 @@ export class ControllerReal implements Controller {
     return (bank << 16) | address;
   }
 
-  private getBankAddressRange(
-    memory: Memory,
-    bankNr: number
-  ): [number, number] {
+  private getBankAddressRange(memory: Memory, bankNr: number): [number, number] {
     if (bankNr === -1) {
       return [0, memory.bootROM.length];
     } else if (bankNr === 0) {
@@ -415,24 +381,18 @@ export class ControllerReal implements Controller {
     if (!this.debuggingEnabled) {
       return;
     }
-    views.forEach(view => view.update());
+    views.forEach((view) => view.update());
     views.clear();
   }
 
   private updateLoopFast() {
     this.updatePending(this.toUpdateFast);
-    this.nextUpdateFast = window.setTimeout(
-      this.updateLoopFast.bind(this),
-      1_000 / 60
-    );
+    this.nextUpdateFast = window.setTimeout(this.updateLoopFast.bind(this), 1_000 / 60);
   }
 
   private updateLoopSlow() {
     this.updatePending(this.toUpdateSlow);
-    this.nextUpdateSlow = window.setTimeout(
-      this.updateLoopSlow.bind(this),
-      1_000 / 5
-    );
+    this.nextUpdateSlow = window.setTimeout(this.updateLoopSlow.bind(this), 1_000 / 5);
   }
 
   // Updated functions
@@ -449,10 +409,7 @@ export class ControllerReal implements Controller {
     this.toUpdateFast.add(this.SPView!);
   }
 
-  private getMemoryView(
-    address: number,
-    bank?: number
-  ): MemoryView | undefined {
+  private getMemoryView(address: number, bank?: number): MemoryView | undefined {
     if (bank === undefined) {
       bank = this.emu!.memory.getBankNrBasedOnAddress(address);
     }
@@ -503,11 +460,7 @@ export class ControllerReal implements Controller {
     const bankView = this.bankViews!.get(ramBank)!;
 
     // clear views
-    for (
-      let addr = Memory.WORKRAMSTART;
-      addr < Memory.WORKRAMSTART + Memory.WORKRAMSIZE;
-      addr++
-    ) {
+    for (let addr = Memory.WORKRAMSTART; addr < Memory.WORKRAMSTART + Memory.WORKRAMSIZE; addr++) {
       this.memoryViews!.delete(this.createMemoryViewKey(ramBank, addr));
     }
 
@@ -528,13 +481,7 @@ export class ControllerReal implements Controller {
     ) {
       const instruction = memory.getInstruction(addr, ramBank);
       if (instruction !== undefined) {
-        const view = new MemoryView(
-          bankView,
-          addr,
-          memory,
-          this.emu!.cpu,
-          this
-        );
+        const view = new MemoryView(bankView, addr, memory, this.emu!.cpu, this);
         this.memoryViews!.set(this.createMemoryViewKey(ramBank, addr), view);
         this.instructionToMemoryView!.set(instruction, view);
         this.toUpdateFast.add(view);
@@ -561,7 +508,7 @@ export class ControllerReal implements Controller {
 
   public showBank(bank: number) {
     this.shownBank = bank;
-    this.bankViews!.forEach(bankView => this.toUpdateFast.add(bankView));
+    this.bankViews!.forEach((bankView) => this.toUpdateFast.add(bankView));
     this.toUpdateFast.add(this.bankSelection!);
   }
 
@@ -618,14 +565,10 @@ export class ControllerReal implements Controller {
 
     // This test avoids short loops from taking over the entire recentInstructions list.
     if (!this.recentInstructions.includes(instruction)) {
-      while (
-        this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS
-      ) {
+      while (this.recentInstructions.length > ControllerReal.MAX_RECENT_INSTRUCTIONS) {
         const oldInstruction = this.recentInstructions.shift()!;
 
-        const currentCounter = this.recentInstructionsCounter.get(
-          oldInstruction
-        );
+        const currentCounter = this.recentInstructionsCounter.get(oldInstruction);
         if (currentCounter === undefined) {
           throw new Error("Old instruction not in list!");
         }
@@ -639,8 +582,8 @@ export class ControllerReal implements Controller {
           if (!view) {
             throw new Error(
               `No view for instruction ${oldInstruction.disassemble(
-                this.emu!.memory
-              )} at ${utils.hexString(oldInstruction.getAddress())}`
+                this.emu!.memory,
+              )} at ${utils.hexString(oldInstruction.getAddress())}`,
             );
           }
           this.toUpdateSlow.add(view);

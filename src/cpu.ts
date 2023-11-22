@@ -65,7 +65,7 @@ export class CPU {
   set SP(addr: number) {
     utils.assert(
       addr >= 0 && addr <= 0xffff,
-      `Setting invalid address ${utils.hexString(addr, 16)} in SP`
+      `Setting invalid address ${utils.hexString(addr, 16)} in SP`,
     );
     this.controller.updatedSP();
     this._SP = addr;
@@ -76,10 +76,7 @@ export class CPU {
   }
 
   setReg(r: number, val: number) {
-    utils.assert(
-      val >= 0 && val <= 0xff,
-      `Setting invalid value ${val} in 8 bit register ${r}`
-    );
+    utils.assert(val >= 0 && val <= 0xff, `Setting invalid value ${val} in 8 bit register ${r}`);
     this._regs[r] = val;
     this.controller.updatedReg(r);
   }
@@ -140,10 +137,7 @@ export class CPU {
   }
 
   setHalfCarryFlagDirect(halfCarryFlag: number) {
-    this.setReg(
-      CPU.F,
-      (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5)
-    );
+    this.setReg(CPU.F, (this.getReg(CPU.F) & 0b1101_1111) | (halfCarryFlag << 5));
   }
 
   setHalfCarryFlag16BitAdd(a: number, b: number) {
@@ -157,14 +151,12 @@ export class CPU {
   }
 
   setHalfCarryFlagSubtract(...numbers: number[]) {
-    const total = numbers.map(n => n & 0xf).reduce((prev, curr) => prev - curr);
+    const total = numbers.map((n) => n & 0xf).reduce((prev, curr) => prev - curr);
     this.setHalfCarryFlagDirect(total < 0 ? 1 : 0);
   }
 
   setCarryFlagSubtract(...numbers: number[]) {
-    const total = numbers
-      .map(n => n & 0xff)
-      .reduce((prev, curr) => prev - curr);
+    const total = numbers.map((n) => n & 0xff).reduce((prev, curr) => prev - curr);
     this.setCarryFlagDirect(total < 0 ? 1 : 0);
   }
 
@@ -249,17 +241,11 @@ export class CPU {
 
     if (memory.interruptVBlankRequested() && memory.interruptVBlankEnabled()) {
       vblank = true;
-    } else if (
-      memory.interruptCoincidenceRequested() &&
-      memory.interruptCoincidenceEnabled()
-    ) {
+    } else if (memory.interruptCoincidenceRequested() && memory.interruptCoincidenceEnabled()) {
       coincidence = true;
     } else if (memory.interruptOAMRequested() && memory.interruptOAMEnabled()) {
       oam = true;
-    } else if (
-      memory.interruptTimerRequested() &&
-      memory.interruptTimerEnabled()
-    ) {
+    } else if (memory.interruptTimerRequested() && memory.interruptTimerEnabled()) {
       timer = true;
     }
     // TODO: add joypad and serial interrupts
@@ -276,7 +262,7 @@ export class CPU {
         memory.interruptCoincidenceClear();
 
         this.pushPC(memory);
-        this.PC = 0x48;  // TODO: same interrupt address as OAM?
+        this.PC = 0x48; // TODO: same interrupt address as OAM?
       } else if (oam) {
         console.log("Executing OAM interrupt");
         memory.interruptOAMClear();

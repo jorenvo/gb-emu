@@ -22,10 +22,7 @@ export class Emulator {
     this.cpu = new CPU();
     this.cpu.setController(controller);
 
-    this.video = new Video(
-      this.memory,
-      document.getElementById("video")! as HTMLCanvasElement
-    );
+    this.video = new Video(this.memory, document.getElementById("video")! as HTMLCanvasElement);
 
     this.paused = false;
 
@@ -74,8 +71,7 @@ export class Emulator {
       if (
         this.breakpoint !== undefined &&
         this.breakpoint === this.cpu.PC &&
-        (this.breakpointBank === undefined ||
-          this.breakpointBank === this.memory.bank)
+        (this.breakpointBank === undefined || this.breakpointBank === this.memory.bank)
       ) {
         this.paused = true;
         return;

@@ -104,8 +104,8 @@ describe("Video subsystem", function () {
           colorExpected[i],
           `wrong color at index ${colorIndex}, color should be ${colorExpected} but is ${image.data.slice(
             offset,
-            offset + 4
-          )}`
+            offset + 4,
+          )}`,
         );
       }
 
