@@ -182,7 +182,7 @@ export class ControllerReal implements Controller {
     this.toUpdateSlow = new Set();
     this.recentInstructions = [];
     this.recentInstructionsCounter = new Map();
-    this.debuggingEnabled = true;
+    this.debuggingEnabled = false;
 
     this.debugToggleButton = new DebugToggleButton("debugToggle", this);
     this.pauseButton = new PauseButton("pause", this);

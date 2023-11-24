@@ -323,6 +323,7 @@ export class Memory {
       value >= 0 && value <= 255,
       `${value} written to ${utils.hexString(address, 16)} is out of range`,
     );
+    utils.assert(value !== undefined, `writing undefined to ${utils.hexString(address, 16)}`);
 
     if (address === Memory.TIMA) {
       return; // 01-read_timing.gb continually writes 0 to TIMA, I assume it should be ignored.
@@ -341,18 +342,6 @@ export class Memory {
         this.ioJoyPadState = JoyPadState.DIRECTION;
       }
       return;
-    }
-
-    if (address === Memory.IE) {
-      const bitToIntStr = ["vblank", "lcd stat", "timer", "serial", "joypad"];
-
-      let valCopy = value;
-      for (const intStr of bitToIntStr) {
-        if (valCopy & 1) {
-          console.log(`enabling ${intStr} interrupt`);
-        }
-        valCopy >>= 1;
-      }
     }
 
     if (address === Memory.DIV) {
@@ -376,8 +365,7 @@ export class Memory {
       return;
     }
 
-    if (value === undefined) debugger;
-
+    // ROM bank select
     if (address >= 0x2000 && address <= 0x3fff) {
       this.setBank(value & 0b1_1111);
       return;
@@ -406,6 +394,19 @@ export class Memory {
       // Clear RAM that has been disassembled for debug purposes
       this.clearDisassembledRam();
       // this.controller.updatedWorkRam(); // TODO: this is way too expensive
+    }
+
+    // Debug logging
+    if (address === Memory.IE) {
+      const bitToIntStr = ["vblank", "lcd stat", "timer", "serial", "joypad"];
+
+      let valCopy = value;
+      for (const intStr of bitToIntStr) {
+        if (valCopy & 1) {
+          console.log(`enabling ${intStr} interrupt`);
+        }
+        valCopy >>= 1;
+      }
     }
 
     this.ram[address] = value;
