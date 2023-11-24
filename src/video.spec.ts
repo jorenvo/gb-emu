@@ -38,7 +38,7 @@ describe("Video subsystem", function () {
       0xff, 0xff, 0x5f, 0x3f, // tile 4 row 7 & 8
     ]);
     const memory = new Memory(fakeROM, new ControllerMock());
-    memory.setBank(0);
+    memory.setROMBankLower(0);
 
     const { document } = new JSDOM("<canvas>").window;
     const canvas = document.getElementsByTagName("canvas")[0];

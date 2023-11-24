@@ -17,7 +17,7 @@ function createMemory(bytes: Uint8Array): Memory {
   fakeROM.set(bytes);
 
   const memory = new Memory(fakeROM, new ControllerMock());
-  memory.setBank(0);
+  memory.setROMBankLower(0);
   return memory;
 }
 

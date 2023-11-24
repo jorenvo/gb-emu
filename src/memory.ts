@@ -3,6 +3,7 @@ import { BOOTROM } from "./roms.js";
 import { Instruction } from "./instruction.js";
 import { Disassembler } from "./disassembler.js";
 import { Controller } from "./controller.js";
+import ThrottledLogger from "./throttledlogger.js";
 
 enum JoyPadState {
   INACTIVE,
@@ -228,8 +229,13 @@ export class Memory {
     }
   }
 
+  inBootMode(): boolean {
+    // TODO: this should be moved to emu?
+    return this.bank === -1;
+  }
+
   getBankNrBasedOnAddress(address: number): number {
-    if (this.bank === -1) {
+    if (this.inBootMode()) {
       if (address < 0x100) {
         return -1;
       } else {
@@ -285,9 +291,35 @@ export class Memory {
     return addressToInstruction.get(address);
   }
 
-  setBank(bank: number) {
-    this.controller.changedBank(bank);
-    this.bank = bank;
+  setROMBankLower(newLower: number) {
+    // Special case for the debugging tools. They sometimes need to switch back and forth between the boot ROM.
+    if (newLower === -1) {
+      this.bank = -1;
+      return;
+    }
+
+    newLower = newLower & 0b0001_1111;
+    if (newLower === 0) {
+      newLower = 1;
+    }
+
+    if (newLower > this.romBanks.length - 1) {
+      newLower &= Math.ceil(Math.log(this.romBanks.length) / Math.log(2)); // TODO: precompute
+    }
+
+    if (this.bank === -1) {
+      this.bank = 0;
+    }
+    this.bank = (this.bank & 0b0110_0000) | newLower;
+    this.controller.changedBank(this.bank);
+  }
+
+  setROMBankHigher(newHigher: number) {
+    if (this.bank === -1) {
+      this.bank = 0;
+    }
+    this.bank = (newHigher & 0b0110_0000) | (this.bank & 0b0001_1111);
+    this.controller.changedBank(this.bank);
   }
 
   getByte(address: number): number {
@@ -296,19 +328,17 @@ export class Memory {
     }
 
     if (address >= Memory.RAMSTART) {
+      // TODO: selected RAM bank
       return this.memory[address];
     }
 
-    const bank = this.getBankNrBasedOnAddress(address);
-    if (bank >= 1) {
-      address -= Memory.BANKSIZE;
-    }
-
     let byte;
-    if (bank === -1) {
+    if (address < 0x100 && this.inBootMode()) {
       byte = this.bootROM[address];
+    } else if (address < 0x4000) {
+      byte = this.romBanks[0][address];
     } else {
-      byte = this.romBanks[bank][address];
+      byte = this.romBanks[this.bank][address - Memory.BANKSIZE];
     }
 
     if (byte === undefined) {
@@ -365,9 +395,15 @@ export class Memory {
       return;
     }
 
-    // ROM bank select
+    // ROM bank select (lower 5 bits)
     if (address >= 0x2000 && address <= 0x3fff) {
-      this.setBank(value & 0b1_1111);
+      this.setROMBankLower(value);
+      return;
+    }
+
+    // ROM bank higher 2 bits or RAM bank select
+    if (address >= 0x4000 && address <= 0x5fff) {
+      this.setROMBankHigher(value);
       return;
     }
 

@@ -534,7 +534,7 @@ export class ControllerReal implements Controller {
   private switchOutOfBootROM(newAddr: number) {
     // TODO: Emulator should do this
     if (this.emu!.memory.bank === -1 && newAddr === 0x100) {
-      this.emu!.memory.setBank(1);
+      this.emu!.memory.setROMBankLower(1);
       console.log("Switched out boot ROM and switched to bank 1");
     }
   }

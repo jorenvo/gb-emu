@@ -422,14 +422,14 @@ export class MemoryView extends View {
       return;
     }
     this.originalBank = this.memory.bank;
-    this.memory.setBank(this.bankView.bank);
+    this.memory.setROMBankLower(this.bankView.bank);
   }
 
   private restoreBank() {
     if (this.originalBank === undefined) {
       return;
     }
-    this.memory.setBank(this.originalBank);
+    this.memory.setROMBankLower(this.originalBank);
     this.originalBank = undefined;
   }
 
