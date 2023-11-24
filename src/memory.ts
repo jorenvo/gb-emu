@@ -53,6 +53,7 @@ export class Memory {
 
   controller: Controller;
   bank: number; // -1 means bootROM
+  ramMode: boolean;
   nrBanks: number;
   bootROM: Uint8Array;
   cartridge: Uint8Array;
@@ -73,6 +74,7 @@ export class Memory {
   constructor(rom: Uint8Array, controller: Controller) {
     this.controller = controller;
     this.bank = -1;
+    this.ramMode = false;
     this.bootROM = new Uint8Array(BOOTROM);
     this.cartridge = new Uint8Array(rom);
     this.romBanks = this.splitCartridge();
@@ -403,7 +405,19 @@ export class Memory {
 
     // ROM bank higher 2 bits or RAM bank select
     if (address >= 0x4000 && address <= 0x5fff) {
-      this.setROMBankHigher(value);
+      if (this.ramMode) {
+        // this.setRAMBank(value);
+        console.warn(`Switching to RAM bank ${utils.hexString(value)} not supported`);
+      } else {
+        this.setROMBankHigher(value);
+      }
+      return;
+    }
+
+    // ROM/RAM mode select
+    if (address >= 0x6000 && address <= 0x7fff) {
+      this.ramMode = Boolean(value & 1);
+      console.warn(`Changed RAM mode to ${this.ramMode}`);
       return;
     }
 
