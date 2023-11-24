@@ -88,14 +88,12 @@ export class Video {
   }
 
   private getColorMap(paletteByte: number): ColorMap {
-    const palette: ColorMap = [
+    return [
       this.colorMap[(paletteByte >> 0) & 0b11],
       this.colorMap[(paletteByte >> 2) & 0b11],
       this.colorMap[(paletteByte >> 4) & 0b11],
       this.colorMap[(paletteByte >> 6) & 0b11],
     ];
-
-    return palette;
   }
 
   getTileDataStart(): number {
@@ -334,14 +332,13 @@ export class Video {
 
   render() {
     const image = this.ctx.createImageData(256, 256);
-    this.renderBackgroundOrWindow(image, !!"background");
-    this.renderBackgroundOrWindow(image, !"window");
+    if (utils.getBit(this.memory.getLCDC(), 0)) {
+      this.renderBackgroundOrWindow(image, !!"background");
+      this.renderBackgroundOrWindow(image, !"window");
+    }
+
     this.renderObjects(image);
     this.renderPhysicalScreenBorder(image);
-
-    if (utils.getBit(this.memory.getLCDC(), 0)) {
-      ThrottledLogger.log("Should hide the background and window");
-    }
 
     if (utils.getBit(this.memory.getLCDC(), 2)) {
       console.error("8x16 sprites are currently unsupported!");
