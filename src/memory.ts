@@ -56,7 +56,7 @@ export class Memory {
   bootROM: Uint8Array;
   cartridge: Uint8Array;
   romBanks: Uint8Array[];
-  ram: Uint8Array; // TODO this is also switchable I think
+  memory: Uint8Array; // TODO this is also switchable I think
   bankToAddressToInstruction: Map<number, Map<number, Instruction>>;
 
   private ioJoyPadState: JoyPadState;
@@ -79,7 +79,7 @@ export class Memory {
     // RAM starts at 0x7fff: total size - 2 rom banks => 0xffff - (0x4000 * 2)
     // This could be size 0x7fff but then we need to translate addresses (- 0x7fff):
     // 0x7fff => 0x0000
-    this.ram = new Uint8Array(0xffff + 1);
+    this.memory = new Uint8Array(0xffff + 1);
 
     if (rom.length === 0) {
       this.mockNintendoCartLogo();
@@ -222,7 +222,7 @@ export class Memory {
 
     let addr = startAddress;
     while (addr < startAddress + Memory.WORKRAMSIZE && addr <= 0xffff) {
-      let instruction = Disassembler.buildInstruction(addr, addr, this.ram);
+      let instruction = Disassembler.buildInstruction(addr, addr, this.memory);
       this.bankToAddressToInstruction.get(-2)!.set(addr, instruction);
       addr += instruction.size();
     }
@@ -247,7 +247,7 @@ export class Memory {
   getBankBasedOnNr(bankNr: number): Uint8Array {
     switch (bankNr) {
       case -2:
-        return this.ram;
+        return this.memory;
       case -1:
         return this.bootROM;
       default:
@@ -296,7 +296,7 @@ export class Memory {
     }
 
     if (address >= Memory.RAMSTART) {
-      return this.ram[address];
+      return this.memory[address];
     }
 
     const bank = this.getBankNrBasedOnAddress(address);
@@ -345,7 +345,7 @@ export class Memory {
     }
 
     if (address === Memory.DIV) {
-      this.ram[Memory.DIV] = 0;
+      this.memory[Memory.DIV] = 0;
       return;
     }
 
@@ -409,7 +409,7 @@ export class Memory {
       }
     }
 
-    this.ram[address] = value;
+    this.memory[address] = value;
     this.controller.updatedStack();
   }
 
@@ -459,7 +459,7 @@ export class Memory {
 
   incDivider() {
     // Cannot use setByte because when a program writes to DIV it will be reset to 0.
-    this.ram[Memory.DIV] = utils.wrapping8BitAdd(this.ram[Memory.DIV], 1);
+    this.memory[Memory.DIV] = utils.wrapping8BitAdd(this.memory[Memory.DIV], 1);
     this.controller.updatedMemReg(Memory.DIV);
   }
 
@@ -487,9 +487,9 @@ export class Memory {
 
     if (tima === 0xff) {
       overflowed = true;
-      this.ram[Memory.TIMA] = this.getByte(Memory.TMA);
+      this.memory[Memory.TIMA] = this.getByte(Memory.TMA);
     } else {
-      this.ram[Memory.TIMA] = tima + 1;
+      this.memory[Memory.TIMA] = tima + 1;
     }
 
     return overflowed;
@@ -518,9 +518,7 @@ export class Memory {
 
     // Apparently when reading this register the 2 most significant bits are set.
     // TODO: what is the value of bit 4 and 5
-    const res = 0b1100_0000 | (io ^ 0b1111);
-    // console.log(`IO register: ${utils.binString(res)}`);
-    return res;
+    return 0b1100_0000 | (io ^ 0b1111);
   }
 
   setIOKeyB(down: boolean) {
