@@ -156,6 +156,7 @@ export class Video {
     scy: number,
     attrFlipX: boolean,
     attrFlipY: boolean,
+    isObject: boolean,
     objectOverlapped: boolean,
   ) {
     for (let byte = 0; byte < 16; byte += 2) {
@@ -167,11 +168,11 @@ export class Video {
         const colorGB = (utils.getBit(msb, bit) << 1) | utils.getBit(lsb, bit);
         const color = colorMap[colorGB];
 
-        // Skip if the color is transparent.
+        // Skip color 0 for objects, it's transparent.
         // The 2d rendering context uses the standard source-over compositing mode,
         // so drawing a transparent (alpha 0) pixel doesn't maintain the existing color
         // it instead turns the pixel white.
-        if (color[3] === 0) {
+        if (isObject && colorGB === 0) {
           continue;
         }
 
@@ -188,14 +189,15 @@ export class Video {
         let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
-        // The object is overlapped by the first background color.
+        // if bg/window color is 0 and objectOverlapped color is set then objectOverlapped color is the one
+        // The object is overlapped by colors 1-3, only draw color 0.
         if (objectOverlapped) {
           const bgColor = image.data.slice(dataOffset, dataOffset + 4);
           const bgFirstColor = this.getColorMapBgOrWindow()[0];
           if (
-            bgColor[0] == bgFirstColor[0] &&
-            bgColor[1] == bgFirstColor[1] &&
-            bgColor[2] == bgFirstColor[2]
+            bgColor[0] === bgFirstColor[0] &&
+            bgColor[1] === bgFirstColor[1] &&
+            bgColor[2] === bgFirstColor[2]
           )
             continue;
         }
@@ -248,6 +250,7 @@ export class Video {
           scrollY,
           false,
           false,
+          !"not object",
           false,
         );
       }
@@ -277,6 +280,7 @@ export class Video {
         0,
         flipX,
         flipY,
+        !!"object",
         objectOverlapped,
       );
     }

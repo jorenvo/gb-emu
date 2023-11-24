@@ -192,7 +192,7 @@ export class IndividualTileDataView extends View {
 
     const ctx = (this.element as HTMLCanvasElement).getContext("2d")!;
     const imgData = ctx.createImageData(this.width, this.height);
-    this.video.renderTile(imgData, colorMap, this.address, 0, 0, 0, 0, false, false, false);
+    this.video.renderTile(imgData, colorMap, this.address, 0, 0, 0, 0, false, false, false, false);
     ctx.putImageData(imgData, 0, 0);
   }
 }
