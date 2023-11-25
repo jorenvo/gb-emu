@@ -1,5 +1,4 @@
 import { Memory } from "./memory.js";
-import ThrottledLogger from "./throttledlogger.js";
 import * as utils from "./utils.js";
 
 type RGBA = [number, number, number, number];
@@ -79,12 +78,7 @@ export class Video {
   }
 
   getColorMapObject(obp0: boolean) {
-    const colorMap = this.getColorMap(obp0 ? this.memory.getOBP0() : this.memory.getOBP1());
-
-    // Index 0 is transparent for objects
-    colorMap[0][3] = 0;
-
-    return colorMap;
+    return this.getColorMap(obp0 ? this.memory.getOBP0() : this.memory.getOBP1());
   }
 
   private getColorMap(paletteByte: number): ColorMap {
@@ -169,9 +163,6 @@ export class Video {
         const color = colorMap[colorGB];
 
         // Skip color 0 for objects, it's transparent.
-        // The 2d rendering context uses the standard source-over compositing mode,
-        // so drawing a transparent (alpha 0) pixel doesn't maintain the existing color
-        // it instead turns the pixel white.
         if (isObject && colorGB === 0) {
           continue;
         }
@@ -189,17 +180,25 @@ export class Video {
         let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
-        // if bg/window color is 0 and objectOverlapped color is set then objectOverlapped color is the one
-        // The object is overlapped by colors 1-3, only draw color 0.
+        // The object is overlapped by background colors 1-3.
         if (objectOverlapped) {
+          const bgColorMap = this.getColorMapBgOrWindow();
           const bgColor = image.data.slice(dataOffset, dataOffset + 4);
-          const bgFirstColor = this.getColorMapBgOrWindow()[0];
-          if (
-            bgColor[0] === bgFirstColor[0] &&
-            bgColor[1] === bgFirstColor[1] &&
-            bgColor[2] === bgFirstColor[2]
-          )
-            continue;
+          let bgColorShouldOverlap = false;
+
+          for (let i = 1; i <= 3; ++i) {
+            const colorMapColor = bgColorMap[i];
+            if (
+              bgColor[0] === colorMapColor[0] &&
+              bgColor[1] === colorMapColor[1] &&
+              bgColor[2] === colorMapColor[2]
+            )
+              bgColorShouldOverlap = true;
+          }
+
+          if (bgColorShouldOverlap) {
+            break;
+          }
         }
 
         for (let i = 0; i < 4; i++) {
@@ -341,7 +340,10 @@ export class Video {
       this.renderBackgroundOrWindow(image, !"window");
     }
 
-    this.renderObjects(image);
+    if (utils.getBit(this.memory.getLCDC(), 1)) {
+      this.renderObjects(image);
+    }
+
     this.renderPhysicalScreenBorder(image);
 
     if (utils.getBit(this.memory.getLCDC(), 2)) {
