@@ -32,6 +32,7 @@ export class Video {
     this.canvas.height = 256;
 
     this.ctx = this.canvas.getContext("2d")!;
+    this.ctx.imageSmoothingEnabled = false;
 
     this.colorWhite = [255, 255, 255, 255]; // 0b00
     this.colorLightGray = [170, 170, 170, 255]; // 0b01
