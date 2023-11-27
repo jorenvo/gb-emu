@@ -27,6 +27,7 @@ import {
   BankSelector,
   TileDataView,
   BootToggleButton,
+  VideoScaleSelector,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -67,6 +68,7 @@ export abstract class Controller {
   public abstract changedBank(bankNr: number): void;
   public abstract getRecentInstructions(): Instruction[];
   public abstract downloadPCLog(): void;
+  public abstract changeVideoScale(newScale: string): void;
   public abstract keyPressB(down: boolean): void;
   public abstract keyPressA(down: boolean): void;
   public abstract keyPressStart(down: boolean): void;
@@ -160,6 +162,7 @@ export class ControllerReal implements Controller {
   private stepNextButton: StepNextButton;
   private copyButton: CopyButton;
   private pcDownloadButton: PCFileButton;
+  private videoScaleSelector: VideoScaleSelector;
 
   // input
   private debuggingEnabled: boolean;
@@ -196,6 +199,7 @@ export class ControllerReal implements Controller {
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
     this.copyButton = new CopyButton("copy", this);
     this.pcDownloadButton = new PCFileButton("downloadPCFile", this);
+    this.videoScaleSelector = new VideoScaleSelector("videoScaling", this);
     this.breakpointSetter = new BreakpointSetter("breakpoint", this);
 
     this.pcLogger = new FileLogger();
@@ -630,6 +634,15 @@ export class ControllerReal implements Controller {
 
   public downloadPCLog() {
     this.pcLogger.download();
+  }
+
+  public changeVideoScale(newScale: string) {
+    const canvas = document.getElementById("video")! as HTMLCanvasElement;
+    const scale = Number(newScale);
+    const defaultSize = 256;
+    const scaledSize = `${defaultSize * scale}px`;
+    canvas.style.width = scaledSize;
+    canvas.style.height = scaledSize;
   }
 
   public keyPressB(down: boolean) {

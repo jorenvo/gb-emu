@@ -1,68 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gb-emu</title>
+    <link rel="stylesheet" href="emu.css" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>gb-emu</title>
-  <link rel="stylesheet" href="emu.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
-</head>
-
-<body>
-  <label for="rom">Upload ROM</label>
-  <input type="file" id="rom" name="rom" />
-  <script src="smoothscroll.min.js"></script>
-  <script type="module" src="js/main.js"></script>
-  <div id="debugger">
-    <button id="loadBootrom">Run bootrom</button>
-    <button id="next">Next</button>
-    <button id="pause">Pause</button>
-    <button id="copy">Copy</button>
-    <button id="downloadPCFile">PC log</button>
-    <input type="text" id="breakpoint" placeholder="bank,breakpoint (e.g. 1,0x10)" />
-    <label for="debugToggle">Debug: </label>
-    <input type="checkbox" id="debugToggle" name="debugToggle">
-    <label for="debugToggle">Bypass boot: </label>
-    <input type="checkbox" id="bootToggle" name="bootToggle" checked>
-    <label for="bankSelection">Bank: </label>
-    <select name="bankSelection" id="bankSelection">
-      <option>/</option>
-    </select>
-  </div>
-  <registers>
-    <register id="regB"></register>
-    <register id="regC"></register>
-    <register id="regD"></register>
-    <register id="regE"></register>
-    <register id="regH"></register>
-    <register id="regL"></register>
-    <register id="regF"></register>
-    <register id="regA"></register>
-    <PC id="PC"></PC>
-    <SP id="SP"></SP>
-  </registers>
-  <registers>
-    <banknr id="bankNr"></banknr>
-    <memregister id="memRegLCDC"></memregister>
-    <memregister id="memRegSTAT"></memregister>
-    <memregister id="memRegLY"></memregister>
-    <memregister id="memRegSCX"></memregister>
-    <memregister id="memRegSCY"></memregister>
-    <memregister id="memRegLYC"></memregister>
-    <memregister id="memRegWY"></memregister>
-    <memregister id="memRegWX"></memregister>
-    <memregister id="memRegDIV"></memregister>
-  </registers>
-  <thread id="thread"></thread>
-  <div class="columns">
-    <canvas tabindex="1" id="video"></canvas>
-    <stack id="stack"></stack>
-    <tilemap id="bgTileMap"></tilemap>
-    <tiledata id="tileData"></tiledata>
-    <div id="memoryBanks"></div>
-    <bankview id="memoryBankRAM"></bankview>
-  </div>
-</body>
-
+  <body>
+    <label for="rom">Upload ROM</label>
+    <input type="file" id="rom" name="rom" />
+    <script src="smoothscroll.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <div id="debugger">
+      <div>
+        <button id="loadBootrom">Run bootrom</button>
+        <button id="next">Next</button>
+        <button id="pause">Pause</button>
+        <button id="copy">Copy</button>
+        <button id="downloadPCFile">PC log</button>
+        <input type="text" id="breakpoint" placeholder="bank,breakpoint (e.g. 1,0x10)" />
+      </div>
+      <div>
+        <label for="debugToggle">Debug: </label>
+        <input type="checkbox" id="debugToggle" name="debugToggle" />
+        <label for="debugToggle">Bypass boot: </label>
+        <input type="checkbox" id="bootToggle" name="bootToggle" checked />
+        <label for="bankSelection">Bank: </label>
+        <select name="bankSelection" id="bankSelection">
+          <option>/</option>
+        </select>
+        <label for="videoScaling">Scale: </label>
+        <select name="videoScaling" id="videoScaling" required>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+          <option value="3">3x</option>
+        </select>
+      </div>
+    </div>
+    <registers>
+      <register id="regB"></register>
+      <register id="regC"></register>
+      <register id="regD"></register>
+      <register id="regE"></register>
+      <register id="regH"></register>
+      <register id="regL"></register>
+      <register id="regF"></register>
+      <register id="regA"></register>
+      <PC id="PC"></PC>
+      <SP id="SP"></SP>
+    </registers>
+    <registers>
+      <banknr id="bankNr"></banknr>
+      <memregister id="memRegLCDC"></memregister>
+      <memregister id="memRegSTAT"></memregister>
+      <memregister id="memRegLY"></memregister>
+      <memregister id="memRegSCX"></memregister>
+      <memregister id="memRegSCY"></memregister>
+      <memregister id="memRegLYC"></memregister>
+      <memregister id="memRegWY"></memregister>
+      <memregister id="memRegWX"></memregister>
+      <memregister id="memRegDIV"></memregister>
+    </registers>
+    <thread id="thread"></thread>
+    <div class="columns">
+      <canvas tabindex="1" id="video"></canvas>
+      <stack id="stack"></stack>
+      <tilemap id="bgTileMap"></tilemap>
+      <tiledata id="tileData"></tiledata>
+      <div id="memoryBanks"></div>
+      <bankview id="memoryBankRAM"></bankview>
+    </div>
+  </body>
 </html>

@@ -303,6 +303,22 @@ export class BankSelector extends View {
   }
 }
 
+export class VideoScaleSelector extends View {
+  controller: Controller;
+
+  constructor(elementID: string, controller: Controller) {
+    super(elementID, undefined, "videoScaleSelectorView");
+    this.controller = controller;
+    this.element.addEventListener("change", this.onChange.bind(this));
+  }
+
+  update() {}
+
+  private onChange(event: Event) {
+    this.controller.changeVideoScale((event.target as HTMLOptionElement).value);
+  }
+}
+
 export class BankView extends View {
   memory: Memory;
   controller: Controller;
