@@ -31,16 +31,17 @@ export class CPU {
   private _controller: Controller | undefined;
 
   constructor() {
-    this._SP = 0xfffe;
-    this.IME = false;
-    this.enableIMETick = -1;
-    this._PC = 0;
     // from 0x0 to 0x7
     // B (0x0)          C (0x1)
     // D (0x2)          E (0x3)
     // H (0x4)          L (0x5)
     // F (flags, 0x6)   A (accumulator, 0x7)
     this._regs = new Uint8Array(new Array(8));
+
+    this._PC = 0x0000;
+    this._SP = 0xfffe;
+    this.IME = false;
+    this.enableIMETick = -1;
     this.tickCounter = 0;
     this.dividerCycleCounter = 0;
     this.timerCycleCounter = 0;
@@ -69,6 +70,19 @@ export class CPU {
     );
     this.controller.updatedSP();
     this._SP = addr;
+  }
+
+  bypassBoot() {
+    // DMG from https://gbdev.io/pandocs/Power_Up_Sequence.html#cpu-registers
+    this.setReg(CPU.A, 0x01);
+    this.setReg(CPU.B, 0x00);
+    this.setReg(CPU.C, 0x13);
+    this.setReg(CPU.D, 0x00);
+    this.setReg(CPU.E, 0xd8);
+    this.setReg(CPU.H, 0x01);
+    this.setReg(CPU.L, 0x4d);
+    this.setZeroFlag(1);
+    this._PC = 0x0100;
   }
 
   getReg(r: number) {

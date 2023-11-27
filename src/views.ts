@@ -653,6 +653,12 @@ export class DebugToggleButton extends Button {
   }
 }
 
+export class BootToggleButton extends Button {
+  click(_e: MouseEvent): void {
+    this.controller.toggleBoot();
+  }
+}
+
 export class PauseButton extends Button {
   click(_e: MouseEvent): void {
     this.controller.togglePause();

@@ -26,6 +26,7 @@ import {
   DebugToggleButton,
   BankSelector,
   TileDataView,
+  BootToggleButton,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -44,6 +45,7 @@ export abstract class Controller {
   public abstract runBootRom(): void;
   public abstract togglePause(): void;
   public abstract toggleDebugging(): void;
+  public abstract toggleBoot(): void;
   public abstract stepNext(): void;
   public abstract setBreakpoint(address: number): void;
   public abstract setBreakpointBank(bank: number): void;
@@ -151,6 +153,7 @@ export class ControllerReal implements Controller {
 
   // buttons
   private debugToggleButton: DebugToggleButton;
+  private bootToggleButton: BootToggleButton;
   private bankSelection: BankSelector | undefined;
   private pauseButton: PauseButton;
   private bootRomButton: RunBootRomButton;
@@ -160,6 +163,7 @@ export class ControllerReal implements Controller {
 
   // input
   private debuggingEnabled: boolean;
+  private bypassBoot: boolean;
   private breakpointSetter: BreakpointSetter;
 
   // necessary in case emu is not yet running
@@ -183,8 +187,10 @@ export class ControllerReal implements Controller {
     this.recentInstructions = [];
     this.recentInstructionsCounter = new Map();
     this.debuggingEnabled = false;
+    this.bypassBoot = true;
 
     this.debugToggleButton = new DebugToggleButton("debugToggle", this);
+    this.bootToggleButton = new BootToggleButton("bootToggle", this);
     this.pauseButton = new PauseButton("pause", this);
     this.stepNextButton = new StepNextButton("next", this);
     this.bootRomButton = new RunBootRomButton("loadBootrom", this);
@@ -198,7 +204,7 @@ export class ControllerReal implements Controller {
 
   private boot(bytes: Uint8Array) {
     console.log("Booting...");
-    this.emu = new Emulator(this, bytes);
+    this.emu = new Emulator(this, bytes, this.bypassBoot);
     window.controller = this;
     window.cpu = this.emu.cpu;
     window.memory = this.emu.memory;
@@ -353,6 +359,10 @@ export class ControllerReal implements Controller {
     this.debuggingEnabled = !this.debuggingEnabled;
   }
 
+  public toggleBoot() {
+    this.bypassBoot = !this.bypassBoot;
+  }
+
   public togglePause() {
     this.emu!.togglePause();
   }
@@ -397,7 +407,12 @@ export class ControllerReal implements Controller {
 
   // Updated functions
   public updatedReg(reg: number) {
-    const view = this.registerViews!.get(reg);
+    // This happens when boot bypassing causes registers to change before the views are ready.
+    if (!this.registerViews) {
+      return;
+    }
+
+    const view = this.registerViews.get(reg);
     if (!view) {
       throw new Error(`Unknown reg ${reg}`);
     }

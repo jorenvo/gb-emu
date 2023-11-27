@@ -17,10 +17,14 @@ export class Emulator {
   breakpoint: number | undefined;
   breakpointBank: number | undefined;
 
-  constructor(controller: Controller, bytes: Uint8Array) {
+  constructor(controller: Controller, bytes: Uint8Array, bypassBoot: boolean) {
     this.memory = new Memory(bytes, controller);
     this.cpu = new CPU();
     this.cpu.setController(controller);
+
+    if (bypassBoot) {
+      this.cpu.bypassBoot();
+    }
 
     this.video = new Video(this.memory, document.getElementById("video")! as HTMLCanvasElement);
 
