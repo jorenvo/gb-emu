@@ -176,7 +176,7 @@ export class Video {
           tileY = 7 - tileY;
         }
 
-        let colorCoordX = this.wrapToScreenCoords(x - scx + tileX);
+        let colorCoordX = this.wrapToScreenCoords(x + scx + tileX);
         let colorCoordY = this.wrapToScreenCoords(y - scy + tileY);
         const dataOffset = (colorCoordY * image.width + colorCoordX) * 4;
 
@@ -301,7 +301,7 @@ export class Video {
       return (row * 256 + col) * numbersPerPixel;
     };
 
-    // Physical Gameboy screen shows 160x144 pixels
+    // Physical Game Boy screen shows 160x144 pixels
     // left and right border
     for (let row = 0; row <= 143; ++row) {
       const offsetStartLeft = toDataOffset(0, row);
