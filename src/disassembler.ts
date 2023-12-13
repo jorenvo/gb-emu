@@ -550,7 +550,7 @@ export class Disassembler {
       case 0xca:
         return new instruction.OpJC(absolute_address);
       case 0xcb:
-        return this.buildPrefixedInstruction(absolute_address, bytes);
+        return this.buildPrefixedInstruction(bank_address, bytes);
       case 0xcc:
         return new instruction.OpCallIfZero(absolute_address);
       case 0xcd:
