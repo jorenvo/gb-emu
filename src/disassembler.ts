@@ -10,8 +10,12 @@ export class Disassembler {
     );
   }
 
-  static buildPrefixedInstruction(address: number, bytes: Uint8Array): instruction.Instruction {
-    const byte = bytes[address + 1];
+  static buildPrefixedInstruction(
+    absolute_address: number,
+    bank_address: number,
+    bytes: Uint8Array,
+  ): instruction.Instruction {
+    const byte = bytes[bank_address + 1];
     switch (byte) {
       case 0x00:
       case 0x01:
@@ -21,7 +25,7 @@ export class Disassembler {
       case 0x05:
       case 0x06:
       case 0x07:
-        return new instruction.OpRLC(address);
+        return new instruction.OpRLC(absolute_address);
       case 0x08:
       case 0x09:
       case 0x0a:
@@ -30,7 +34,7 @@ export class Disassembler {
       case 0x0d:
       case 0x0e:
       case 0x0f:
-        return new instruction.OpRRC(address);
+        return new instruction.OpRRC(absolute_address);
       case 0x10:
       case 0x11:
       case 0x12:
@@ -39,7 +43,7 @@ export class Disassembler {
       case 0x15:
       case 0x16:
       case 0x17:
-        return new instruction.OpRL(address);
+        return new instruction.OpRL(absolute_address);
       case 0x18:
       case 0x19:
       case 0x1a:
@@ -48,7 +52,7 @@ export class Disassembler {
       case 0x1d:
       case 0x1e:
       case 0x1f:
-        return new instruction.OpRR(address);
+        return new instruction.OpRR(absolute_address);
       case 0x20:
       case 0x21:
       case 0x22:
@@ -57,7 +61,7 @@ export class Disassembler {
       case 0x25:
       case 0x26:
       case 0x27:
-        return new instruction.OpSLA(address);
+        return new instruction.OpSLA(absolute_address);
       case 0x28:
       case 0x29:
       case 0x2a:
@@ -66,7 +70,7 @@ export class Disassembler {
       case 0x2d:
       case 0x2e:
       case 0x2f:
-        return new instruction.OpSRA(address);
+        return new instruction.OpSRA(absolute_address);
       case 0x30:
       case 0x31:
       case 0x32:
@@ -75,7 +79,7 @@ export class Disassembler {
       case 0x35:
       case 0x36:
       case 0x37:
-        return new instruction.OpSwap(address);
+        return new instruction.OpSwap(absolute_address);
       case 0x38:
       case 0x39:
       case 0x3a:
@@ -84,7 +88,7 @@ export class Disassembler {
       case 0x3d:
       case 0x3e:
       case 0x3f:
-        return new instruction.OpSRL(address);
+        return new instruction.OpSRL(absolute_address);
       case 0x40:
       case 0x41:
       case 0x42:
@@ -149,7 +153,7 @@ export class Disassembler {
       case 0x7d:
       case 0x7e:
       case 0x7f:
-        return new instruction.OpBit(address);
+        return new instruction.OpBit(absolute_address);
       case 0x80:
       case 0x81:
       case 0x82:
@@ -214,7 +218,7 @@ export class Disassembler {
       case 0xbd:
       case 0xbe:
       case 0xbf:
-        return new instruction.OpRes(address);
+        return new instruction.OpRes(absolute_address);
       case 0xc0:
       case 0xc1:
       case 0xc2:
@@ -279,10 +283,10 @@ export class Disassembler {
       case 0xfd:
       case 0xfe:
       case 0xff:
-        return new instruction.OpSet(address);
+        return new instruction.OpSet(absolute_address);
       default:
-        Disassembler.logNotImplemented(address, byte, !!"prefixed");
-        return new instruction.NotImplemented(address);
+        Disassembler.logNotImplemented(absolute_address, byte, !!"prefixed");
+        return new instruction.NotImplemented(absolute_address);
     }
   }
 
@@ -550,7 +554,7 @@ export class Disassembler {
       case 0xca:
         return new instruction.OpJC(absolute_address);
       case 0xcb:
-        return this.buildPrefixedInstruction(bank_address, bytes);
+        return this.buildPrefixedInstruction(absolute_address, bank_address, bytes);
       case 0xcc:
         return new instruction.OpCallIfZero(absolute_address);
       case 0xcd:
