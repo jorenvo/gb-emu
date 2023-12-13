@@ -215,6 +215,10 @@ export class Memory {
     return bankToAddressToInstruction;
   }
 
+  bypassBoot() {
+    this.setROMBankLower(1);
+  }
+
   getMapperType() {
     const byteToType = new Map([
       [0x00, "ROM ONLY"],

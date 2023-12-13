@@ -24,6 +24,7 @@ export class Emulator {
 
     if (bypassBoot) {
       this.cpu.bypassBoot();
+      this.memory.bypassBoot();
     }
 
     this.video = new Video(this.memory, document.getElementById("video")! as HTMLCanvasElement);
