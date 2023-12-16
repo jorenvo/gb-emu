@@ -209,6 +209,7 @@ export class ControllerReal implements Controller {
   private boot(bytes: Uint8Array) {
     console.log("Booting...");
     this.emu = new Emulator(this, bytes, this.bypassBoot);
+
     window.controller = this;
     window.cpu = this.emu.cpu;
     window.memory = this.emu.memory;
@@ -223,7 +224,7 @@ export class ControllerReal implements Controller {
 
     this.memoryViews = new Map();
     this.instructionToMemoryView = new Map();
-    this.createMemoryViews(this.emu.cpu, this.emu.memory);
+    this.disassembleROM();
 
     this.stackView = new StackView("stack", this.emu.cpu, this.emu.memory);
     this.SPView = new SPView("SP", this.emu.cpu);
@@ -359,8 +360,16 @@ export class ControllerReal implements Controller {
     this.boot(new Uint8Array());
   }
 
+  private disassembleROM() {
+    if (this.debuggingEnabled) {
+      this.emu!.memory.disassemble();
+      this.createMemoryViews(this.emu!.cpu, this.emu!.memory);
+    }
+  }
+
   public toggleDebugging() {
     this.debuggingEnabled = !this.debuggingEnabled;
+    this.disassembleROM();
   }
 
   public toggleBoot() {
@@ -598,14 +607,15 @@ export class ControllerReal implements Controller {
         } else if (timesInList === 0) {
           oldInstruction.recentlyExecuted = false;
           const view = this.instructionToMemoryView!.get(oldInstruction);
-          if (!view) {
-            throw new Error(
+          if (view) {
+            this.toUpdateSlow.add(view);
+          } else {
+            console.warn(
               `No view for instruction ${oldInstruction.disassemble(
                 this.emu!.memory,
               )} at ${utils.hexString(oldInstruction.getAddress())}`,
             );
           }
-          this.toUpdateSlow.add(view);
         }
 
         this.recentInstructionsCounter.set(oldInstruction, timesInList);

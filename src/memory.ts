@@ -88,7 +88,7 @@ export class Memory {
       this.mockNintendoCartLogo();
     }
 
-    this.bankToAddressToInstruction = this.disassemble();
+    this.bankToAddressToInstruction = new Map();
     this.nrBanks = this.romBanks.length;
 
     this.ioJoyPadState = JoyPadState.INACTIVE;
@@ -168,10 +168,12 @@ export class Memory {
     return banks;
   }
 
-  private disassemble(): Map<number, Map<number, Instruction>> {
-    const bankToAddressToInstruction: Map<number, Map<number, Instruction>> = new Map();
+  disassemble() {
+    if (this.bankToAddressToInstruction.has(0)) {
+      return;
+    }
 
-    bankToAddressToInstruction.set(-1, new Map());
+    this.bankToAddressToInstruction.set(-1, new Map());
     let i = 0;
     while (i < this.bootROM.length) {
       const newInstruction = Disassembler.buildInstruction(i, i, this.bootROM);
@@ -181,12 +183,12 @@ export class Memory {
         throw new Error(`Encountered unimplemented instruction: ${s}`);
       }
 
-      bankToAddressToInstruction.get(-1)!.set(i, newInstruction);
+      this.bankToAddressToInstruction.get(-1)!.set(i, newInstruction);
       i += size;
     }
 
     for (let bankNr = 0; bankNr < this.romBanks.length; ++bankNr) {
-      bankToAddressToInstruction.set(bankNr, new Map());
+      this.bankToAddressToInstruction.set(bankNr, new Map());
 
       let bank = this.romBanks[bankNr];
       let addr = 0;
@@ -207,12 +209,10 @@ export class Memory {
           throw new Error(`Encountered unimplemented instruction: ${s}`);
         }
 
-        bankToAddressToInstruction.get(bankNr)!.set(addr, newInstruction);
+        this.bankToAddressToInstruction.get(bankNr)!.set(addr, newInstruction);
         addr += size;
       }
     }
-
-    return bankToAddressToInstruction;
   }
 
   bypassBoot() {
@@ -461,6 +461,7 @@ export class Memory {
     // ROM/RAM mode select
     if (address >= 0x6000 && address <= 0x7fff) {
       this.ramMode = Boolean(value & 1);
+      debugger;
       console.warn(`Changed RAM mode to ${this.ramMode}`);
       return;
     }
