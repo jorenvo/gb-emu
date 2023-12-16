@@ -29,6 +29,19 @@ export abstract class View {
   }
 }
 
+export class MapperTypeView extends View {
+  memory: Memory;
+
+  constructor(elementID: string, memory: Memory) {
+    super(elementID);
+    this.memory = memory;
+  }
+
+  update() {
+    this.element.innerText = `MBC: ${this.memory.getMapperType()}`;
+  }
+}
+
 export class RegisterView extends View {
   cpu: CPU;
   name: string;

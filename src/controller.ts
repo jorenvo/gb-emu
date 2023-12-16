@@ -28,6 +28,7 @@ import {
   TileDataView,
   BootToggleButton,
   VideoScaleSelector,
+  MapperTypeView,
 } from "./views.js";
 import { FileLogger } from "./logger.js";
 import * as utils from "./utils.js";
@@ -137,6 +138,7 @@ export class ControllerReal implements Controller {
   private recentInstructionsCounter: Map<Instruction, number>;
 
   // views
+  private mapperTypeView: MapperTypeView | undefined;
   private registerViews: Map<number, RegisterView> | undefined;
   private bankViews: Map<number, BankView> | undefined;
   private memoryViews: Map<number, MemoryView> | undefined;
@@ -215,6 +217,7 @@ export class ControllerReal implements Controller {
     window.memory = this.emu.memory;
     window.diss = Disassembler;
 
+    this.mapperTypeView = new MapperTypeView("mapperType", this.emu.memory);
     this.bankSelection = new BankSelector("bankSelection", this.emu.memory, this);
     this.registerViews = this.createRegisterViews(this.emu.cpu);
     this.bankNrView = new BankNrView("bankNr", this.emu.memory);
@@ -251,6 +254,8 @@ export class ControllerReal implements Controller {
   }
 
   private markAllUpdated() {
+    this.toUpdateFast.add(this.mapperTypeView!);
+
     for (const view of this.registerViews!.values()) {
       this.toUpdateFast.add(view);
     }
