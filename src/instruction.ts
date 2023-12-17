@@ -637,7 +637,7 @@ export class OpInc8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    let reg = "";
+    let reg: string;
     if (this.getByte(memory) === 0x34) {
       reg = "(HL)";
     } else {
@@ -701,7 +701,7 @@ export class OpDec8 extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    let reg = "";
+    let reg: string;
     if (this.getByte(memory) === 0x35) {
       reg = "(HL)";
     } else {
@@ -1134,7 +1134,7 @@ export class OpJRC extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    let condition = "";
+    let condition: string;
     switch (this.getByte(memory)) {
       case 0x20:
         condition = "NZ";
@@ -1518,8 +1518,8 @@ export class OpPush extends Instruction {
   }
 
   exec(cpu: CPU, memory: Memory): number {
-    let low = 0;
-    let high = 0;
+    let low: number;
+    let high: number;
     if (this.getByte(memory) === 0xf5) {
       high = cpu.getReg(CPU.A);
       low = cpu.getReg(CPU.F) & 0xf0; // the 4 non-flag bits are unused
@@ -2219,7 +2219,7 @@ export class OpSwap extends Instruction {
 
   disassemble(memory: Memory) {
     const opcode = this.getNext8Bits(memory);
-    let regString = "";
+    let regString: string;
     if (opcode !== 0x36) {
       const reg = opcode & 0xf;
       regString = this.getStringForR8(reg);
@@ -2373,7 +2373,7 @@ export class OpSLA extends Instruction {
   }
 
   disassemble(memory: Memory) {
-    let regStr = "";
+    let regStr: string;
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
@@ -2399,7 +2399,7 @@ export class OpSRA extends OpShift {
   }
 
   disassemble(memory: Memory) {
-    let regStr = "";
+    let regStr: string;
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
@@ -2423,7 +2423,7 @@ export class OpSRL extends OpShift {
   }
 
   disassemble(memory: Memory) {
-    let regStr = "";
+    let regStr: string;
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
@@ -2466,7 +2466,7 @@ export class OpOrR8 extends Instruction {
 
   disassemble(memory: Memory) {
     const opcode = this.getByte(memory);
-    let regStr = "";
+    let regStr: string;
     if (this.isHL(memory)) {
       regStr = "(HL)";
     } else {
