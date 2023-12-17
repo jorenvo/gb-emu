@@ -739,16 +739,37 @@ export class OpRLCA extends Instruction {
   }
 }
 
-export class OpRRC extends Instruction {
-  size() {
-    return 2;
-  }
+abstract class OpRotate extends Instruction {
+  abstract rotate(cpu: CPU, value: number): number;
 
   protected getReg(memory: Memory) {
     return this.getNext8Bits(memory) & 0b111;
   }
 
-  private rotate(cpu: CPU, value: number): number {
+  size() {
+    return 2;
+  }
+
+  exec(cpu: CPU, memory: Memory): number {
+    const register = this.getReg(memory);
+    if (register === 6) {
+      const addr = cpu.getHL();
+      const val = memory.getByte(addr);
+      memory.setByte(addr, this.rotate(cpu, val));
+      return 16;
+    } else {
+      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
+      return 8;
+    }
+  }
+}
+
+export class OpRRC extends OpRotate {
+  protected getReg(memory: Memory) {
+    return this.getNext8Bits(memory) & 0b111;
+  }
+
+  rotate(cpu: CPU, value: number): number {
     const carry = value & 1;
     value = ((value >> 1) | (carry << 7)) & 0xff;
 
@@ -765,17 +786,38 @@ export class OpRRC extends Instruction {
     return value;
   }
 
-  exec(cpu: CPU, memory: Memory): number {
-    const register = this.getReg(memory);
-    if (register === 6) {
-      const addr = cpu.getHL();
-      const val = memory.getByte(addr);
-      memory.setByte(addr, this.rotate(cpu, val));
-      return 16;
-    } else {
-      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
-      return 8;
+  disassemble(memory: Memory) {
+    const reg = this.getReg(memory);
+    let str = "(HL)";
+    if (reg !== 6) {
+      str = this.getStringForR8(reg);
     }
+
+    return `RRC ${str}`;
+  }
+}
+
+export class OpRL extends OpRotate {
+  getReg(memory: Memory) {
+    return this.getNext8Bits(memory) & 0xf;
+  }
+
+  rotate(cpu: CPU, value: number): number {
+    const carry = cpu.getCarryFlag();
+    const bit7 = value & 0x80;
+    value = ((value << 1) | carry) & 0xff;
+
+    cpu.clearAllFlags();
+
+    if (bit7) {
+      cpu.setCarryFlagDirect(1);
+    }
+
+    if (value === 0) {
+      cpu.setZeroFlag(1);
+    }
+
+    return value;
   }
 
   disassemble(memory: Memory) {
@@ -785,7 +827,7 @@ export class OpRRC extends Instruction {
       regString = this.getStringForR8(reg);
     }
 
-    return `RRC ${regString}`;
+    return `RL ${regString}`;
   }
 }
 
@@ -822,57 +864,6 @@ export class OpRLA extends Instruction {
 
   disassemble(_memory: Memory) {
     return "RLA";
-  }
-}
-
-export class OpRL extends Instruction {
-  size() {
-    return 2;
-  }
-
-  private getReg(memory: Memory) {
-    return this.getNext8Bits(memory) & 0xf;
-  }
-
-  private rotate(cpu: CPU, value: number): number {
-    const carry = cpu.getCarryFlag();
-    const bit7 = value & 0x80;
-    value = ((value << 1) | carry) & 0xff;
-
-    cpu.clearAllFlags();
-
-    if (bit7) {
-      cpu.setCarryFlagDirect(1);
-    }
-
-    if (value === 0) {
-      cpu.setZeroFlag(1);
-    }
-
-    return value;
-  }
-
-  exec(cpu: CPU, memory: Memory): number {
-    const register = this.getReg(memory);
-    if (register === 6) {
-      const addr = cpu.getHL();
-      const val = memory.getByte(addr);
-      memory.setByte(addr, this.rotate(cpu, val));
-      return 16;
-    } else {
-      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
-      return 8;
-    }
-  }
-
-  disassemble(memory: Memory) {
-    const reg = this.getReg(memory);
-    let regString = "(HL)";
-    if (reg !== 6) {
-      regString = this.getStringForR8(reg);
-    }
-
-    return `RL ${regString}`;
   }
 }
 
@@ -924,16 +915,8 @@ export class OpRLC extends Instruction {
   }
 }
 
-export class OpRR extends Instruction {
-  size() {
-    return 2;
-  }
-
-  protected getReg(memory: Memory) {
-    return this.getNext8Bits(memory) & 0b111;
-  }
-
-  private rotate(cpu: CPU, value: number): number {
+export class OpRR extends OpRotate {
+  rotate(cpu: CPU, value: number): number {
     const carry = cpu.getCarryFlag();
     const bit1 = value & 1;
     value = ((value >> 1) | (carry << 7)) & 0xff;
@@ -951,23 +934,10 @@ export class OpRR extends Instruction {
     return value;
   }
 
-  exec(cpu: CPU, memory: Memory): number {
-    const register = this.getReg(memory);
-    if (register === 6) {
-      const addr = cpu.getHL();
-      const val = memory.getByte(addr);
-      memory.setByte(addr, this.rotate(cpu, val));
-      return 16;
-    } else {
-      cpu.setReg(register, this.rotate(cpu, cpu.getReg(register)));
-      return 8;
-    }
-  }
-
   disassemble(memory: Memory) {
-    const regNr = this.getReg(memory);
+    const reg = this.getReg(memory);
     let str = "(HL)";
-    if (regNr !== 6) {
+    if (reg !== 6) {
       str = this.getStringForR8(this.getReg(memory));
     }
 
